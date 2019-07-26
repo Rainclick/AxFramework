@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Entities.Framework;
+using WebFramework.Filters;
 
 namespace WebFramework.Api
 {
@@ -27,7 +28,6 @@ namespace WebFramework.Api
         //    var list = await _repository.TableNoTracking.ProjectTo<TSelectDto>().ToListAsync(cancellationToken);
         //    return Ok(list);
         //}
-
         [HttpGet]
         public virtual ApiResult<IQueryable<TSelectDto>> Get()
         {
