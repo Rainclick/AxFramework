@@ -1,0 +1,127 @@
+﻿using System;
+using System.Linq;
+using System.Net;
+using System.Security.Claims;
+using System.Text;
+using System.Threading.Tasks;
+using Common;
+using Common.Exception;
+using Common.Utilities;
+using Data;
+using Data.Repositories.UserRepositories;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+namespace WebFramework.Configuration
+{
+    public static class ServiceCollectionExtensions
+    {
+
+        public static void AddDbContext(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddDbContext<DataContext>(options =>
+            {
+                options.UseSqlServer(configuration.GetConnectionString("SqlServer"))
+                    .ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryClientEvaluationWarning));
+            });
+        }
+
+        public static void AddMinimalMvc(this IServiceCollection services)
+        {
+            services.AddMvcCore(options =>
+                {
+                    options.Filters.Add(new AuthorizeFilter());
+                })
+                .AddApiExplorer()
+                .AddAuthorization()
+                .AddFormatterMappings()
+                .AddDataAnnotations()
+                .AddJsonFormatters(options =>
+                {
+                    options.Formatting = Newtonsoft.Json.Formatting.Indented;
+                    options.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                }).AddCors()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+        }
+
+        public static void AddJwtAuthentication(this IServiceCollection services, JwtSettings jwtSettings)
+        {
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                var secretKey = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
+                var encryptKey = Encoding.UTF8.GetBytes(jwtSettings.EncryptKey);
+
+                var validationParameters = new TokenValidationParameters
+                {
+                    ClockSkew = TimeSpan.Zero, // default: 5 min
+                    RequireSignedTokens = true,
+
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+
+                    RequireExpirationTime = true,
+                    ValidateLifetime = true,
+
+                    ValidateAudience = true, //default : false
+                    ValidAudience = jwtSettings.Audience,
+
+                    ValidateIssuer = true, //default : false
+                    ValidIssuer = jwtSettings.Issuer,
+
+                    TokenDecryptionKey = new SymmetricSecurityKey(encryptKey)
+                };
+
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = validationParameters;
+                options.Events = new JwtBearerEvents
+                {
+                    OnAuthenticationFailed = context =>
+                    {
+                        if (context.Exception != null)
+                            throw new AppException(ApiResultStatusCode.UnAuthorized, "عدم احراز هویت", HttpStatusCode.Unauthorized, context.Exception);
+                        return Task.CompletedTask;
+                    },
+                    OnChallenge = context =>
+                    {
+                        //var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(JwtBearerEvents));
+                        //logger.LogError("OnChallenge error", context.Error, context.ErrorDescription);
+
+                        if (context.AuthenticateFailure != null)
+                            throw new AppException(ApiResultStatusCode.UnAuthorized, "خطای احراز هویت", HttpStatusCode.Unauthorized, context.AuthenticateFailure);
+                        throw new AppException(ApiResultStatusCode.UnAuthorized, "شما برای دسترسی به منابع احراز هویت نشده اید", HttpStatusCode.Unauthorized);
+
+                        //return Task.CompletedTask;
+                    },
+                    OnTokenValidated = async context =>
+                    {
+                        var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+
+                        var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+                        if (claimsIdentity != null && claimsIdentity.Claims?.Any() != true)
+                            context.Fail("This token has no claims.");
+
+                        var userId = claimsIdentity.GetUserId<int>();
+                        var user = await userRepository.GetByIdAsync(context.HttpContext.RequestAborted, userId);
+
+                        if (!user.IsActive)
+                            context.Fail("User is not active.");
+
+                        await userRepository.UpdateLastLoginDateAsync(user, context.HttpContext.RequestAborted);
+                    }
+                };
+
+            });
+        }
+    }
+}
