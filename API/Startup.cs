@@ -32,6 +32,8 @@ namespace API
             services.AddDbContext(Configuration);
             services.AddMinimalMvc();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
+            services.AddCustomApiVersioning();
+
             return services.BuildAutofacServiceProvider();
         }
 

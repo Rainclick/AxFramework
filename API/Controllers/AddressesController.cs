@@ -7,13 +7,11 @@ using WebFramework.Api;
 
 namespace API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    [ApiVersion("1")]
     [AllowAnonymous]
-    public class AddressController : AxController<AddressDto, AddressDto, Address>
+    public class AddressesController : AxController<AddressDto, AddressDto, Address>
     {
-
-        public AddressController(IBaseRepository<Address> repository) : base(repository)
+        public AddressesController(IBaseRepository<Address> repository) : base(repository)
         {
         }
     }

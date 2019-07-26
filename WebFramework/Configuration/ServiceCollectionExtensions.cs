@@ -123,5 +123,12 @@ namespace WebFramework.Configuration
 
             });
         }
+
+
+        public static void AddCustomApiVersioning (this IServiceCollection services)
+        {
+            services.AddApiVersioning();
+            
+        }
     }
 }
