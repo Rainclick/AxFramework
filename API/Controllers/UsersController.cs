@@ -13,7 +13,6 @@ using WebFramework.Api;
 
 namespace API.Controllers
 {
-    [ApiVersion("1")]
     public class UsersController : AxController<UserDto, User>
     {
         private readonly IUserRepository _userRepository;
