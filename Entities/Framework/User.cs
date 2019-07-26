@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Entities.Framework
@@ -15,6 +16,7 @@ namespace Entities.Framework
         public DateTime BirthDate { get; set; }
         public string FullName => FirstName + " " + LastName;
         public DateTimeOffset? LastLoginDate { get; set; }
+        public ICollection<Address> Addresses { get; set; }
     }
 
     public enum GenderType

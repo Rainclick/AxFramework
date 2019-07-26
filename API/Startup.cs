@@ -1,13 +1,11 @@
 ﻿using System;
-using API.Models;
-using AutoMapper;
 using Common;
-using Entities.Framework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebFramework.Configuration;
+using WebFramework.CustomMapping;
 using WebFramework.Middlewares;
 
 namespace API
@@ -20,11 +18,8 @@ namespace API
         {
             Configuration = configuration;
 
-            //AutoMapperConfiguration.InitializeAutoMapper();
-            Mapper.Initialize(config =>
-            {
-                config.CreateMap<User, UserDto>().ReverseMap();
-            });
+            AutoMapperConfiguration.InitializeAutoMapper();
+
             _siteSettings = configuration.GetSection(nameof(SiteSettings)).Get<SiteSettings>();
         }
 
