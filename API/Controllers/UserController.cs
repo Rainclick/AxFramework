@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
-using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Common.Utilities;
 using Data.Repositories.UserRepositories;
@@ -36,15 +35,15 @@ namespace API.Controllers
         public ApiResult<IQueryable<UserDto>> Get()
         {
             var users = _userRepository.GetAll().ProjectTo<UserDto>();
-            return Ok(users); 
+            return Ok(users);
         }
 
         [HttpGet("{id:int}")]
         public async Task<ApiResult<UserDto>> Get(int id, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByIdAsync(id, cancellationToken);
-            var user2 = Mapper.Map<UserDto>(user);
-            return user2;
+            var userDto = UserDto.FromEntity(user);
+            return userDto;
         }
 
         [HttpPost]

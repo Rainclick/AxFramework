@@ -14,7 +14,6 @@ namespace Entities.Framework
         public string LastName { get; set; }
         public GenderType GenderType { get; set; }
         public DateTime BirthDate { get; set; }
-        public string FullName => FirstName + " " + LastName;
         public DateTimeOffset? LastLoginDate { get; set; }
         public ICollection<Address> Addresses { get; set; }
     }
