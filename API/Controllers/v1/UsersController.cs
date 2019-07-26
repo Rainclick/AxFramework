@@ -11,8 +11,9 @@ using Services;
 using Services.Services.Services;
 using WebFramework.Api;
 
-namespace API.Controllers
+namespace API.Controllers.v1
 {
+    [ApiVersion("1")]
     public class UsersController : AxController<UserDto, User>
     {
         private readonly IUserRepository _userRepository;
