@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using API.Models;
-using AutoMapper.QueryableExtensions;
+﻿using API.Models;
 using Data.Repositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
@@ -16,11 +12,9 @@ namespace API.Controllers
     [AllowAnonymous]
     public class AddressController : AxController<AddressDto, AddressDto, Address>
     {
-        private readonly IBaseRepository<Address> _repository;
 
         public AddressController(IBaseRepository<Address> repository) : base(repository)
         {
-            _repository = repository;
         }
     }
 }
