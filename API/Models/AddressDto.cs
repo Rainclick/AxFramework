@@ -8,8 +8,6 @@ namespace API.Models
     public class AddressDto : BaseDto<AddressDto, Address, int>, IValidatableObject
     {
         public string Content { get; set; }
-        public string City { get; set; }
-        public string UserFirstName { get; set; }
         public int UserId { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
