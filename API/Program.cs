@@ -34,6 +34,7 @@ namespace API
                 .ConfigureLogging(options => options.ClearProviders())
                 .UseNLog()
                 .UseKestrel()
+                .UseIISIntegration()
                 .UseStartup<Startup>();
     }
 }
