@@ -1,7 +1,10 @@
 ﻿using System;
 using Common;
+using Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using WebFramework.Configuration;
@@ -33,7 +36,7 @@ namespace API
             services.AddMinimalMvc();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
-
+            
             return services.BuildAutofacServiceProvider();
         }
 
@@ -45,6 +48,9 @@ namespace API
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
+            using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
+            var context = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
+            context.Database.Migrate();
         }
     }
 }
