@@ -26,8 +26,6 @@ namespace Data.Repositories
         void Detach(TEntity entity);
         TEntity GetById(params object[] ids);
         TEntity GetById(object id);
-        Task<TEntity> GetByIdAsync(CancellationToken cancellationToken, params object[] ids);
-        Task<TEntity> GetByIdAsync(object id, CancellationToken cancellationToken);
         void LoadCollection<TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> collectionProperty) where TProperty : class;
         Task LoadCollectionAsync<TProperty>(TEntity entity, Expression<Func<TEntity, IEnumerable<TProperty>>> collectionProperty, CancellationToken cancellationToken) where TProperty : class;
         void LoadReference<TProperty>(TEntity entity, Expression<Func<TEntity, TProperty>> referenceProperty) where TProperty : class;

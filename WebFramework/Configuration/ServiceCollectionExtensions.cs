@@ -11,8 +11,6 @@ using Data;
 using Data.Repositories.UserRepositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -31,23 +29,23 @@ namespace WebFramework.Configuration
             });
         }
 
-        public static void AddMinimalMvc(this IServiceCollection services)
-        {
-            services.AddMvcCore(options =>
-                {
-                    options.Filters.Add(new AuthorizeFilter());
-                })
-                .AddApiExplorer()
-                .AddAuthorization()
-                .AddFormatterMappings()
-                .AddDataAnnotations()
-                .AddJsonFormatters(options =>
-                {
-                    options.Formatting = Newtonsoft.Json.Formatting.Indented;
-                    options.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-                }).AddCors()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-        }
+        //public static void AddMinimalMvc(this IServiceCollection services)
+        //{
+        //    services.AddMvcCore(options =>
+        //        {
+        //            options.Filters.Add(new AuthorizeFilter());
+        //        })
+        //        .AddApiExplorer()
+        //        .AddAuthorization()
+        //        .AddFormatterMappings()
+        //        .AddDataAnnotations()
+        //        .AddJsonFormatters(options =>
+        //        {
+        //            options.Formatting = Newtonsoft.Json.Formatting.Indented;
+        //            options.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+        //        }).AddCors()
+        //        .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+        //}
 
         public static void AddJwtAuthentication(this IServiceCollection services, JwtSettings jwtSettings)
         {
@@ -112,7 +110,7 @@ namespace WebFramework.Configuration
                             context.Fail("This token has no claims.");
 
                         var userId = claimsIdentity.GetUserId<int>();
-                        var user = await userRepository.GetByIdAsync(context.HttpContext.RequestAborted, userId);
+                        var user = await userRepository.GetFirstAsync(x => x.Id == userId, context.HttpContext.RequestAborted);
 
                         if (!user.IsActive)
                             context.Fail("User is not active.");
@@ -125,13 +123,13 @@ namespace WebFramework.Configuration
         }
 
 
-        public static void AddCustomApiVersioning (this IServiceCollection services)
+        public static void AddCustomApiVersioning(this IServiceCollection services)
         {
             services.AddApiVersioning(options =>
             {
                 options.ReportApiVersions = true;
             });
-            
+
         }
     }
 }

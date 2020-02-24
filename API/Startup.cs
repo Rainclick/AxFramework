@@ -1,9 +1,10 @@
 ﻿using System;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Common;
 using Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ namespace API
     {
         private readonly SiteSettings _siteSettings;
         public IConfiguration Configuration;
+        public ILifetimeScope AutofacContainer { get; private set; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -29,28 +31,38 @@ namespace API
 
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public IServiceProvider ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<SiteSettings>(Configuration.GetSection(nameof(SiteSettings)));
             services.AddDbContext(Configuration);
-            services.AddMinimalMvc();
+            services.AddMvc(options => options.EnableEndpointRouting = false).AddNewtonsoftJson();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
-            
-            return services.BuildAutofacServiceProvider();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseCustomExceptionHandler();
-            app.UseHsts(env);
+            app.UseHosts(env);
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
+            this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
             using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
             var context = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
-            context.Database.Migrate();
+            //context.Database.Migrate();
         }
+
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            //builder.Populate(services);
+
+            //Register Services to Autofac ContainerBuilder
+            builder.AddServices();
+
+        }
+
     }
 }

@@ -30,16 +30,6 @@ namespace Data.Repositories
             return Entities.Find(id);
         }
 
-        public virtual Task<TEntity> GetByIdAsync(CancellationToken cancellationToken, params object[] ids)
-        {
-            return Entities.FindAsync(ids, cancellationToken);
-        }
-
-        public Task<TEntity> GetByIdAsync(object id, CancellationToken cancellationToken)
-        {
-            return Entities.FindAsync(new[] { id }, cancellationToken);
-        }
-
         public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken, bool saveNow = true)
         {
             Assert.NotNull(entity, nameof(entity));

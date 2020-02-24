@@ -59,7 +59,7 @@ namespace WebFramework.Api
         [HttpPut]
         public virtual async Task<ApiResult<TSelectDto>> Update(TDto dto, CancellationToken cancellationToken)
         {
-            var model = await _repository.GetByIdAsync(cancellationToken, dto.Id);
+            var model = await _repository.GetFirstAsync(x => x.Id.Equals(dto.Id), cancellationToken);
 
             model = dto.ToEntity(model);
 
@@ -73,8 +73,7 @@ namespace WebFramework.Api
         [HttpDelete("{id:guid}")]
         public virtual async Task<ApiResult> Delete(TKey id, CancellationToken cancellationToken)
         {
-            var model = await _repository.GetByIdAsync(cancellationToken, id);
-
+            var model = await _repository.GetFirstAsync(x => x.Id.Equals(id), cancellationToken);
             await _repository.DeleteAsync(model, cancellationToken);
 
             return Ok();

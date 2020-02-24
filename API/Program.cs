@@ -1,6 +1,8 @@
 ﻿using System;
-using Microsoft.AspNetCore;
+using System.IO;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
 
@@ -14,7 +16,7 @@ namespace API
             try
             {
                 logger.Debug("init main");
-                CreateWebHostBuilder(args).Build().Run();
+                CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
             {
@@ -29,12 +31,26 @@ namespace API
             }
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .ConfigureLogging(options => options.ClearProviders())
-                .UseNLog()
-                .UseKestrel()
-                .UseIISIntegration()
-                .UseStartup<Startup>();
+        //public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        //    WebHost.CreateDefaultBuilder(args)
+        //        .ConfigureLogging(options => options.ClearProviders())
+        //        .UseNLog()
+        //        .UseKestrel()
+        //        .UseIISIntegration()
+        //        .UseStartup<Startup>();
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.ConfigureLogging(options => options.ClearProviders());
+                    webBuilder.UseNLog();
+                    //webBuilder.UseKestrel();
+                    webBuilder.UseContentRoot(Directory.GetCurrentDirectory());
+                    webBuilder.UseIISIntegration();
+                    webBuilder.UseStartup<Startup>();
+
+                });
     }
 }
