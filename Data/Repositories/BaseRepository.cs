@@ -30,6 +30,11 @@ namespace Data.Repositories
             return Entities.Find(id);
         }
 
+        public IQueryable<TEntity> Run(string query)
+        {
+            return Entities.FromSqlRaw(query);
+        }
+
         public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken, bool saveNow = true)
         {
             Assert.NotNull(entity, nameof(entity));

@@ -38,5 +38,6 @@ namespace Data.Repositories
         IQueryable<TEntity> GetAll();
         Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken);
         TEntity GetFirst(Expression<Func<TEntity, bool>> predicate);
+        IQueryable<TEntity> Run(string query);
     }
 }
