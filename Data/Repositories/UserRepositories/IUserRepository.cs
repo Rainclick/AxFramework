@@ -1,15 +1,14 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using Entities.Framework;
 
 namespace Data.Repositories.UserRepositories
 {
-    public interface IUserRepository : IBaseRepository<User>, IScopedDependency
+    public interface IUserRepository : IBaseRepository<AxUser>, IScopedDependency
     {
-        Task<User> GetByUserAndPass(string username, string password, CancellationToken cancellationToken);
-        Task AddAsync(User user, string password, CancellationToken cancellationToken);
-        Task UpdateLastLoginDateAsync(User user, CancellationToken cancellationToken);
+        Task<AxUser> GetByUserAndPass(string username, string password, CancellationToken cancellationToken);
+        Task AddAsync(AxUser user, string password, CancellationToken cancellationToken);
+        Task UpdateLastLoginDateAsync(AxUser user, CancellationToken cancellationToken);
     }
 }

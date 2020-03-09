@@ -8,7 +8,7 @@ using ValidationContext = System.ComponentModel.DataAnnotations.ValidationContex
 
 namespace API.Models
 {
-    public class UserDto : BaseDto<UserDto, User, int>, IValidatableObject
+    public class UserDto : BaseDto<UserDto, AxUser, long>, IValidatableObject
     {
         public string UserName { get; set; }
         public string Password { get; set; }
@@ -22,7 +22,7 @@ namespace API.Models
                 yield return new ValidationResult("رمز عبور نمیتواند 123456 باشد", new[] { nameof(Password) });
         }
 
-        public override void CustomMappings(IMappingExpression<User, UserDto> mapping)
+        public override void CustomMappings(IMappingExpression<AxUser, UserDto> mapping)
         {
             mapping.ForMember(
                 dest => dest.FullName,

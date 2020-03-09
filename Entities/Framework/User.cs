@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Entities.Framework
 {
-    public class User : BaseEntity
+    public class AxUser : BaseEntity
     {
         [Required]
         public string UserName { get; set; }
@@ -15,7 +15,6 @@ namespace Entities.Framework
         public GenderType GenderType { get; set; }
         public DateTime BirthDate { get; set; }
         public DateTimeOffset? LastLoginDate { get; set; }
-        public ICollection<Address> Addresses { get; set; }
     }
 
     public enum GenderType

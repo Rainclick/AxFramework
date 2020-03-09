@@ -46,7 +46,9 @@ namespace API
                 {
                     webBuilder.ConfigureLogging(options => options.ClearProviders());
                     webBuilder.UseNLog();
-                    //webBuilder.UseKestrel();
+                    webBuilder.ConfigureKestrel(serverOptions =>
+                    {
+                    });
                     webBuilder.UseContentRoot(Directory.GetCurrentDirectory());
                     webBuilder.UseIISIntegration();
                     webBuilder.UseStartup<Startup>();

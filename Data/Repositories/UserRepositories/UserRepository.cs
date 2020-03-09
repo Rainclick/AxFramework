@@ -9,25 +9,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories.UserRepositories
 {
-    public class UserRepository : BaseRepository<User>, IUserRepository
+    public class UserRepository : BaseRepository<AxUser>, IUserRepository
     {
         public UserRepository(DataContext dbContext) : base(dbContext)
         {
         }
 
-        public Task<User> GetByUserAndPass(string username, string password, CancellationToken cancellationToken)
+        public Task<AxUser> GetByUserAndPass(string username, string password, CancellationToken cancellationToken)
         {
             var passwordHash = SecurityHelper.GetSha256Hash(password);
             return Table.Where(p => p.UserName == username && p.Password == passwordHash).SingleOrDefaultAsync(cancellationToken);
         }
 
-        public Task UpdateLastLoginDateAsync(User user, CancellationToken cancellationToken)
+        public Task UpdateLastLoginDateAsync(AxUser user, CancellationToken cancellationToken)
         {
             user.LastLoginDate = DateTimeOffset.Now;
             return UpdateAsync(user, cancellationToken);
         }
 
-        public async Task AddAsync(User user, string password, CancellationToken cancellationToken)
+        public async Task AddAsync(AxUser user, string password, CancellationToken cancellationToken)
         {
             var exists = await TableNoTracking.AnyAsync(p => p.UserName == user.UserName);
             if (exists)

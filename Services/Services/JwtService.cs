@@ -23,7 +23,7 @@ namespace Services.Services
             //this.signInManager = signInManager;
         }
 
-        public async Task<AccessToken> GenerateAsync(User user)
+        public async Task<AccessToken> GenerateAsync(AxUser user)
         {
             var secretKey = Encoding.UTF8.GetBytes(_siteSetting.JwtSettings.SecretKey);
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256Signature);
@@ -54,7 +54,7 @@ namespace Services.Services
             return new AccessToken(securityToken);
         }
 
-        private async Task<IEnumerable<Claim>> _getClaimsAsync(User user)
+        private async Task<IEnumerable<Claim>> _getClaimsAsync(AxUser user)
         {
             if (user == null)
                 return null;

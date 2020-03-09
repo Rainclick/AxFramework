@@ -15,7 +15,8 @@ namespace Entities.Framework
         public int? ModifierUserId { get; set; }
     }
 
-    public abstract class BaseEntity : BaseEntity<int>
+    public abstract class BaseEntity : BaseEntity<long>
     {
     }
+
 }
