@@ -39,7 +39,12 @@ namespace API.Controllers.v1
             string barsaUser;
             try
             {
-                barsaUser = WebServiceConsumer.Invoke<string>($"http://185.211.57.94/api/custom/checkUser?username={username}&password={password}", null, MethodType.Get);
+                var options = new RequestOptions
+                {
+                    Authorization = resInvoke.data.token,
+                    Headers = new Dictionary<string, string> {{"sth", resInvoke.data.sth}}
+                };
+                barsaUser = WebServiceConsumer.Invoke<string>($"http://185.211.57.94/api/custom/checkUser?username={username}&password={password}", null, MethodType.Get, options);
             }
             catch
             {
