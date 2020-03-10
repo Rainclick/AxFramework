@@ -28,19 +28,18 @@ namespace API.Controllers.v1
         }
 
 
-        [HttpGet("[action]")]
-        public async Task<IEnumerable<AxServiceDto>> GetData()
+        [HttpGet("[action]/{userId}")]
+        public async Task<IEnumerable<AxServiceDto>> GetData(long userId)
         {
             using var qe = new QueryExecutor();
             var data = await qe.Connection.QueryAsync<AxServiceDto>(@"
-                /*ReportName='_ريز برنامه غذايي جهت سرويس موبايل', ReportId='1204113530000020189'*/
 SELECT
 A.Id,
 A.DeliveryDate,
 A_Food.Title as FoodTitle,
 A_MealGroup.Title as A_MealGroup_Title,
 A_Restaurant.Title as RestaurantTitle,
-A_Meal.Title as A_Meal_Title,
+A_Meal.Title as MealTitle,
 A.Planned,
 A.Reservable,
 A.Reserved,
@@ -67,7 +66,7 @@ left outer join Res_DailyFoodPlanDetails A_DailyFoodPlanDetails on (A_DailyFoodP
 FULL OUTER JOIN Res_PersonnelFoodReservation ON A.Food = Res_PersonnelFoodReservation.Food AND
 A.DeliveryDate = Res_PersonnelFoodReservation.Date AND A.Meal = Res_PersonnelFoodReservation.Meal
 ");
-            var a = data.Where(x => x.Id != null && x.Day > 0);
+            var a = data.Where(x => x.Id != null && x.Day > 0).OrderBy(x => x.DeliveryDate);
             return a;
         }
     }
