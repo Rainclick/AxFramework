@@ -109,13 +109,13 @@ namespace WebFramework.Configuration
                         if (claimsIdentity != null && claimsIdentity.Claims?.Any() != true)
                             context.Fail("This token has no claims.");
 
-                        var userId = claimsIdentity.GetUserId<int>();
-                        var user = await userRepository.GetFirstAsync(x => x.Id == userId, context.HttpContext.RequestAborted);
+                        //var userId = claimsIdentity.GetUserId<long>();
+                        //var user = await userRepository.GetFirstAsync(x => x.Id == userId, context.HttpContext.RequestAborted);
 
-                        if (!user.IsActive)
-                            context.Fail("User is not active.");
+                        //if (!user.IsActive)
+                        //    context.Fail("User is not active.");
 
-                        await userRepository.UpdateLastLoginDateAsync(user, context.HttpContext.RequestAborted);
+                        //await userRepository.UpdateLastLoginDateAsync(user, context.HttpContext.RequestAborted);
                     }
                 };
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
@@ -36,22 +37,22 @@ namespace API.Controllers.v1
 
             if (!resInvoke.succeed)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, resInvoke.error.userMessage);
-            string barsaUser;
+            Model<string> barsaUser;
             try
             {
                 var options = new RequestOptions
                 {
                     Authorization = resInvoke.data.token,
-                    Headers = new Dictionary<string, string> {{"sth", resInvoke.data.sth}}
+                    Headers = new Dictionary<string, string> { { "sth", resInvoke.data.sth } }
                 };
-                barsaUser = WebServiceConsumer.Invoke<string>($"http://185.211.57.94/api/custom/checkUser?username={username}&password={password}", null, MethodType.Get, options);
+                barsaUser = WebServiceConsumer.Invoke<Model<string>>($"http://185.211.57.94/api/custom/checkUser?username={username}&password={password}", null, MethodType.Get, options);
             }
             catch
             {
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "خطا در SSO برسا نوین رای");
             }
 
-            if (string.IsNullOrWhiteSpace(barsaUser))
+            if (barsaUser == null)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "نام کاربری و یا رمز عبور اشتباه است");
 
             var axUser = new AxUser { UserName = username, Password = password };
@@ -81,10 +82,32 @@ namespace API.Controllers.v1
                 Device = device
             };
             qe.Connection.Insert(tb);
-            var split = barsaUser.Split(",,", StringSplitOptions.RemoveEmptyEntries);
-            token.userId = long.Parse(split[0]);
-            token.name = split[1];
+            token.userId = long.Parse(barsaUser.data);
             return token;
         }
+
+        [HttpGet("[action]/{userId}")]
+        public async Task<ApiResult<UserInfo>> GetUserInfo(long userId)
+        {
+            var userInfo = new UserInfo();
+            using var qe = new QueryExecutor();
+            var user = await qe.Connection.QueryFirstOrDefaultAsync<UserDto>("Select DISPLAYNAME from Spl_Users where Id = @userId", new { userId });
+            if (user != null)
+            {
+                userInfo.DisplayName = user.DisplayName;
+            }
+            else
+                return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "کاربری یافت نشد!");
+
+
+            var loginLog = await qe.Connection.QueryFirstOrDefaultAsync<AxUserLoginLog>("Select * from AxUserLoginLogs where UserId=@userId ORDER BY [DateTime] DESC OFFSET (1) ROWS FETCH NEXT (1) ROWS ONLY", new { userId });
+            if (loginLog != null)
+                userInfo.LastLogin = loginLog.DateTime.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
+
+            userInfo.MsgCount = 0;
+            return userInfo;
+        }
     }
+
+
 }

@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using Data.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,14 +18,27 @@ namespace API.Controllers.v1
     public class AxServiceController : BaseController
     {
 
-        [Route("GetConfig/{vc:int}")]
+        [Route("GetConfig/{vc:int}/{vn}/{device}/{userId}")]
         [HttpGet]
         [AllowAnonymous]
-        public ApiResult<ConfigDto> GetConfig(int vc)
+        public async Task<ApiResult<ConfigDto>> GetConfig(int vc, string vn, string device, long userId)
         {
             using var qe = new QueryExecutor();
-            var config = qe.RunFirstOrDefault<ConfigDto>($"select * from AxConfig where VersionCode > {vc} order by datetime desc");
+            var config = await qe.Connection.QueryFirstOrDefaultAsync<ConfigDto>($"select * from AxConfig where VersionCode > {vc} order by datetime desc");
             var apiResult = new ApiResult<ConfigDto>(true, ApiResultStatusCode.Success, config);
+            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
+            var logId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1203113500000000107");
+            var loginLog = new AxUserLoginLog
+            {
+                DateTime = DateTime.Now,
+                Device = device,
+                Ip = remoteIpAddress?.ToString(),
+                UserId = userId == 0 ? (long?)null : userId,
+                VersionCode = vc,
+                VersionName = vn,
+                Id = logId
+            };
+            await qe.Connection.InsertAsync(loginLog);
             return apiResult;
         }
 
@@ -70,4 +85,5 @@ A.DeliveryDate = Res_PersonnelFoodReservation.Date AND A.Meal = Res_PersonnelFoo
             return a;
         }
     }
+
 }
