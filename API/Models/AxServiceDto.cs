@@ -15,6 +15,7 @@ namespace API.Models
         public string WeekDayTitle { get; set; }
         public long Day { get; set; }
         public DateTime DeliveryDate { get; set; }
+        public int  Num { get; set; }
         public string DeliveryDateString => DeliveryDate.ToPerDateString("MM/dd");
     }
 }

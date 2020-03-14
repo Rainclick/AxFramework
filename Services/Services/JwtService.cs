@@ -50,7 +50,6 @@ namespace Services.Services
 
             var tokenHandler = new JwtSecurityTokenHandler();
             var securityToken = tokenHandler.CreateJwtSecurityToken(descriptor);
-
             return new AccessToken(securityToken);
         }
 

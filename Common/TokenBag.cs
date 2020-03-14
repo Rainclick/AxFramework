@@ -1,7 +1,7 @@
 ﻿using System;
 using Dapper.Contrib.Extensions;
 
-namespace API.Models
+namespace Common
 {
     [Table("AxToken")]
     public class TokenBag

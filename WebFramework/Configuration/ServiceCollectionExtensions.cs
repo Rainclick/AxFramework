@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Common;
 using Common.Exception;
 using Common.Utilities;
+using Dapper;
 using Data;
+using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -108,6 +110,14 @@ namespace WebFramework.Configuration
                         var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
                         if (claimsIdentity != null && claimsIdentity.Claims?.Any() != true)
                             context.Fail("This token has no claims.");
+
+                        var authHeader = context.Request.Headers["Authorization"];
+                        var token = authHeader.ToString().Replace("bearer ", "");
+
+                        using var qe = new QueryExecutor();
+                        var tokenBag = qe.Connection.QueryFirstOrDefault<TokenBag>("Select * from AxToken where Token = @token", new { token });
+                        if (tokenBag == null)
+                            throw new AppException(ApiResultStatusCode.UnAuthorized, "UnAuth", HttpStatusCode.Unauthorized);
 
                         //var userId = claimsIdentity.GetUserId<long>();
                         //var user = await userRepository.GetFirstAsync(x => x.Id == userId, context.HttpContext.RequestAborted);

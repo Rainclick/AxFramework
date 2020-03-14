@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
@@ -28,9 +29,11 @@ namespace API.Controllers.v1
             _jwtService = jwtService;
         }
 
+
+
         [HttpGet("[action]")]
         [AllowAnonymous]
-        public async Task<ApiResult<AccessToken>> AxToken(string username, string password, string device)
+        public async Task<ApiResult<AccessToken>> AxToken(string username, string password, string device, bool isAgain)
         {
             dynamic data = new { un = username, pwd = password };
             Model<Token> resInvoke = WebServiceConsumer.Invoke<Model<Token>>("http://185.211.57.94/api/auth/ServiceLogin3", data, MethodType.Post, null);
@@ -59,17 +62,28 @@ namespace API.Controllers.v1
             using var qe = new QueryExecutor();
             var tokenBag = qe.Connection.QueryFirstOrDefault<TokenBag>("Select * from AxToken where username = @username", new { username });
 
-            if (tokenBag != null)
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.LogicError, null, $"کاربر گرامی {tokenBag.UserName} عزیز دستگاه {tokenBag.Device} قبلا با کاربری شما وارد سیستم شده است در صورت ادامه آن دستگاه از سیستم خارج می گردد,آیا ادامه می دهید؟");
-
             var requestOptions = new RequestOptions
             {
                 Authorization = resInvoke.data.token,
                 Headers = new Dictionary<string, string> { { "sth", resInvoke.data.sth } }
             };
+
             var res = WebServiceConsumer.Invoke<Model<dynamic>>("http://185.211.57.94/api/auth/logout", null, MethodType.Post, requestOptions);
             if (!res.succeed)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "مشکل از logout برسا");
+
+            if (tokenBag != null && !isAgain)
+            {
+         
+                return new ApiResult<AccessToken>(false, ApiResultStatusCode.LogicError, null,
+                    $"کاربر گرامی {tokenBag.UserName} عزیز دستگاه {tokenBag.Device} قبلا با کاربری شما وارد سیستم شده است در صورت ادامه آن دستگاه از سیستم خارج می گردد,آیا ادامه می دهید؟");
+            }
+
+            if (isAgain)
+            {
+                await DeleteToken(username);
+            }
+
             var token = await _jwtService.GenerateAsync(axUser);
             var tbId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1203113500000000106");
             var tb = new TokenBag
@@ -104,8 +118,35 @@ namespace API.Controllers.v1
             if (loginLog != null)
                 userInfo.LastLogin = loginLog.DateTime.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
 
-            userInfo.MsgCount = 0;
+            userInfo.MsgCount = 2;
             return userInfo;
+        }
+
+        [HttpGet("[action]")]
+        [AllowAnonymous]
+        public async Task<ApiResult<List<string>>> GetFooterTexts()
+        {
+            using var qe = new QueryExecutor();
+            var data = await qe.Connection.QueryAsync<string>("Select Text from AxFooterText where Active = 1");
+            var list = data.ToList();
+            if (list.Any())
+                return list.ToList();
+            return new ApiResult<List<string>>(false, ApiResultStatusCode.NotFound, null, "کاربری یافت نشد!");
+
+        }
+
+        [HttpGet("[action]")]
+        public async Task<ApiResult<bool>> SignOut()
+        {
+            var username = User.Identity.GetUserName();
+            await DeleteToken(username);
+            return true;
+        }
+
+        private static async Task DeleteToken(string username)
+        {
+            using var qe = new QueryExecutor();
+            await qe.Connection.ExecuteAsync("Delete from AxToken where username = @username", new {username});
         }
     }
 
