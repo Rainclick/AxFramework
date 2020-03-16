@@ -15,7 +15,7 @@ namespace API.Models
         public string FullName { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-        {
+        { 
             if (UserName != null && UserName.Equals("test", StringComparison.OrdinalIgnoreCase))
                 yield return new ValidationResult("نام کاربری نمیتواند Test باشد", new[] { nameof(UserName) });
             if (Password.Equals("123456"))
