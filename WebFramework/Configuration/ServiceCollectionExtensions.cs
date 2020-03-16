@@ -17,6 +17,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
+
 namespace WebFramework.Configuration
 {
     public static class ServiceCollectionExtensions
@@ -119,6 +121,7 @@ namespace WebFramework.Configuration
                         if (tokenBag == null)
                             throw new AppException(ApiResultStatusCode.UnAuthorized, "UnAuth", HttpStatusCode.Unauthorized);
 
+                
                         //var userId = claimsIdentity.GetUserId<long>();
                         //var user = await userRepository.GetFirstAsync(x => x.Id == userId, context.HttpContext.RequestAborted);
 
