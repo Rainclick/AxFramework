@@ -31,18 +31,21 @@ namespace API.Controllers.v1
         [HttpGet("[action]")]
         [AllowAnonymous]
         public async Task<AccessToken> AxToken(string username, string password, CancellationToken cancellationToken)
-        {   
+        {
             var passwordHash = SecurityHelper.GetSha256Hash(password);
             var user = await _userRepository.GetFirstAsync(x => x.UserName == username && x.Password == passwordHash, cancellationToken);
             if (user == null)
                 throw new UnauthorizedAccessException("نام کاربری و یا رمز عبور اشتباه است");
             var token = await _jwtService.GenerateAsync(user);
-
+            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
             var userToken = new UserToken
             {
                 Active = true,
-                Token = token.access_token,
-                UserAgent = Request.Headers["User-Agent"].ToString()
+                Token = token?.access_token,
+                UserAgent = Request.Headers["User-Agent"].ToString(),
+                Ip = remoteIpAddress?.ToString(),
+                ClientId = Guid.NewGuid().ToString(),
+                Browser = ""
             };
 
             await _userTokenRepository.AddAsync(userToken, cancellationToken);
