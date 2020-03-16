@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
 using Common.Utilities;
+using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
@@ -18,22 +19,33 @@ namespace API.Controllers.v1
     {
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
+        private readonly IBaseRepository<UserToken> _userTokenRepository;
 
-        public UsersController(IUserRepository userRepository, IJwtService jwtService) : base(userRepository)
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<UserToken> userTokenRepository) : base(userRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
+            _userTokenRepository = userTokenRepository;
         }
 
         [HttpGet("[action]")]
         [AllowAnonymous]
         public async Task<AccessToken> AxToken(string username, string password, CancellationToken cancellationToken)
-        {
+        {   
             var passwordHash = SecurityHelper.GetSha256Hash(password);
             var user = await _userRepository.GetFirstAsync(x => x.UserName == username && x.Password == passwordHash, cancellationToken);
             if (user == null)
                 throw new UnauthorizedAccessException("نام کاربری و یا رمز عبور اشتباه است");
             var token = await _jwtService.GenerateAsync(user);
+
+            var userToken = new UserToken
+            {
+                Active = true,
+                Token = token.access_token,
+                UserAgent = Request.Headers["User-Agent"].ToString()
+            };
+
+            await _userTokenRepository.AddAsync(userToken, cancellationToken);
             return token;
         }
     }

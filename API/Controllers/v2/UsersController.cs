@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using API.Models;
 using Common.Exception;
+using Data.Repositories;
 using Data.Repositories.UserRepositories;
+using Entities.Framework;
 using Microsoft.AspNetCore.Mvc;
 using Services.Services.Services;
 using WebFramework.Api;
@@ -13,7 +15,7 @@ namespace API.Controllers.v2
     public class UsersController : v1.UsersController
     {
         private readonly IUserRepository _userRepository;
-        public UsersController(IUserRepository userRepository, IJwtService jwtService) : base(userRepository, jwtService)
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<UserToken> userTokenRepository) : base(userRepository, jwtService, userTokenRepository)
         {
             _userRepository = userRepository;
         }
