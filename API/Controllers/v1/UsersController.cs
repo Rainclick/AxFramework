@@ -37,13 +37,19 @@ namespace API.Controllers.v1
             if (user == null)
                 throw new UnauthorizedAccessException("نام کاربری و یا رمز عبور اشتباه است");
             var token = await _jwtService.GenerateAsync(user);
+
             var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
+            var ip = remoteIpAddress?.ToString();
+            var computerName = CompNameHelper.DetermineCompName(ip);
+
             var userToken = new UserToken
             {
                 Active = true,
                 Token = token?.access_token,
                 UserAgent = Request.Headers["User-Agent"].ToString(),
-                Ip = remoteIpAddress?.ToString(),
+                Ip = ip,
+                DeviceName = computerName,
+                UserId = user.Id,
                 ClientId = Guid.NewGuid().ToString(),
                 Browser = ""
             };
