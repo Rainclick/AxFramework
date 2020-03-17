@@ -60,9 +60,9 @@ namespace API.Controllers.v1
             if (barsaUser == null)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "نام کاربری و یا رمز عبور اشتباه است");
 
-            var axUser = new AxUser { UserName = username, Password = password };
+            var axUser = new AxUser { UserName = username, Password = password, Id = long.Parse(barsaUser.data) };
             using var qe = new QueryExecutor();
-            var tokenBag = qe.Connection.QueryFirstOrDefault<TokenBag>("Select * from AxToken where username = @username", new { username });
+            var tokenBag = qe.Connection.QueryFirstOrDefault<TokenBag>("Select * from AxToken where UserId = @userId", new { userId = axUser.Id });
 
             var requestOptions = new RequestOptions
             {
@@ -78,7 +78,7 @@ namespace API.Controllers.v1
             {
 
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.LogicError, null,
-                    $"کاربر گرامی {tokenBag.UserName} عزیز دستگاه {tokenBag.Device} قبلا با کاربری شما وارد سیستم شده است در صورت ادامه آن دستگاه از سیستم خارج می گردد,آیا ادامه می دهید؟");
+                    $"کاربر گرامی {username} عزیز دستگاه {tokenBag.Device} قبلا با کاربری شما وارد سیستم شده است در صورت ادامه آن دستگاه از سیستم خارج می گردد,آیا ادامه می دهید؟");
             }
 
             if (isAgain)
@@ -86,7 +86,7 @@ namespace API.Controllers.v1
                 await DeleteToken(username);
             }
 
-            axUser.Id = long.Parse(barsaUser.data);
+
 
             var token = await _jwtService.GenerateAsync(axUser);
             var tbId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1203113500000000106");
@@ -96,7 +96,7 @@ namespace API.Controllers.v1
                 Token = token.access_token,
                 CreateDateTime = DateTime.Now,
                 ExpireDateTime = DateTime.Now.AddSeconds(token.expires_in),
-                UserName = username,
+                UserId = axUser.Id,
                 Device = device
             };
             qe.Connection.Insert(tb);
@@ -162,10 +162,39 @@ namespace API.Controllers.v1
             var userId = User.Identity.GetUserId<long>();
             var offset = page * pageCount;
             using var qe = new QueryExecutor();
-            var data = await qe.Connection.QueryAsync<UserMessageDto>("Select * from AxNotification where UserId = @userId ORDER BY InsertDateTime DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId,offset,pageCount });
+            var data = await qe.Connection.QueryAsync<UserMessageDto>("Select * from AxNotification where UserId = @userId ORDER BY InsertDateTime DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount });
 
             return new ApiResult<IEnumerable<UserMessageDto>>(true, ApiResultStatusCode.Success, data);
         }
+
+        [HttpGet("[action]/{msgId}/{device}")]
+        [Authorize]
+        public async Task<ApiResult<bool>> SetMsgSeen(long msgId, string device, CancellationToken cancellationToken)
+        {
+            var userId = User.Identity.GetUserId<long>();
+            using var qe = new QueryExecutor();
+            await qe.Connection.ExecuteAsync("  UPDATE AxNotification SET SeenDateTime = GETDATE() , IsSeen=1, SeenDevice = @device WHERE UserId = @userId and Id = @msgId", new
+            {
+                device,
+                userId,
+                msgId
+            });
+
+            return true;
+        }
+
+        [HttpPost("[action]")]
+        [Authorize]
+        public async Task<ApiResult<bool>> SetUserGToken(Gtoken gtoken, CancellationToken cancellationToken)
+        {
+            var userId = User.Identity.GetUserId<long>();
+            using var qe = new QueryExecutor();
+            await qe.Connection.ExecuteAsync("UPDATE AxToken SET GToken = @token WHERE UserId = @userId", new { token = gtoken.Token, userId });
+
+            return true;
+        }
+
+
     }
 
 

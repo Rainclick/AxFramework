@@ -9,7 +9,7 @@ namespace Common
         [ExplicitKey]
         public long Id { get; set; }
         public string Token { get; set; }
-        public string UserName { get; set; }
+        public long? UserId { get; set; }
         public string Device { get; set; }
         public DateTime ExpireDateTime { get; set; }
         public DateTime CreateDateTime { get; set; }
