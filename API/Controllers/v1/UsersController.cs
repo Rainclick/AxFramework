@@ -83,7 +83,7 @@ namespace API.Controllers.v1
 
             if (isAgain)
             {
-                await DeleteToken(username);
+                await DeleteToken(axUser.Id);
             }
 
 
@@ -143,15 +143,15 @@ namespace API.Controllers.v1
         [HttpGet("[action]")]
         public async Task<ApiResult<bool>> SignOut()
         {
-            var username = User.Identity.GetUserName();
-            await DeleteToken(username);
+            var userId = User.Identity.GetUserId<long>();
+            await DeleteToken(userId);
             return true;
         }
 
-        private static async Task DeleteToken(string username)
+        private static async Task DeleteToken(long userId)
         {
             using var qe = new QueryExecutor();
-            await qe.Connection.ExecuteAsync("Delete from AxToken where username = @username", new { username });
+            await qe.Connection.ExecuteAsync("Delete from AxToken where UserId = @userId", new { userId });
         }
 
         [HttpGet("[action]/{page}")]
