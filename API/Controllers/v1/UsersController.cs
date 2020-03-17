@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
+using Common.Exception;
 using Common.Utilities;
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -74,7 +76,7 @@ namespace API.Controllers.v1
 
             if (tokenBag != null && !isAgain)
             {
-         
+
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.LogicError, null,
                     $"کاربر گرامی {tokenBag.UserName} عزیز دستگاه {tokenBag.Device} قبلا با کاربری شما وارد سیستم شده است در صورت ادامه آن دستگاه از سیستم خارج می گردد,آیا ادامه می دهید؟");
             }
@@ -83,6 +85,8 @@ namespace API.Controllers.v1
             {
                 await DeleteToken(username);
             }
+
+            axUser.Id = long.Parse(barsaUser.data);
 
             var token = await _jwtService.GenerateAsync(axUser);
             var tbId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1203113500000000106");
@@ -96,7 +100,7 @@ namespace API.Controllers.v1
                 Device = device
             };
             qe.Connection.Insert(tb);
-            token.userId = long.Parse(barsaUser.data);
+            token.userId = axUser.Id;
             return token;
         }
 
@@ -118,7 +122,8 @@ namespace API.Controllers.v1
             if (loginLog != null)
                 userInfo.LastLogin = loginLog.DateTime.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
 
-            userInfo.MsgCount = 2;
+            var msgCount = await qe.Connection.ExecuteScalarAsync<int>("Select count(*) from AxNotification where UserId = @userId And IsSeen = 0", new { userId });
+            userInfo.MsgCount = msgCount;
             return userInfo;
         }
 
@@ -146,7 +151,20 @@ namespace API.Controllers.v1
         private static async Task DeleteToken(string username)
         {
             using var qe = new QueryExecutor();
-            await qe.Connection.ExecuteAsync("Delete from AxToken where username = @username", new {username});
+            await qe.Connection.ExecuteAsync("Delete from AxToken where username = @username", new { username });
+        }
+
+        [HttpGet("[action]/{page}")]
+        [Authorize]
+        public async Task<ApiResult<IEnumerable<UserMessageDto>>> GetUserMessages(int page, CancellationToken cancellationToken)
+        {
+            var pageCount = 10;
+            var userId = User.Identity.GetUserId<long>();
+            var offset = page * pageCount;
+            using var qe = new QueryExecutor();
+            var data = await qe.Connection.QueryAsync<UserMessageDto>("Select * from AxNotification where UserId = @userId ORDER BY InsertDateTime DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId,offset,pageCount });
+
+            return new ApiResult<IEnumerable<UserMessageDto>>(true, ApiResultStatusCode.Success, data);
         }
     }
 

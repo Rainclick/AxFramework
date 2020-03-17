@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
+using Common.Utilities;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Data.Repositories;
@@ -43,10 +43,10 @@ namespace API.Controllers.v1
         }
 
 
-        [HttpGet("[action]/{userId}")]
-        [Authorize]
-        public async Task<IEnumerable<AxServiceDto>> GetData(long userId)
+        [HttpGet("[action]")]
+        public async Task<IEnumerable<AxServiceDto>> GetData()
         {
+            var userId = User.Identity.GetUserId<long>();
             using var qe = new QueryExecutor();
             var data = await qe.Connection.QueryAsync<AxServiceDto>(@"select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate DESC", new { userId });
             return data;
