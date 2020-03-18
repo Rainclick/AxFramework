@@ -43,4 +43,8 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\Users\Amir\source\repos\AxFramework\API\API.xml</DocumentationFile>
+  </PropertyGroup>
+
 </Project>

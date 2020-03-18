@@ -25,9 +25,16 @@ namespace API.Controllers.v1
             _jwtService = jwtService;
         }
 
+        /// <summary>
+        /// This method is Login 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         [HttpGet("[action]")]
         [AllowAnonymous]
-        public async Task<AccessToken> AxToken(string username, string password, CancellationToken cancellationToken)
+        public virtual async Task<AccessToken> AxToken(string username, string password, CancellationToken cancellationToken)
         {
             var passwordHash = SecurityHelper.GetSha256Hash(password);
             var user = await _userRepository.GetFirstAsync(x => x.UserName == username && x.Password == passwordHash, cancellationToken);
