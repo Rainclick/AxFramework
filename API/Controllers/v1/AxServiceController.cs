@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
@@ -44,12 +45,23 @@ namespace API.Controllers.v1
 
 
         [HttpGet("[action]")]
-        public async Task<IEnumerable<AxServiceDto>> GetData()
+        public async Task<IEnumerable<AxServiceDtoReserve>> GetData()
         {
             var userId = User.Identity.GetUserId<long>();
             using var qe = new QueryExecutor();
-            var data = await qe.Connection.QueryAsync<AxServiceDto>(@"select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate DESC", new { userId });
+            var data = await qe.Connection.QueryAsync<AxServiceDtoReserve>(@"select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate DESC", new { userId });
             return data;
+        }
+
+        [HttpGet("[action]/{page}")]
+        public async Task<ApiResult<IEnumerable<AxServiceDtoHistory>>> GetReservesHistory(int page)
+        {
+            var pageCount = 10;
+            var userId = User.Identity.GetUserId<long>();
+            var offset = page * pageCount;
+            using var qe = new QueryExecutor();
+            var data = await qe.Connection.QueryAsync<AxServiceDtoHistory>("SELECT * FROM UserReservationHistory WHERE UserId = @userId ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount });
+            return new ApiResult<IEnumerable<AxServiceDtoHistory>>(true, ApiResultStatusCode.Success, data);
         }
     }
 
