@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
 using WebFramework.Middlewares;
+using WebFramework.Swagger;
 
 namespace API
 {
@@ -38,6 +40,7 @@ namespace API
             services.AddMvc(options => options.EnableEndpointRouting = false).AddNewtonsoftJson();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
+            services.AddSwagger();
 
         }
 
@@ -49,6 +52,8 @@ namespace API
             app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseMvc();
+            app.UseSwaggerAndUi();
+
             this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
             using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
             var context = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
