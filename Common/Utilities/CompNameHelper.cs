@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 
 namespace Common.Utilities
@@ -8,10 +7,18 @@ namespace Common.Utilities
     {
         public static string DetermineCompName(string ip)
         {
-            var myIp = IPAddress.Parse(ip);
-            var getIpHost = Dns.GetHostEntry(myIp);
-            List<string> compName = getIpHost.HostName.Split('.').ToList();
-            return compName.FirstOrDefault();
+            try
+            {
+                var myIp = IPAddress.Parse(ip);
+                var getIpHost = Dns.GetHostEntry(myIp);
+                var compName = getIpHost.HostName.Split('.').ToList();
+                return compName.FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
+
         }
     }
 }
