@@ -45,15 +45,17 @@ namespace API.Controllers.v1
             var userToken = new UserToken
             {
                 Active = true,
-                Token = token?.access_token,
+                Token = token.access_token,
                 UserAgent = Request.Headers["User-Agent"].ToString(),
                 Ip = ip,
                 DeviceName = computerName,
                 UserId = user.Id,
                 ClientId = Guid.NewGuid().ToString(),
+                CreatorUserId = user.Id,
                 Browser = ""
             };
 
+            //Response.Cookies.Append("AxToken", token.access_token);
             await _userTokenRepository.AddAsync(userToken, cancellationToken);
             return token;
         }
