@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
@@ -53,14 +54,26 @@ namespace API.Controllers.v1
             return data;
         }
 
-        [HttpGet("[action]/{page}")]
-        public async Task<ApiResult<IEnumerable<AxServiceDtoHistory>>> GetReservesHistory(int page)
+        [HttpGet("[action]/{page}/{month}")]
+        [Authorize]
+        public async Task<ApiResult<IEnumerable<AxServiceDtoHistory>>> GetReservesHistory(int page, int month)
         {
+            IEnumerable<AxServiceDtoHistory> data;
             var pageCount = 10;
             var userId = User.Identity.GetUserId<long>();
             var offset = page * pageCount;
             using var qe = new QueryExecutor();
-            var data = await qe.Connection.QueryAsync<AxServiceDtoHistory>("SELECT * FROM UserReservationHistory WHERE UserId = @userId ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount });
+            if (month > 0 && month <= 12)
+            {
+                var p = new PersianCalendar();
+                var year = p.GetYear(DateTime.Now);
+                var fDate = DateExtensionMethods.GetMiladiDate(year + "-" + month + "-1");
+                var tDate = month < 12 ? DateExtensionMethods.GetMiladiDate(year + "-" + (month + 1) + "-1") : DateExtensionMethods.GetMiladiDate((year + 1) + "-1-1");
+
+                data = await qe.Connection.QueryAsync<AxServiceDtoHistory>("SELECT * FROM UserReservationHistory WHERE UserId = @userId And [Date] >= @fDate and [Date] < @tDate ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount, fDate, tDate });
+            }
+            else
+                data = await qe.Connection.QueryAsync<AxServiceDtoHistory>("SELECT * FROM UserReservationHistory WHERE UserId = @userId ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount });
             return new ApiResult<IEnumerable<AxServiceDtoHistory>>(true, ApiResultStatusCode.Success, data);
         }
     }
