@@ -37,10 +37,17 @@ namespace API
         {
             services.Configure<SiteSettings>(Configuration.GetSection(nameof(SiteSettings)));
             services.AddDbContext(Configuration);
+            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }));
             services.AddMvc(options => options.EnableEndpointRouting = false).AddNewtonsoftJson();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
             services.AddSwagger();
+
 
         }
 
@@ -51,8 +58,10 @@ namespace API
             app.UseHosts(env);
             app.UseHttpsRedirection();
             app.UseAuthentication();
+            app.UseCors("MyPolicy");
             app.UseMvc();
             app.UseSwaggerAndUi();
+      
 
             this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
             using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
