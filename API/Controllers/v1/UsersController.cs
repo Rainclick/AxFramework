@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
-using Common.Exception;
 using Common.Utilities;
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -30,8 +29,6 @@ namespace API.Controllers.v1
         {
             _jwtService = jwtService;
         }
-
-
 
         [HttpGet("[action]")]
         [AllowAnonymous]
@@ -104,9 +101,11 @@ namespace API.Controllers.v1
             return token;
         }
 
-        [HttpGet("[action]/{userId}")]
-        public async Task<ApiResult<UserInfo>> GetUserInfo(long userId)
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<ApiResult<UserInfo>> GetUserInfo()
         {
+            var userId = User.Identity.GetUserId<long>();
             var userInfo = new UserInfo();
             using var qe = new QueryExecutor();
             var user = await qe.Connection.QueryFirstOrDefaultAsync<UserDto>("Select DISPLAYNAME from Spl_Users where Id = @userId", new { userId });
@@ -141,6 +140,7 @@ namespace API.Controllers.v1
         }
 
         [HttpGet("[action]")]
+        [Authorize]
         public async Task<ApiResult<bool>> SignOut()
         {
             var userId = User.Identity.GetUserId<long>();

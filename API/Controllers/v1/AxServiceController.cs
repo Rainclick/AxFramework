@@ -46,6 +46,7 @@ namespace API.Controllers.v1
 
 
         [HttpGet("[action]")]
+        [Authorize]
         public async Task<IEnumerable<AxServiceDtoReserve>> GetData()
         {
             var userId = User.Identity.GetUserId<long>();
