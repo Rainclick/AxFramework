@@ -2,14 +2,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
-using Common.Exception;
+using Common;
 using Common.Utilities;
 using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis;
 using Services;
 using Services.Services.Services;
 using WebFramework.Api;
@@ -26,6 +25,7 @@ namespace API.Controllers.v1
         private readonly IJwtService _jwtService;
         private readonly IBaseRepository<UserToken> _userTokenRepository;
 
+        /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<UserToken> userTokenRepository) : base(userRepository)
         {
             _userRepository = userRepository;
@@ -42,12 +42,12 @@ namespace API.Controllers.v1
         /// <returns></returns>
         [HttpGet("[action]")]
         [AllowAnonymous]
-        public virtual async Task<AccessToken> AxToken(string username, string password, CancellationToken cancellationToken)
+        public async Task<ApiResult<AccessToken>> AxToken(string username, string password, CancellationToken cancellationToken)
         {
             var passwordHash = SecurityHelper.GetSha256Hash(password);
             var user = await _userRepository.GetFirstAsync(x => x.UserName == username && x.Password == passwordHash, cancellationToken);
             if (user == null)
-                throw new AppException("نام کاربری و یا رمز عبور اشتباه است");
+                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "نام کاربری و یا رمز عبور اشتباه است");
             var clientId = Guid.NewGuid().ToString();
             var token = await _jwtService.GenerateAsync(user, clientId);
 
@@ -83,7 +83,7 @@ namespace API.Controllers.v1
         /// <returns></returns>
         /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("[action]")]
-        public virtual async Task<ApiResult> SignOut(CancellationToken cancellationToken)
+        public async Task<ApiResult> SignOut(CancellationToken cancellationToken)
         {
             var clientId = User.Identity.GetClientId();
             var userToken = await _userTokenRepository.GetFirstAsync(x => x.ClientId == clientId, cancellationToken);
