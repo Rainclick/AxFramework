@@ -9,6 +9,9 @@ using WebFramework.Api;
 
 namespace API.Controllers.v1
 {
+    /// <summary>
+    /// Fetch Menus or Systems for user 
+    /// </summary>
     [ApiVersion("1")]
     [AllowAnonymous]
     public class MenusController : BaseController
@@ -20,6 +23,11 @@ namespace API.Controllers.v1
             _repository = repository;
         }
 
+        /// <summary>
+        /// Get Systems And Menus for Signed User
+        /// </summary>
+        /// <param name="parentId">Parent node Id for fetching them children</param>
+        /// <returns></returns>
         [HttpGet("{parentId?}")]
         public virtual ApiResult<IQueryable<MenuDto>> Get(int? parentId)
         {

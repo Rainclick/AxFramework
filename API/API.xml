@@ -4,6 +4,11 @@
         <name>API</name>
     </assembly>
     <members>
+        <member name="T:API.Controllers.v1.UsersController">
+            <summary>
+            Users Methods
+            </summary>
+        </member>
         <member name="M:API.Controllers.v1.UsersController.AxToken(System.String,System.String,System.Threading.CancellationToken)">
             <summary>
             This method is Login 
@@ -12,6 +17,14 @@
             <param name="password"></param>
             <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="M:API.Controllers.v1.UsersController.SignOut(System.Threading.CancellationToken)">
+            <summary>
+            SignOut user and Remove user Token from Db
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+            <exception cref="T:System.UnauthorizedAccessException"></exception>
         </member>
     </members>
 </doc>

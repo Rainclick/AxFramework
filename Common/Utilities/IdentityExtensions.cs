@@ -33,5 +33,10 @@ namespace Common.Utilities
         {
             return identity?.FindFirstValue(ClaimTypes.Name);
         }
+
+        public static string GetClientId(this IIdentity identity)
+        {
+            return identity?.FindFirstValue(ClaimTypes.UserData);
+        }
     }
 }

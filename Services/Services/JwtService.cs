@@ -23,7 +23,7 @@ namespace Services.Services
             //this.signInManager = signInManager;
         }
 
-        public async Task<AccessToken> GenerateAsync(User user)
+        public async Task<AccessToken> GenerateAsync(User user, string clientId)
         {
             var secretKey = Encoding.UTF8.GetBytes(_siteSetting.JwtSettings.SecretKey);
             var signingCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), SecurityAlgorithms.HmacSha256Signature);
@@ -34,7 +34,7 @@ namespace Services.Services
             //var certificate = new X509Certificate2("d:\\aaaa2.cer"/*, "P@ssw0rd"*/);
             //var encryptingCredentials = new X509EncryptingCredentials(certificate);
 
-            var claims = await _getClaimsAsync(user);
+            var claims = await _getClaimsAsync(user, clientId);
 
             var descriptor = new SecurityTokenDescriptor
             {
@@ -54,7 +54,7 @@ namespace Services.Services
             return new AccessToken(securityToken);
         }
 
-        private async Task<IEnumerable<Claim>> _getClaimsAsync(User user)
+        private async Task<IEnumerable<Claim>> _getClaimsAsync(User user, string clientId)
         {
             if (user == null)
                 return null;
@@ -64,6 +64,7 @@ namespace Services.Services
             {
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.UserData, clientId),
             };
 
             return list;

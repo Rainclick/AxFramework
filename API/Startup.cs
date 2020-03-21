@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using NLog;
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
 using WebFramework.Middlewares;
@@ -61,7 +61,9 @@ namespace API
             app.UseCors("MyPolicy");
             app.UseMvc();
             app.UseSwaggerAndUi();
-      
+
+            var configurationVariable = Configuration.GetConnectionString("SqlServer");
+            LogManager.Configuration.Variables["ConnectionString"] = configurationVariable;
 
             this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
             using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
