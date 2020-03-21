@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Entities.Framework
@@ -15,5 +16,6 @@ namespace Entities.Framework
         public int UserId { get; set; }
         [ForeignKey("UserId")]
         public User User { get; set; }
+        public DateTime ExpireDateTime { get; set; }
     }
 }

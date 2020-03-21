@@ -4,9 +4,21 @@
         <name>API</name>
     </assembly>
     <members>
+        <member name="T:API.Controllers.v1.MenusController">
+            <summary>
+            Fetch Menus or Systems for user 
+            </summary>
+        </member>
+        <member name="M:API.Controllers.v1.MenusController.Get(System.Nullable{System.Int32})">
+            <summary>
+            Get Systems And Menus for Signed User
+            </summary>
+            <param name="parentId">Parent node Id for fetching them children</param>
+            <returns></returns>
+        </member>
         <member name="T:API.Controllers.v1.UsersController">
             <summary>
-            Users Methods
+            Users Actions
             </summary>
         </member>
         <member name="M:API.Controllers.v1.UsersController.AxToken(System.String,System.String,System.Threading.CancellationToken)">

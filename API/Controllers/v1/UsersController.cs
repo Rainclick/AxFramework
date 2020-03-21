@@ -66,7 +66,8 @@ namespace API.Controllers.v1
                 UserId = user.Id,
                 ClientId = clientId,
                 CreatorUserId = user.Id,
-                Browser = ""
+                Browser = "",
+                ExpireDateTime = DateTime.Now.AddSeconds(token.expires_in)
             };
 
             //Response.Cookies.Append("AxToken", token.access_token);
@@ -94,7 +95,7 @@ namespace API.Controllers.v1
             return Ok();
         }
 
-  
+
 
 
     }
