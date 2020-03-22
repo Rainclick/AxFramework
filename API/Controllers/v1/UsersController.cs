@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
+using AutoMapper.QueryableExtensions;
 using Common;
 using Common.Utilities;
 using Data.Repositories;
@@ -9,6 +13,7 @@ using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Services;
 using Services.Services.Services;
 using WebFramework.Api;
@@ -24,13 +29,17 @@ namespace API.Controllers.v1
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
         private readonly IBaseRepository<UserToken> _userTokenRepository;
+        private readonly IBaseRepository<Menu> _menuRepository;
+        private readonly IBaseRepository<ConfigData> _configDataRepository;
 
         /// <inheritdoc />
-        public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<UserToken> userTokenRepository) : base(userRepository)
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository) : base(userRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
             _userTokenRepository = userTokenRepository;
+            _menuRepository = menuRepository;
+            _configDataRepository = configDataRepository;
         }
 
         /// <summary>
@@ -66,12 +75,20 @@ namespace API.Controllers.v1
                 UserId = user.Id,
                 ClientId = clientId,
                 CreatorUserId = user.Id,
+                InsertDateTime = DateTime.Now,
                 Browser = "",
                 ExpireDateTime = DateTime.Now.AddSeconds(token.expires_in)
             };
 
             //Response.Cookies.Append("AxToken", token.access_token);
             await _userTokenRepository.AddAsync(userToken, cancellationToken);
+
+            await Task.Run(() =>
+            {
+                var oldTokens = _userTokenRepository.GetAll(t => t.ExpireDateTime < DateTime.Now);
+                _userTokenRepository.DeleteRange(oldTokens);
+            }, cancellationToken);
+
             return token;
         }
 
@@ -83,6 +100,7 @@ namespace API.Controllers.v1
         /// <returns></returns>
         /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("[action]")]
+        [Authorize]
         public async Task<ApiResult> SignOut(CancellationToken cancellationToken)
         {
             var clientId = User.Identity.GetClientId();
@@ -95,7 +113,46 @@ namespace API.Controllers.v1
             return Ok();
         }
 
+        /// <summary>
+        /// Get Init Information For Main Panel
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<ApiResult<UserInfo>> GetInitData(CancellationToken cancellationToken)
+        {
+            var userId = User.Identity.GetUserId<int>();
+            var user = await _userRepository.GetFirstAsync(x => x.Id == userId, cancellationToken);
+            _userRepository.LoadReference(user, t => t.UserSettings);
 
+
+            if (user == null)
+                return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "کاربر یافت نشد");
+
+            var config = await _configDataRepository.TableNoTracking.ProjectTo<ConfigDataDto>().FirstOrDefaultAsync(x => x.Active, cancellationToken);
+
+            if (config == null)
+                return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "تنظیمات اولیه سامانه به درستی انجام نشده است");
+
+            _userRepository.LoadReference(user, t => t.UserSettings);
+            var userInfo = new UserInfo
+            {
+                UserName = user.UserName,
+                DateTimeNow = DateTime.Now.ToPerDateString(),
+                OrganizationName = config.OrganizationName,
+                OrganizationLogo = "/api/v1/General/GetOrganizationLogo",
+                UserPicture = "/api/v1/users/GetUserPicture",
+                UnReedMsgCount = 0,
+                UserTheme = user.UserSettings?.Theme,
+                UserDisplayName = user.FullName,
+                VersionName = config.VersionName,
+                DefaultSystemId = user.UserSettings?.DefaultSystemId,
+                SystemsList = _menuRepository.GetAll(x => x.Active && x.ParentId == null).ProjectTo<AxSystem>()
+            };
+            return userInfo;
+        }
 
 
     }

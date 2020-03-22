@@ -21,6 +21,9 @@
             Users Actions
             </summary>
         </member>
+        <member name="M:API.Controllers.v1.UsersController.#ctor(Data.Repositories.UserRepositories.IUserRepository,Services.Services.Services.IJwtService,Data.Repositories.IBaseRepository{Entities.Framework.UserToken},Data.Repositories.IBaseRepository{Entities.Framework.Menu},Data.Repositories.IBaseRepository{Entities.Framework.ConfigData})">
+            <inheritdoc />
+        </member>
         <member name="M:API.Controllers.v1.UsersController.AxToken(System.String,System.String,System.Threading.CancellationToken)">
             <summary>
             This method is Login 
@@ -33,6 +36,14 @@
         <member name="M:API.Controllers.v1.UsersController.SignOut(System.Threading.CancellationToken)">
             <summary>
             SignOut user and Remove user Token from Db
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+            <exception cref="T:System.UnauthorizedAccessException"></exception>
+        </member>
+        <member name="M:API.Controllers.v1.UsersController.GetInitData(System.Threading.CancellationToken)">
+            <summary>
+            Get Init Information For Main Panel
             </summary>
             <param name="cancellationToken"></param>
             <returns></returns>

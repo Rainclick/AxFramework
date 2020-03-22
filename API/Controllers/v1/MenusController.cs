@@ -3,7 +3,6 @@ using API.Models;
 using AutoMapper.QueryableExtensions;
 using Data.Repositories;
 using Entities.Framework;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
 
@@ -13,7 +12,6 @@ namespace API.Controllers.v1
     /// Fetch Menus or Systems for user 
     /// </summary>
     [ApiVersion("1")]
-    [AllowAnonymous]
     public class MenusController : BaseController
     {
         private readonly IBaseRepository<Menu> _repository;

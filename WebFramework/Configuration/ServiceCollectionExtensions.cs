@@ -3,12 +3,15 @@ using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Common;
 using Common.Exception;
 using Common.Utilities;
 using Data;
+using Data.Repositories;
 using Data.Repositories.UserRepositories;
+using Entities.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -103,19 +106,25 @@ namespace WebFramework.Configuration
                     },
                     OnTokenValidated = async context =>
                     {
-                        var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                        //var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                        var _userTokenRepository = context.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserToken>>();
 
                         var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
                         if (claimsIdentity != null && claimsIdentity.Claims?.Any() != true)
                             context.Fail("This token has no claims.");
 
-                        var userId = claimsIdentity.GetUserId<int>();
-                        var user = await userRepository.GetFirstAsync(x => x.Id == userId, context.HttpContext.RequestAborted);
+                        var clientId = claimsIdentity.GetClientId();
+                        var userToken = await _userTokenRepository.GetAll(x => x.ClientId == clientId).Include(x => x.User)
+                            .Select(x => new UserToken { User = new User { IsActive = x.User.IsActive } })
+                            .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
 
-                        if (!user.IsActive)
-                            context.Fail("User is not active.");
+                        if (userToken == null)
+                            throw new AppException("عدم احراز هویت");
 
-                        await userRepository.UpdateLastLoginDateAsync(user, context.HttpContext.RequestAborted);
+                        if (!userToken.User.IsActive)
+                            context.Fail("کاربری شما غیرفعال شده است");
+
+                        //await userRepository.UpdateLastLoginDateAsync(userToken.User, context.HttpContext.RequestAborted);
                     }
                 };
 
