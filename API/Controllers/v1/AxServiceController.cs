@@ -26,7 +26,7 @@ namespace API.Controllers.v1
         public async Task<ApiResult<ConfigDto>> GetConfig(int vc, string vn, string device, long userId)
         {
             using var qe = new QueryExecutor();
-            var config = await qe.Connection.QueryFirstOrDefaultAsync<ConfigDto>($"select * from AxConfig where VersionCode > {vc} order by datetime desc");
+            var config = await qe.Connection.QueryFirstOrDefaultAsync<ConfigDto>($"select * from AxConfig where VersionCode > {vc} and IsActive = 1 order by datetime desc");
             var apiResult = new ApiResult<ConfigDto>(true, ApiResultStatusCode.Success, config);
             var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
             var logId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1203113500000000107");
