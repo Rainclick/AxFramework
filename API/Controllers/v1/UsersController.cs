@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Services;
 using Services.Services.Services;
@@ -30,20 +32,25 @@ namespace API.Controllers.v1
         private readonly IJwtService _jwtService;
         private readonly IMemoryCache _memoryCache;
         private readonly IBaseRepository<LoginLog> _loginlogRepository;
+        private readonly IBaseRepository<Permission> _permissionRepository;
         private readonly IBaseRepository<UserToken> _userTokenRepository;
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
+        private readonly IBaseRepository<UserGroup> _userGroupRepository;
 
         /// <inheritdoc />
-        public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository) : base(userRepository)
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
+            IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository, IBaseRepository<UserGroup> userGroupRepository) : base(userRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
             _memoryCache = memoryCache;
             _loginlogRepository = loginlogRepository;
+            _permissionRepository = permissionRepository;
             _userTokenRepository = userTokenRepository;
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
+            _userGroupRepository = userGroupRepository;
         }
 
         /// <summary>
@@ -128,6 +135,51 @@ namespace API.Controllers.v1
                 _userTokenRepository.DeleteRange(oldTokens);
             }, cancellationToken);
 
+
+            var keys = _memoryCache.Get("user" + user.Id);
+            if (keys == null)
+            {
+                await Task.Run(() =>
+                {
+                    var keys = new HashSet<string>();
+                    var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == user.Id)
+                        .Include(x => x.Menu);
+                    foreach (var item in userPermissions)
+                    {
+                        if (!string.IsNullOrWhiteSpace(item.Menu.Key))
+                            keys.Add(item.Menu.Key);
+                    }
+
+                    var userGroups = _userGroupRepository.GetAll(x => x.UserId == user.Id);
+                    foreach (var item in userGroups)
+                    {
+                        var groupPermissions = _permissionRepository.GetAll(x => x.GroupId == item.GroupId && x.Access)
+                            .Include(x => x.Menu);
+                        foreach (var groupPermission in groupPermissions)
+                        {
+                            if (!string.IsNullOrWhiteSpace(groupPermission.Menu.Key))
+                                keys.Add(groupPermission.Menu.Key);
+                        }
+                    }
+
+                    var userDenied = _permissionRepository.GetAll(x => x.UserId == user.Id && !x.Access)
+                        .Select(x => x.Menu.Key);
+                    foreach (var item in userDenied)
+                    {
+                        keys.Remove(item);
+                    }
+
+                    //var NotShowInTreeKeys = _permissionRepository.GetAll(x => !x.ShowInTree && keys.Contains(x.ParentKey) && !x.Key.Contains("GetList")).ToList().Select(x=>x.Key);
+                    //foreach (var item in NotShowInTreeKeys)
+                    //{
+                    //    keys.Add(item);
+                    //}
+
+                    _memoryCache.Set("user" + user.Id, keys);
+
+                }, cancellationToken);
+            }
+
             await Task.Run(() =>
             {
                 _loginlogRepository.Update(loginlog);
@@ -185,6 +237,8 @@ namespace API.Controllers.v1
             });
 
 
+            var menus = _menuRepository.GetAll(x => x.Active && x.ParentId == null).ProjectTo<AxSystem>();
+
             _userRepository.LoadReference(user, t => t.UserSettings);
             var userInfo = new UserInfo
             {
@@ -202,7 +256,5 @@ namespace API.Controllers.v1
             };
             return userInfo;
         }
-
-
     }
 }

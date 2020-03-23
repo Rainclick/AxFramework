@@ -21,7 +21,7 @@
             Users Actions
             </summary>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.#ctor(Data.Repositories.UserRepositories.IUserRepository,Services.Services.Services.IJwtService,Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.LoginLog},Data.Repositories.IBaseRepository{Entities.Framework.UserToken},Data.Repositories.IBaseRepository{Entities.Framework.Menu},Data.Repositories.IBaseRepository{Entities.Framework.ConfigData})">
+        <member name="M:API.Controllers.v1.UsersController.#ctor(Data.Repositories.UserRepositories.IUserRepository,Services.Services.Services.IJwtService,Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.LoginLog},Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserToken},Data.Repositories.IBaseRepository{Entities.Framework.Menu},Data.Repositories.IBaseRepository{Entities.Framework.ConfigData},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup})">
             <inheritdoc />
         </member>
         <member name="M:API.Controllers.v1.UsersController.AxToken(System.String,System.String,System.Threading.CancellationToken)">

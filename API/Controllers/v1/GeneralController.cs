@@ -1,10 +1,10 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Common.Utilities;
 using Data.Repositories;
 using Entities.Framework;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
 
@@ -22,6 +22,7 @@ namespace API.Controllers.v1
 
 
         [HttpGet("[action]")]
+        [Authorize]
         public async Task<IActionResult> GetOrganizationLogo(CancellationToken cancellationToken)
         {
             var data = await _repository.GetFirstAsync(x => x.Active, cancellationToken);

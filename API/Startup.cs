@@ -1,16 +1,23 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common;
 using Data;
+using Data.Repositories;
+using Entities.Framework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
+using WebFramework.Filters;
 using WebFramework.Middlewares;
 using WebFramework.Swagger;
 
@@ -69,6 +76,7 @@ namespace API
             using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
             var context = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
             //context.Database.Migrate();
+
         }
 
         public void ConfigureContainer(ContainerBuilder builder)
