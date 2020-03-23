@@ -1,11 +1,13 @@
 ﻿using System.Linq;
 using API.Models;
 using AutoMapper.QueryableExtensions;
+using Common;
 using Data.Repositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
+using WebFramework.Filters;
 
 namespace API.Controllers.v1
 {
@@ -28,7 +30,7 @@ namespace API.Controllers.v1
         /// <param name="parentId">Parent node Id for fetching them children</param>
         /// <returns></returns>
         [HttpGet("{parentId?}")]
-        [Authorize]
+        [AxAuthorize(StateType = StateType.OnlyToken)]
         public virtual ApiResult<IQueryable<MenuDto>> Get(int? parentId)
         {
             var menus = _repository.GetAll(x => x.ParentId == parentId).ProjectTo<MenuDto>();

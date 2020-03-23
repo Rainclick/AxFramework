@@ -19,6 +19,7 @@ using Services;
 using Services.Services.Services;
 using UAParser;
 using WebFramework.Api;
+using WebFramework.Filters;
 
 namespace API.Controllers.v1
 {
@@ -61,7 +62,7 @@ namespace API.Controllers.v1
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet("[action]")]
-        [AllowAnonymous]
+        [AxAuthorize(StateType = StateType.Ignore)]
         public async Task<ApiResult<AccessToken>> AxToken(string username, string password, CancellationToken cancellationToken)
         {
             var passwordHash = SecurityHelper.GetSha256Hash(password);
@@ -196,7 +197,7 @@ namespace API.Controllers.v1
         /// <returns></returns>
         /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("[action]")]
-        [Authorize]
+        [AxAuthorize(StateType = StateType.OnlyToken)]
         public async Task<ApiResult> SignOut(CancellationToken cancellationToken)
         {
             var clientId = User.Identity.GetClientId();
@@ -216,7 +217,7 @@ namespace API.Controllers.v1
         /// <returns></returns>
         /// <exception cref="UnauthorizedAccessException"></exception>
         [HttpGet("[action]")]
-        [Authorize]
+        [AxAuthorize(StateType = StateType.OnlyToken)]
         public async Task<ApiResult<UserInfo>> GetInitData(CancellationToken cancellationToken)
         {
             var userId = User.Identity.GetUserId<int>();
@@ -237,7 +238,7 @@ namespace API.Controllers.v1
             });
 
 
-            var menus = _menuRepository.GetAll(x => x.Active && x.ParentId == null).ProjectTo<AxSystem>();
+            //var menus = _menuRepository.GetAll(x => x.Active && x.ParentId == null).ProjectTo<AxSystem>();
 
             _userRepository.LoadReference(user, t => t.UserSettings);
             var userInfo = new UserInfo

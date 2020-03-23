@@ -1,18 +1,33 @@
-﻿using System;
-using System.Linq;
+﻿using Common;
 using Common.Utilities;
 using Microsoft.AspNetCore.Mvc.Filters;
-using WebFramework.UserData;
 
 namespace WebFramework.Filters
 {
     public class AxAuthorizeAttribute : ActionFilterAttribute, IAuthorizationFilter
     {
-        public string Key { get; set; }
+        public AxOp AxOp { get; set; }
+        public AxOp ParentAxOp { get; set; }
+        public bool ShowInMenu { get; }
 
-        public AxAuthorizeAttribute(string key)
+        public StateType StateType { get; set; }
+
+        public AxAuthorizeAttribute(AxOp axOp, AxOp parentAxOp, bool showInMenu = false)
         {
-            Key = key;
+            AxOp = axOp;
+            ParentAxOp = parentAxOp;
+            ShowInMenu = showInMenu;
+        }
+
+        public AxAuthorizeAttribute(AxOp axOp, bool showInMenu = false)
+        {
+            AxOp = axOp;
+            ShowInMenu  = showInMenu;
+        }
+
+        public AxAuthorizeAttribute()
+        {
+            
         }
 
         public void OnAuthorization(AuthorizationFilterContext filterContext)
@@ -20,11 +35,11 @@ namespace WebFramework.Filters
             var context = filterContext.HttpContext;
             //var userRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
             var userId = context.User.Identity.GetUserId<int>();
-            var keys = UserPermissionManager.GetKeys(userId);
-            var haveAccess = keys?.Any(x => string.Equals(x, Key, StringComparison.CurrentCultureIgnoreCase));
-            if (keys != null && !haveAccess.Value)
-            {
-            }
+            //var keys = UserPermissionManager.GetKeys(userId);
+          
+            //if (keys != null && !haveAccess.Value)
+            //{
+            //}
 
         }
     }
