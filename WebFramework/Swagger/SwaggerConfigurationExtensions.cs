@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -36,7 +37,6 @@ namespace WebFramework.Swagger
 
                 options.SwaggerDoc("v1", new OpenApiInfo { Version = "v1", Title = "API V1" });
                 options.SwaggerDoc("v2", new OpenApiInfo { Version = "v2", Title = "API V2" });
-
                 #region Filters
                 ////Enable to use [SwaggerRequestExample] & [SwaggerResponseExample]
                 //options.ExampleFilters();
@@ -52,24 +52,32 @@ namespace WebFramework.Swagger
                 //options.OperationFilter<UnauthorizedResponsesOperationFilter>(true, "Bearer");
                 //#endregion
 
-                //#region Add Jwt Authentication
-                ////Add Lockout icon on top of swagger ui page to authenticate
-                ////options.AddSecurityDefinition("Bearer", new ApiKeyScheme
-                ////{
-                ////    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                ////    Name = "Authorization",
-                ////    In = "header"
-                ////});
-                ////options.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
-                ////{
-                ////    {"Bearer", new string[] { }}
-                ////});
-                //options.AddSecurityDefinition("Bearer", new OAuth2Scheme
-                //{
-                //    Flow = "password",
-                //    TokenUrl = "https://localhost:5001/api/v1/users/Token",
-                //});
-                //#endregion
+                #region Add Jwt Authentication
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme ex: Authorization: Bearer token...",
+                    Name = "Authorization",
+                    In = ParameterLocation.Header
+                });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            },
+                            //Scheme = "oauth2",
+                            Name = "Bearer",
+                            In = ParameterLocation.Header,
+
+                        },
+                        new List<string>()
+                    }
+                });
+                #endregion
 
                 #region Versioning
                 //// Remove version parameter from all Operations
