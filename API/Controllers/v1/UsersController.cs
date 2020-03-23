@@ -11,7 +11,6 @@ using Common.Utilities;
 using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
@@ -27,7 +26,7 @@ namespace API.Controllers.v1
     /// Users Actions
     /// </summary>
     [ApiVersion("1")]
-    public class UsersController : AxController<UserDto, User>
+    public class UsersController : BaseController
     {
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
@@ -41,7 +40,7 @@ namespace API.Controllers.v1
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
-            IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository, IBaseRepository<UserGroup> userGroupRepository) : base(userRepository)
+            IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository, IBaseRepository<UserGroup> userGroupRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;

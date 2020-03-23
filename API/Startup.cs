@@ -51,7 +51,11 @@ namespace API
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             }));
-            services.AddMvc(options => options.EnableEndpointRouting = false).AddNewtonsoftJson();
+            services.AddMvc(options =>
+            {
+                options.EnableEndpointRouting = false;
+                options.Filters.Add(new AxAuthorizeAttribute { StateType = StateType.OnlyToken });
+            }).AddNewtonsoftJson();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
             services.AddSwagger();
