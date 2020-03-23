@@ -42,6 +42,7 @@ namespace WebFramework.Filters
             var userId = context.User.Identity.GetUserId<int>();
             if (StateType == StateType.OnlyToken && userId <= 0)
                 throw new AppException(ApiResultStatusCode.UnAuthorized, "شما برای دسترسی به منابع مرود نظر احراز هویت نشده اید");
+            var u = context.Request.Path.ToString();
 
             if (StateType == StateType.Authorized)
             {

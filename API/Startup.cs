@@ -9,6 +9,7 @@ using Common;
 using Data;
 using Data.Repositories;
 using Entities.Framework;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -54,7 +55,6 @@ namespace API
             services.AddMvc(options =>
             {
                 options.EnableEndpointRouting = false;
-                options.Filters.Add(new AxAuthorizeAttribute { StateType = StateType.OnlyToken });
             }).AddNewtonsoftJson();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();

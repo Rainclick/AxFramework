@@ -60,12 +60,13 @@ namespace API.Controllers.v1
         /// <param name="password"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        [HttpGet("[action]")]
+        
         [AxAuthorize(StateType = StateType.Ignore)]
-        public async Task<ApiResult<AccessToken>> AxToken(string username, string password, CancellationToken cancellationToken)
+        [HttpPost("[action]")]
+        public async Task<ApiResult<AccessToken>> AxToken(LoginDto loginDto, CancellationToken cancellationToken)
         {
-            var passwordHash = SecurityHelper.GetSha256Hash(password);
-            var user = await _userRepository.GetFirstAsync(x => x.UserName == username && x.Password == passwordHash, cancellationToken);
+            var passwordHash = SecurityHelper.GetSha256Hash(loginDto.Password);
+            var user = await _userRepository.GetFirstAsync(x => x.UserName == loginDto.Username && x.Password == passwordHash, cancellationToken);
 
             var address = Request.HttpContext.Connection.RemoteIpAddress;
             var computerName = address.GetDeviceName();
@@ -90,11 +91,11 @@ namespace API.Controllers.v1
                 BrowserVersion = info.UA.Major + "." + info.UA.Minor,
                 UserId = user?.Id,
                 CreatorUserId = 1,
-                InvalidPassword = password,
+                InvalidPassword = loginDto.Password,
                 Ip = ip,
                 MachineName = computerName,
                 Os = info.Device + " " + info.OS,
-                UserName = username,
+                UserName = loginDto.Username,
                 ValidSignIn = false
             };
             _loginlogRepository.Add(loginlog);
