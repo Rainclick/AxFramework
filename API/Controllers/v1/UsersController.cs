@@ -1,21 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
+using Common.Exception;
 using Common.Utilities;
 using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Services;
 using Services.Services.Services;
+using UAParser;
 using WebFramework.Api;
 
 namespace API.Controllers.v1
@@ -28,15 +28,19 @@ namespace API.Controllers.v1
     {
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
+        private readonly IMemoryCache _memoryCache;
+        private readonly IBaseRepository<LoginLog> _loginlogRepository;
         private readonly IBaseRepository<UserToken> _userTokenRepository;
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
 
         /// <inheritdoc />
-        public UsersController(IUserRepository userRepository, IJwtService jwtService, IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository) : base(userRepository)
+        public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository) : base(userRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
+            _memoryCache = memoryCache;
+            _loginlogRepository = loginlogRepository;
             _userTokenRepository = userTokenRepository;
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
@@ -55,30 +59,65 @@ namespace API.Controllers.v1
         {
             var passwordHash = SecurityHelper.GetSha256Hash(password);
             var user = await _userRepository.GetFirstAsync(x => x.UserName == username && x.Password == passwordHash, cancellationToken);
+
+            var address = Request.HttpContext.Connection.RemoteIpAddress;
+            var computerName = address.GetDeviceName();
+            var ip = address.GetIp();
+
+            #region loginLog And configLoad
+
+            var config = _memoryCache.GetOrCreate(CacheKeys.ConfigData, entry =>
+            {
+                var dataDto = _configDataRepository.TableNoTracking.ProjectTo<ConfigDataDto>().FirstOrDefault(x => x.Active);
+                if (dataDto == null)
+                    throw new NotFoundException("تنظیمات اولیه سامانه به درستی انجام نشده است");
+                return dataDto;
+            });
+            var userAgent = Request.Headers["User-Agent"].ToString();
+            var uaParser = Parser.GetDefault();
+            var info = uaParser.Parse(userAgent);
+            var loginlog = new LoginLog
+            {
+                AppVersion = config.VersionName,
+                Browser = info.UA.Family,
+                BrowserVersion = info.UA.Major + "." + info.UA.Minor,
+                UserId = user?.Id,
+                CreatorUserId = 1,
+                InvalidPassword = password,
+                Ip = ip,
+                MachineName = computerName,
+                Os = info.Device + " " + info.OS,
+                UserName = username,
+                ValidSignIn = false
+            };
+            _loginlogRepository.Add(loginlog);
+            #endregion
+
             if (user == null)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "نام کاربری و یا رمز عبور اشتباه است");
+
+            loginlog.ValidSignIn = true;
+            loginlog.InvalidPassword = string.Empty;
+            loginlog.ModifierUserId = 1;
+
             var clientId = Guid.NewGuid().ToString();
             var token = await _jwtService.GenerateAsync(user, clientId);
-
-            var remoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress;
-            var ip = remoteIpAddress?.ToString();
-            var computerName = CompNameHelper.DetermineCompName(ip);
-
 
             var userToken = new UserToken
             {
                 Active = true,
                 Token = token.access_token,
-                UserAgent = Request.Headers["User-Agent"].ToString(),
+                UserAgent = userAgent,
                 Ip = ip,
                 DeviceName = computerName,
                 UserId = user.Id,
                 ClientId = clientId,
                 CreatorUserId = user.Id,
                 InsertDateTime = DateTime.Now,
-                Browser = "",
+                Browser = info.UA.ToString(),
                 ExpireDateTime = DateTime.Now.AddSeconds(token.expires_in)
             };
+
 
             //Response.Cookies.Append("AxToken", token.access_token);
             await _userTokenRepository.AddAsync(userToken, cancellationToken);
@@ -87,6 +126,11 @@ namespace API.Controllers.v1
             {
                 var oldTokens = _userTokenRepository.GetAll(t => t.ExpireDateTime < DateTime.Now);
                 _userTokenRepository.DeleteRange(oldTokens);
+            }, cancellationToken);
+
+            await Task.Run(() =>
+            {
+                _loginlogRepository.Update(loginlog);
             }, cancellationToken);
 
             return token;
@@ -131,10 +175,15 @@ namespace API.Controllers.v1
             if (user == null)
                 return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "کاربر یافت نشد");
 
-            var config = await _configDataRepository.TableNoTracking.ProjectTo<ConfigDataDto>().FirstOrDefaultAsync(x => x.Active, cancellationToken);
 
-            if (config == null)
-                return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "تنظیمات اولیه سامانه به درستی انجام نشده است");
+            var config = _memoryCache.GetOrCreate(CacheKeys.ConfigData, entry =>
+            {
+                var dataDto = _configDataRepository.TableNoTracking.ProjectTo<ConfigDataDto>().FirstOrDefault(x => x.Active);
+                if (dataDto == null)
+                    throw new NotFoundException("تنظیمات اولیه سامانه به درستی انجام نشده است");
+                return dataDto;
+            });
+
 
             _userRepository.LoadReference(user, t => t.UserSettings);
             var userInfo = new UserInfo

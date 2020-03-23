@@ -13,5 +13,6 @@ namespace Entities.Framework
         public string Key { get; set; }
         public string Icon { get; set; }
         public virtual ICollection<Menu> Children { get; set; }
+
     }
 }

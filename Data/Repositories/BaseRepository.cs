@@ -114,6 +114,8 @@ namespace Data.Repositories
         public virtual void Add(TEntity entity, bool saveNow = true)
         {
             Assert.NotNull(entity, nameof(entity));
+            entity.InsertDateTime = DateTime.Now;
+            //System.Web.HttpContext.Current.User.Identity.GetUserId();
             Entities.Add(entity);
             if (saveNow)
                 DbContext.SaveChanges();
@@ -132,7 +134,7 @@ namespace Data.Repositories
             Assert.NotNull(entity, nameof(entity));
 
             AttachEntity(entity);
-
+            entity.ModifiedDateTime = DateTime.Now;
             Entities.Update(entity);
             if (saveNow)
                 DbContext.SaveChanges();
