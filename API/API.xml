@@ -9,6 +9,13 @@
             Fetch Menus or Systems for user 
             </summary>
         </member>
+        <member name="M:API.Controllers.v1.MenusController.#ctor(Data.Repositories.IBaseRepository{Entities.Framework.Menu},Microsoft.Extensions.Caching.Memory.IMemoryCache)">
+            <summary>
+            
+            </summary>
+            <param name="repository"></param>
+            <param name="memoryCache"></param>
+        </member>
         <member name="M:API.Controllers.v1.MenusController.Get(System.Nullable{System.Int32})">
             <summary>
             Get Systems And Menus for Signed User
