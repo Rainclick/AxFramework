@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
@@ -77,6 +76,56 @@ namespace API.Controllers.v1
                 data = await qe.Connection.QueryAsync<AxServiceDtoHistory>("SELECT * FROM UserReservationHistory WHERE UserId = @userId ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount });
             return new ApiResult<IEnumerable<AxServiceDtoHistory>>(true, ApiResultStatusCode.Success, data);
         }
-    }
 
+
+        [HttpPost("[action]")]
+        [Authorize]
+        public async Task<ApiResult> AddAxReserve(AxReserveRequest req)
+        {
+            var userId = User.Identity.GetUserId<long>();
+            using var qe = new QueryExecutor();
+
+            var personnel = await qe.Connection.ExecuteScalarAsync<long>("select Personnel  from Res_PersonelRestaurantSetting WHERE UserId = @userId", new { userId });
+            var plan = await qe.Connection.QueryFirstOrDefaultAsync<AxServiceDtoReserve>("select * from UserActiveFoodPlans WHERE Id = @pid", new { pid = req.Id });
+            if (plan == null)
+                return new ApiResult(false, ApiResultStatusCode.NotFound, "رزرو یافت نشد");
+
+            if (plan.Reservable <= 0)
+                return new ApiResult(false, ApiResultStatusCode.NotFound, "ظرفیت غذای مورد نظر تکمیل شد");
+
+            var reserve = await qe.Connection.QueryFirstOrDefaultAsync<AxReserveRequest>("Select * from Res_PersonnelFoodReservation WHERE Personnel = @personnel and PersonnelDailyReservationDetails =@pid", new { personnel, pid = req.Id });
+            if (reserve == null)
+            {
+                var nextId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1207113500000010123");
+                var axReserveRequest = new AxReserveRequest
+                {
+                    Id = nextId,
+                    Num = req.Num,
+                    Personnel = personnel,
+                    Progress = "APIV1",
+                    DayOfWeek = plan.WeekDay,
+                    Food = plan.Food,
+                    Meal = plan.Meal,
+                    PersonnelDailyReservationDetails = req.Id,
+                    Restaurant = plan.Restaurant,
+                    ServeFoodPlace = 1207027580000000101,
+                    Category = 1,
+                    Status = 1,
+                    CategoryCaption = "سهمیه شخص",
+                    StatusCaption = "رزرو شده"
+                };
+                qe.Connection.Insert(axReserveRequest);
+                return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت انجام شد");
+            }
+
+            if (req.Num == 0)
+            {
+                await qe.Connection.DeleteAsync(reserve);
+                return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت حذف شد");
+            }
+            reserve.Num = req.Num;
+            await qe.Connection.UpdateAsync(reserve);
+            return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت ویرایش شد");
+        }
+    }
 }

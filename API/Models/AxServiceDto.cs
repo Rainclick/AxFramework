@@ -1,5 +1,6 @@
 ﻿using System;
 using Common.Utilities;
+using Dapper.Contrib.Extensions;
 
 namespace API.Models
 {
@@ -26,7 +27,32 @@ namespace API.Models
         public long Day { get; set; }
         public DateTime DeliveryDate { get; set; }
         public string DeliveryDateString => DeliveryDate.ToPerDateString("MM/dd");
+        public int Reservable { get; set; }
+        public long Food { get; set; }
+        public long Meal { get; set; }
+        public long Restaurant { get; set; }
+        public int WeekDay { get; set; }
     }
 
+
+    [Table("Res_PersonnelFoodReservation")]
+    public class AxReserveRequest
+    {
+        [ExplicitKey]
+        public long Id { get; set; }
+        public long PersonnelDailyReservationDetails { get; set; }
+        public long Food { get; set; }
+        public long ServeFoodPlace { get; set; }
+        public long Personnel { get; set; }
+        public long Meal { get; set; }
+        public long Restaurant { get; set; }
+        public int DayOfWeek { get; set; }
+        public int Category { get; set; }
+        public int Status { get; set; }
+        public int Num { get; set; }
+        public string StatusCaption { get; set; }
+        public string CategoryCaption { get; set; }
+        public string Progress { get; set; }
+    }
 
 }
