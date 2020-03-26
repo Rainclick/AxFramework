@@ -4,6 +4,11 @@
         <name>API</name>
     </assembly>
     <members>
+        <member name="T:API.Controllers.v1.GroupsController">
+            <summary>
+            Group Methods
+            </summary>
+        </member>
         <member name="T:API.Controllers.v1.MenusController">
             <summary>
             Fetch Menus or Systems for user 
@@ -64,19 +69,17 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.Get(System.Threading.CancellationToken)">
+        <member name="M:API.Controllers.v1.UsersController.Get">
             <summary>
             Get All Users
             </summary>
-            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.Get(System.Int32,System.Threading.CancellationToken)">
+        <member name="M:API.Controllers.v1.UsersController.Get(System.Int32)">
             <summary>
             Get User Instance By Id
             </summary>
             <param name="id"></param>
-            <param name="cancellationToken"></param>
             <returns></returns>
         </member>
         <member name="M:API.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IWebHostEnvironment)">

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Linq;
+using System.Threading;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
@@ -15,25 +16,26 @@ namespace API.Controllers.v1
     /// Group Methods
     /// </summary>
     [ApiVersion("1")]
-    public class GroupController : BaseController
+    public class GroupsController : BaseController
     {
         private readonly IBaseRepository<AxGroup> _groupRepository;
 
-        public GroupController(IBaseRepository<AxGroup> groupRepository)
+        public GroupsController(IBaseRepository<AxGroup> groupRepository)
         {
             _groupRepository = groupRepository;
         }
 
         [HttpGet]
         [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.GroupList, ShowInMenu = true)]
-        public ApiResult<AxGroupDto> Get(CancellationToken cancellationToken)
+        public ApiResult<IQueryable<AxGroupDto>> Get(CancellationToken cancellationToken)
         {
             var groups = _groupRepository.GetAll().ProjectTo<AxGroupDto>();
             return Ok(groups);
         }
 
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GroupList, ShowInMenu = true)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GroupItem)]
+        [Route("{id}")]
         public ApiResult<AxGroupDto> Get(int id, CancellationToken cancellationToken)
         {
             var group = _groupRepository.GetAll(x => x.Id == id).ProjectTo<AxGroupDto>().FirstOrDefaultAsync(cancellationToken);

@@ -273,11 +273,10 @@ namespace API.Controllers.v1
         /// <summary>
         /// Get All Users
         /// </summary>
-        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet]
         [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
-        public ApiResult<IQueryable<UserSelectDto>> Get(CancellationToken cancellationToken)
+        public ApiResult<IQueryable<UserSelectDto>> Get()
         {
             var users = _userRepository.GetAll().ProjectTo<UserSelectDto>();
             return Ok(users);
@@ -287,13 +286,13 @@ namespace API.Controllers.v1
         /// Get User Instance By Id
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="cancellationToken"></param>
         /// <returns></returns>
         [HttpGet]
+        [Route("{id}")]
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.UserItem)]
-        public ApiResult<UserSelectDto> Get(int id, CancellationToken cancellationToken)
+        public ApiResult<UserSelectDto> Get(int id)
         {
-            var user = _userRepository.GetAll(x => x.Id == id).ProjectTo<UserSelectDto>().FirstOrDefaultAsync(cancellationToken);
+            var user = _userRepository.GetAll(x => x.Id == id).ProjectTo<UserSelectDto>().FirstOrDefault();
             return Ok(user);
         }
 
