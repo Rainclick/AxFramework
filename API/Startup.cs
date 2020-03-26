@@ -9,7 +9,6 @@ using Common;
 using Data;
 using Data.Repositories;
 using Entities.Framework;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -160,7 +159,7 @@ namespace API
 
                 if (node.Parent == AxOp.None)
                 {
-                    lst[^1].Url = itemUrl;
+                    //lst[^1].Url = itemUrl;
                     return lst;
                 }
 

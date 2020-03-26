@@ -16,6 +16,5 @@ namespace Entities.Framework
         public virtual ICollection<Menu> Children { get; set; }
         public AxOp AxOp { get; set; }
         public int OrderId { get; set; }
-        public string Url { get; set; }
     }
 }

@@ -109,10 +109,13 @@ namespace Common.Utilities
         /// <param name="assemblies">Assemblies contains Entities</param>
         public static void RegisterAllEntities<TBaseType>(this ModelBuilder modelBuilder, params Assembly[] assemblies)
         {
-            IEnumerable<Type> types = assemblies.SelectMany(a => a.GetExportedTypes()).Where(c => c.IsClass && !c.IsAbstract && c.IsPublic && typeof(TBaseType).IsAssignableFrom(c));
+           var types = assemblies.SelectMany(a => a.GetExportedTypes()).Where(c => c.IsClass && !c.IsAbstract && c.IsPublic && typeof(TBaseType).IsAssignableFrom(c));
 
             foreach (var type in types)
+            {
                 modelBuilder.Entity(type);
+                modelBuilder.Entity(type).Property<byte[]>("RowVersion").IsRowVersion();
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ namespace Entities.Framework
         public DateTime? ModifiedDateTime { get; set; }
         public int CreatorUserId { get; set; }
         public int? ModifierUserId { get; set; }
+        public byte[] RowVersion { get; set; }
     }
 
     public abstract class BaseEntity : BaseEntity<int>

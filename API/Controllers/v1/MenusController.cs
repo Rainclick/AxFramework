@@ -1,11 +1,15 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
+using Common.Utilities;
 using Data.Repositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using WebFramework.Api;
 using WebFramework.Filters;
 
@@ -18,10 +22,12 @@ namespace API.Controllers.v1
     public class MenusController : BaseController
     {
         private readonly IBaseRepository<Menu> _repository;
+        private readonly IMemoryCache _memoryCache;
 
-        public MenusController(IBaseRepository<Menu> repository)
+        public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache)
         {
             _repository = repository;
+            _memoryCache = memoryCache;
         }
 
         /// <summary>
@@ -33,7 +39,12 @@ namespace API.Controllers.v1
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public virtual ApiResult<IQueryable<MenuDto>> Get(int? parentId)
         {
-            var menus = _repository.GetAll(x => x.ParentId == parentId).ProjectTo<MenuDto>();
+            var userId = User.Identity.GetUserId<int>();
+            var menus = _repository.GetAll(x => x.ParentId == parentId).Include(x => x.Children).ProjectTo<MenuDto>();
+            var keys = _memoryCache.Get<HashSet<string>>("user" + userId);
+
+            var parents = keys?.FirstOrDefault()?.Split('.');
+
             var data = _repository.GetAll(x => x.ParentId == parentId).ProjectTo<MenuDto>();
             //var query = menus    // your starting point - table in the "from" statement
             //    .Join(database.Post_Metas, // the source table of the inner join

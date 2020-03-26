@@ -12,17 +12,10 @@ namespace WebFramework.Filters
     public class AxAuthorizeAttribute : ActionFilterAttribute, IAuthorizationFilter
     {
         public AxOp AxOp { get; set; }
-        public AxOp ParentAxOp { get; set; }
+        public AxOp ParentAxOp => this.AxOp.GetAxParent();
         public bool ShowInMenu { get; }
 
         public StateType StateType { get; set; }
-
-        public AxAuthorizeAttribute(AxOp axOp, AxOp parentAxOp, bool showInMenu = false)
-        {
-            AxOp = axOp;
-            ParentAxOp = parentAxOp;
-            ShowInMenu = showInMenu;
-        }
 
         public AxAuthorizeAttribute(AxOp axOp, bool showInMenu = false)
         {
@@ -42,7 +35,6 @@ namespace WebFramework.Filters
             var userId = context.User.Identity.GetUserId<int>();
             if (StateType == StateType.OnlyToken && userId <= 0)
                 throw new AppException(ApiResultStatusCode.UnAuthorized, "شما برای دسترسی به منابع مرود نظر احراز هویت نشده اید");
-            var u = context.Request.Path.ToString();
 
             if (StateType == StateType.Authorized)
             {

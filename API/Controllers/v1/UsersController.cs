@@ -56,11 +56,9 @@ namespace API.Controllers.v1
         /// <summary>
         /// This method is Login 
         /// </summary>
-        /// <param name="username"></param>
-        /// <param name="password"></param>
+        /// <param name="loginDto"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        
         [AxAuthorize(StateType = StateType.Ignore)]
         [HttpPost("[action]")]
         public async Task<ApiResult<AccessToken>> AxToken(LoginDto loginDto, CancellationToken cancellationToken)
@@ -142,13 +140,12 @@ namespace API.Controllers.v1
             {
                 await Task.Run(() =>
                 {
-                    var keys = new HashSet<string>();
-                    var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == user.Id)
-                        .Include(x => x.Menu);
+                    var hashSet = new HashSet<string>();
+                    var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == user.Id).Include(x => x.Menu);
                     foreach (var item in userPermissions)
                     {
                         if (!string.IsNullOrWhiteSpace(item.Menu.Key))
-                            keys.Add(item.Menu.Key);
+                            hashSet.Add(item.Menu.Key);
                     }
 
                     var userGroups = _userGroupRepository.GetAll(x => x.UserId == user.Id);
@@ -159,7 +156,7 @@ namespace API.Controllers.v1
                         foreach (var groupPermission in groupPermissions)
                         {
                             if (!string.IsNullOrWhiteSpace(groupPermission.Menu.Key))
-                                keys.Add(groupPermission.Menu.Key);
+                                hashSet.Add(groupPermission.Menu.Key);
                         }
                     }
 
@@ -167,7 +164,7 @@ namespace API.Controllers.v1
                         .Select(x => x.Menu.Key);
                     foreach (var item in userDenied)
                     {
-                        keys.Remove(item);
+                        hashSet.Remove(item);
                     }
 
                     //var NotShowInTreeKeys = _permissionRepository.GetAll(x => !x.ShowInTree && keys.Contains(x.ParentKey) && !x.Key.Contains("GetList")).ToList().Select(x=>x.Key);
@@ -176,7 +173,7 @@ namespace API.Controllers.v1
                     //    keys.Add(item);
                     //}
 
-                    _memoryCache.Set("user" + user.Id, keys);
+                    _memoryCache.Set("user" + user.Id, hashSet);
 
                 }, cancellationToken);
             }
@@ -257,5 +254,34 @@ namespace API.Controllers.v1
             };
             return userInfo;
         }
+
+
+        /// <summary>
+        /// Get Signed User Permission keys
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.OnlyToken)]
+        public ApiResult<List<string>> GetUserPermissions(CancellationToken cancellationToken)
+        {
+            var userId = User.Identity.GetUserId<int>();
+            var keys = _memoryCache.Get<HashSet<string>>("user" + userId).ToList();
+            return keys;
+        }
+
+        /// <summary>
+        /// Get All Users
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.UserList)]
+        public ApiResult<IQueryable<UserSelectDto>> Get(CancellationToken cancellationToken)
+        {
+            var users = _userRepository.GetAll().ProjectTo<UserSelectDto>();
+            return Ok(users);
+        }
+
     }
 }

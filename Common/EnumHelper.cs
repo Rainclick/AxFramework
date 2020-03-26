@@ -56,5 +56,11 @@ namespace Common
                 node = node.Parent.GetAttribute<AxDisplay>();
             }
         }
+
+        public static AxOp GetAxParent(this AxOp axOp)
+        {
+            var axDisplay = axOp.GetAttribute<AxDisplay>();
+            return axDisplay.Parent;
+        }
     }
 }
