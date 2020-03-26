@@ -11,5 +11,6 @@ namespace API.Models
         public int? ParentId { get; set; }
         public string Key { get; set; }
         public string Icon { get; set; }
+        public virtual ICollection<MenuDto> Children { get; set; }
     }
 }

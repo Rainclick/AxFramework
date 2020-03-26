@@ -13,7 +13,7 @@ namespace WebFramework.Filters
     {
         public AxOp AxOp { get; set; }
         public AxOp ParentAxOp => this.AxOp.GetAxParent();
-        public bool ShowInMenu { get; }
+        public bool ShowInMenu { get; set; }
 
         public StateType StateType { get; set; }
 

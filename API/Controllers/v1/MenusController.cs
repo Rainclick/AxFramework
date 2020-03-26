@@ -22,35 +22,103 @@ namespace API.Controllers.v1
     {
         private readonly IBaseRepository<Menu> _repository;
         private readonly IMemoryCache _memoryCache;
+        private readonly IBaseRepository<Permission> _permissionRepository;
+        private readonly IBaseRepository<UserGroup> _userGroupRepository;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="repository"></param>
         /// <param name="memoryCache"></param>
-        public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache)
+        /// <param name="permissionRepository"></param>
+        /// <param name="userGroupRepository"></param>
+        public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache, IBaseRepository<Permission> permissionRepository, IBaseRepository<UserGroup> userGroupRepository)
         {
             _repository = repository;
             _memoryCache = memoryCache;
+            _permissionRepository = permissionRepository;
+            _userGroupRepository = userGroupRepository;
         }
 
         /// <summary>
         /// Get Systems And Menus for Signed User
         /// </summary>
-        /// <param name="parentId">Parent node Id for fetching them children</param>
+        /// <param name="systemId"></param>
         /// <returns></returns>
-        [HttpGet("{parentId?}")]
+        [HttpGet("[action]/{systemId}")]
         [AxAuthorize(StateType = StateType.OnlyToken)]
-        public virtual ApiResult<IQueryable<MenuDto>> Get(int? parentId)
+        public virtual ApiResult<List<MenuDto>> GetSystemMenus(int systemId)
         {
             var userId = User.Identity.GetUserId<int>();
-            var menus = _repository.GetAll(x => x.ParentId == parentId).Include(x => x.Children).ProjectTo<MenuDto>();
-            var keys = _memoryCache.Get<HashSet<string>>("user" + userId);
+            var menus = _repository.GetAll(x => x.ParentId == systemId && x.Active).Include(x => x.Children).Select(x => new
+            {
+                x.Key,
+                x.Title,
+                x.Icon,
+                Children = x.Children.Where(c => c.ShowInMenu && x.Active).Select(c => new
+                {
+                    c.Key,
+                    c.Title,
+                    c.Icon
+                })
+            }).ProjectTo<MenuDto>();
+
+            var keys = _memoryCache.GetOrCreate("user" + userId, GetKeysFromDb);
             if (keys == null)
                 return NotFound();
-            return Ok(menus);
+
+            var lst = menus.ToList();
+            var output = new List<MenuDto>();
+            foreach (var menu in lst)
+            {
+                var childList = new List<MenuDto>();
+                foreach (var child in menu.Children)
+                {
+                    if (keys.Any(x => x.Equals(child.Key)))
+                        childList.Add(child);
+                }
+                output.Add(new MenuDto { Children = childList, Icon = menu.Icon, Key = menu.Key, Title = menu.Title });
+            }
+            return Ok(output);
         }
 
+        private HashSet<string> GetKeysFromDb(ICacheEntry arg)
+        {
+            var userId = User.Identity.GetUserId<int>();
+            var hashSet = new HashSet<string>();
+            var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == userId).Include(x => x.Menu);
+            foreach (var item in userPermissions)
+            {
+                if (!string.IsNullOrWhiteSpace(item.Menu.Key))
+                    hashSet.Add(item.Menu.Key);
+            }
 
+            var userGroups = _userGroupRepository.GetAll(x => x.UserId == userId);
+            foreach (var item in userGroups)
+            {
+                var groupPermissions = _permissionRepository.GetAll(x => x.GroupId == item.GroupId && x.Access)
+                    .Include(x => x.Menu);
+                foreach (var groupPermission in groupPermissions)
+                {
+                    if (!string.IsNullOrWhiteSpace(groupPermission.Menu.Key))
+                        hashSet.Add(groupPermission.Menu.Key);
+                }
+            }
+
+            var userDenied = _permissionRepository.GetAll(x => x.UserId == userId && !x.Access)
+                .Select(x => x.Menu.Key);
+            foreach (var item in userDenied)
+            {
+                hashSet.Remove(item);
+            }
+
+            //var NotShowInTreeKeys = _permissionRepository.GetAll(x => !x.ShowInTree && keys.Contains(x.ParentKey) && !x.Key.Contains("GetList")).ToList().Select(x=>x.Key);
+            //foreach (var item in NotShowInTreeKeys)
+            //{
+            //    keys.Add(item);
+            //}
+            return hashSet;
+
+        }
     }
 }
