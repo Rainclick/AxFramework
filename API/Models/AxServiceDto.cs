@@ -53,6 +53,7 @@ namespace API.Models
         public string StatusCaption { get; set; }
         public string CategoryCaption { get; set; }
         public string Progress { get; set; }
+        public DateTime Date { get; set; }
     }
 
 }

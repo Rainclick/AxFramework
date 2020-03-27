@@ -8,9 +8,11 @@ using Common.Utilities;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Data.Repositories;
+using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
+using Log = NLog.Fluent.Log;
 
 namespace API.Controllers.v1
 {
@@ -112,7 +114,8 @@ namespace API.Controllers.v1
                     Category = 1,
                     Status = 1,
                     CategoryCaption = "سهمیه شخص",
-                    StatusCaption = "رزرو شده"
+                    StatusCaption = "رزرو شده",
+                    Date = plan.DeliveryDate
                 };
                 qe.Connection.Insert(axReserveRequest);
                 return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت انجام شد");
