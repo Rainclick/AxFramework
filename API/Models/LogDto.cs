@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+using Entities.Framework;
+using WebFramework.Api;
 
-namespace Entities.Framework
+namespace API.Models
 {
-    public class Log : BaseEntity
+    public class LogDto: BaseDto<LogDto, Log, int>
     {
-        [Required]
         public DateTime Logged { get; set; }
-        [Required]
         public string Level { get; set; }
-        [Required]
         public string Message { get; set; }
         public string UserName { get; set; }
         public string ServerName { get; set; }
@@ -21,6 +17,5 @@ namespace Entities.Framework
         public string RemoteAddress { get; set; }
         public string Logger { get; set; }
         public string Callsite { get; set; }
-        public string Exception { get; set; }
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
 using WebFramework.Filters;
 
-namespace API.Controllers.v1
+namespace API.Controllers.v1.Basic
 {
     [ApiVersion("1")]
     public class GeneralController : BaseController

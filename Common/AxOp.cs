@@ -5,19 +5,7 @@
         None,
         [AxDisplay("اطلاعات پایه", "01", None)]
         Basic,
-        [AxDisplay("مدیریت اشخاص", "01", Basic)]
-        PeopleManagement,
-        [AxDisplay("لیست اشخاص", "01", PeopleManagement)]
-        PersonList,
-        [AxDisplay("فرم شخص", "02", PeopleManagement)]
-        PersonItem,
-        [AxDisplay("ایجاد", "03", PeopleManagement)]
-        PersonInsert,
-        [AxDisplay("ویرایش", "04", PeopleManagement)]
-        PersonUpdate,
-        [AxDisplay("حذف شخص", "05", PeopleManagement)]
-        PersonDelete,
-        [AxDisplay("تصاویر", "01", PersonItem)]
+        [AxDisplay("تصاویر", "01", UserItem)]
         PersonImages,
         [AxDisplay("درج", "01", PersonImages)]
         PersonImageInsert,
@@ -37,18 +25,28 @@
         UserUpdate,
         [AxDisplay("حذف کاربر", "05", UserManagement)]
         UserDelete,
-        [AxDisplay("لیست آدرس ها", "02", PersonItem)]
+        [AxDisplay("لیست آدرس ها", "02", UserItem)]
         AddressList,
-        [AxDisplay("فرم آدرس", "03", PersonItem)]
+        [AxDisplay("فرم آدرس", "03", UserItem)]
         AddressItem,
-        [AxDisplay("ایجاد", "04", PersonItem)]
+        [AxDisplay("ایجاد", "04", AddressList)]
         AddressInsert,
-        [AxDisplay("ویرایش", "05", PersonItem)]
+        [AxDisplay("ویرایش", "05", AddressList)]
         AddressUpdate,
-        [AxDisplay("حذف", "06", PersonItem)]
+        [AxDisplay("حذف", "06", AddressList)]
         AddressDelete,
         [AxDisplay("داشبورد", "03", Basic)]
         DashboardIndex,
+        [AxDisplay("رویدادنگاری", "01", Basic)]
+        Audits,
+        [AxDisplay("لیست خطا ها", "01", Audits)]
+        LogList,
+        [AxDisplay("جزئیات خطا", "01", LogList)]
+        LogItem,
+        [AxDisplay("تاریخچه تغییرات", "02", Audits)]
+        ChangeTracker,
+        [AxDisplay("جزئیات تاریخچه تغییرات", "01", ChangeTracker)]
+        ChangeTrackerItem,
         [AxDisplay("گزارشات", "99", None)]
         Reports,
         [AxDisplay("گزارشات اطلاعات پایه", "01", Reports)]

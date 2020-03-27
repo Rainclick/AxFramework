@@ -12,7 +12,7 @@ using Microsoft.Extensions.Caching.Memory;
 using WebFramework.Api;
 using WebFramework.Filters;
 
-namespace API.Controllers.v1
+namespace API.Controllers.v1.Basic
 {
     /// <summary>
     /// Fetch Menus or Systems for user 

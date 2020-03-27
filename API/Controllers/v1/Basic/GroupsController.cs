@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
 
-namespace API.Controllers.v1
+namespace API.Controllers.v1.Basic
 {
     /// <summary>
     /// Group Methods

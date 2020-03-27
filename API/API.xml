@@ -4,17 +4,17 @@
         <name>API</name>
     </assembly>
     <members>
-        <member name="T:API.Controllers.v1.GroupsController">
+        <member name="T:API.Controllers.v1.Basic.GroupsController">
             <summary>
             Group Methods
             </summary>
         </member>
-        <member name="T:API.Controllers.v1.MenusController">
+        <member name="T:API.Controllers.v1.Basic.MenusController">
             <summary>
             Fetch Menus or Systems for user 
             </summary>
         </member>
-        <member name="M:API.Controllers.v1.MenusController.#ctor(Data.Repositories.IBaseRepository{Entities.Framework.Menu},Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup})">
+        <member name="M:API.Controllers.v1.Basic.MenusController.#ctor(Data.Repositories.IBaseRepository{Entities.Framework.Menu},Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup})">
             <summary>
             
             </summary>
@@ -23,22 +23,22 @@
             <param name="permissionRepository"></param>
             <param name="userGroupRepository"></param>
         </member>
-        <member name="M:API.Controllers.v1.MenusController.GetSystemMenus(System.Int32)">
+        <member name="M:API.Controllers.v1.Basic.MenusController.GetSystemMenus(System.Int32)">
             <summary>
             Get Systems And Menus for Signed User
             </summary>
             <param name="systemId"></param>
             <returns></returns>
         </member>
-        <member name="T:API.Controllers.v1.UsersController">
+        <member name="T:API.Controllers.v1.Basic.UsersController">
             <summary>
             Users Actions
             </summary>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.#ctor(Data.Repositories.UserRepositories.IUserRepository,Services.Services.Services.IJwtService,Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.LoginLog},Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserToken},Data.Repositories.IBaseRepository{Entities.Framework.Menu},Data.Repositories.IBaseRepository{Entities.Framework.ConfigData},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup})">
+        <member name="M:API.Controllers.v1.Basic.UsersController.#ctor(Data.Repositories.UserRepositories.IUserRepository,Services.Services.Services.IJwtService,Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.LoginLog},Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserToken},Data.Repositories.IBaseRepository{Entities.Framework.Menu},Data.Repositories.IBaseRepository{Entities.Framework.ConfigData},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup})">
             <inheritdoc />
         </member>
-        <member name="M:API.Controllers.v1.UsersController.AxToken(API.Models.LoginDto,System.Threading.CancellationToken)">
+        <member name="M:API.Controllers.v1.Basic.UsersController.AxToken(API.Models.LoginDto,System.Threading.CancellationToken)">
             <summary>
             This method is Login 
             </summary>
@@ -46,7 +46,7 @@
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.SignOut(System.Threading.CancellationToken)">
+        <member name="M:API.Controllers.v1.Basic.UsersController.SignOut(System.Threading.CancellationToken)">
             <summary>
             SignOut user and Remove user Token from Db
             </summary>
@@ -54,7 +54,7 @@
             <returns></returns>
             <exception cref="T:System.UnauthorizedAccessException"></exception>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.GetInitData(System.Threading.CancellationToken)">
+        <member name="M:API.Controllers.v1.Basic.UsersController.GetInitData(System.Threading.CancellationToken)">
             <summary>
             Get Init Information For Main Panel
             </summary>
@@ -62,20 +62,20 @@
             <returns></returns>
             <exception cref="T:System.UnauthorizedAccessException"></exception>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.GetUserPermissions(System.Threading.CancellationToken)">
+        <member name="M:API.Controllers.v1.Basic.UsersController.GetUserPermissions(System.Threading.CancellationToken)">
             <summary>
             Get Signed User Permission keys
             </summary>
             <param name="cancellationToken"></param>
             <returns></returns>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.Get">
+        <member name="M:API.Controllers.v1.Basic.UsersController.Get">
             <summary>
             Get All Users
             </summary>
             <returns></returns>
         </member>
-        <member name="M:API.Controllers.v1.UsersController.Get(System.Int32)">
+        <member name="M:API.Controllers.v1.Basic.UsersController.Get(System.Int32)">
             <summary>
             Get User Instance By Id
             </summary>
