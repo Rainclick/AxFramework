@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
+using Autofac.Core;
 using AutoMapper.QueryableExtensions;
 using Common;
 using Common.Exception;
@@ -275,11 +277,25 @@ namespace API.Controllers.v1.Basic
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
-        public ApiResult<IQueryable<UserSelectDto>> Get()
+        [AxAuthorize(StateType = StateType.Ignore, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
+        public ApiResult<IQueryable<UserSelectDto>> Get(string filter, FilterType filterMode, string sort, int page, int pageSize, SortType sortType)
         {
-            var users = _userRepository.GetAll().ProjectTo<UserSelectDto>();
-            return Ok(users);
+            var keyPairs = filter?.Split(',');
+            var keyValue1 = keyPairs?.FirstOrDefault()?.Split('=');
+            var parameter = Expression.Parameter(typeof(User), "x");
+            if (keyValue1 != null)
+            {
+                var member = Expression.Property(parameter, keyValue1[0]); 
+                var constant = Expression.Constant(keyValue1[1]);
+                var body = Expression.Equal(member, constant); 
+                var finalExpression = Expression.Lambda<Func<User, bool>>(body, parameter);
+
+                var users = _userRepository.GetAll(finalExpression).ProjectTo<UserSelectDto>();
+                return Ok(users);
+            }
+
+
+            return Ok(_userRepository.GetAll().ProjectTo<UserSelectDto>());
         }
 
         /// <summary>
