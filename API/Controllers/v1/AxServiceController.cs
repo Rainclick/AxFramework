@@ -87,15 +87,15 @@ namespace API.Controllers.v1
             var userId = User.Identity.GetUserId<long>();
             using var qe = new QueryExecutor();
 
-            var personnel = await qe.Connection.ExecuteScalarAsync<long>("select Personnel  from Res_PersonelRestaurantSetting WHERE UserId = @userId", new { userId });
-            var plan = await qe.Connection.QueryFirstOrDefaultAsync<AxServiceDtoReserve>("select * from UserActiveFoodPlans WHERE pid = @pid", new { pid = req.Id });
+            var personnelSettingId = await qe.Connection.ExecuteScalarAsync<long>("select Id  from Res_PersonelRestaurantSetting WHERE UserId = @userId", new { userId });
+            var plan = await qe.Connection.QueryFirstOrDefaultAsync<AxServiceDtoReserve>("select * from UserActiveFoodPlans WHERE Id = @Id", new { req.Id });
             if (plan == null)
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "رزرو یافت نشد");
 
             if (plan.RemainingBookable <= 0)
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "ظرفیت غذای مورد نظر تکمیل شد");
 
-            var reserve = await qe.Connection.QueryFirstOrDefaultAsync<AxReserveRequest>("Select * from Res_PersonnelFoodReservation WHERE Personnel = @personnel and PersonnelDailyReservationDetails =@pid", new { personnel, pid = req.Id });
+            var reserve = await qe.Connection.QueryFirstOrDefaultAsync<AxReserveRequest>("Select * from Res_PersonnelFoodReservation WHERE Personnel = @personnel and PersonnelDailyReservationDetails =@pid", new { personnel = personnelSettingId, pid = plan.Pid });
             if (reserve == null)
             {
                 var nextId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1207113500000010123");
@@ -103,12 +103,12 @@ namespace API.Controllers.v1
                 {
                     Id = nextId,
                     Num = req.Num,
-                    Personnel = personnel,
+                    Personnel = personnelSettingId,
                     Progress = "APIV1",
                     DayOfWeek = plan.WeekDay,
                     Food = plan.Food,
                     Meal = plan.Meal,
-                    PersonnelDailyReservationDetails = req.Id,
+                    PersonnelDailyReservationDetails = plan.Pid,
                     Restaurant = plan.Restaurant,
                     ServeFoodPlace = 1207027580000000101,
                     Category = 1,

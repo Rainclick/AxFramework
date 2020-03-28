@@ -20,7 +20,6 @@ namespace API.Models
         public string DateString => Date.ToPerDateString("MM/dd") + " " + WeekDayTitle;
         public string ServePlace { get; set; }
         public string StatusTxt { get; set; }
-        public long Pid { get; set; }
     }
 
     public class AxServiceDtoReserve : AxServiceDto
@@ -33,6 +32,7 @@ namespace API.Models
         public long Meal { get; set; }
         public long Restaurant { get; set; }
         public int WeekDay { get; set; }
+        public long Pid { get; set; }
     }
 
 
