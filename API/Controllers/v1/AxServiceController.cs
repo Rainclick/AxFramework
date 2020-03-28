@@ -88,11 +88,11 @@ namespace API.Controllers.v1
             using var qe = new QueryExecutor();
 
             var personnel = await qe.Connection.ExecuteScalarAsync<long>("select Personnel  from Res_PersonelRestaurantSetting WHERE UserId = @userId", new { userId });
-            var plan = await qe.Connection.QueryFirstOrDefaultAsync<AxServiceDtoReserve>("select * from UserActiveFoodPlans WHERE Id = @pid", new { pid = req.Id });
+            var plan = await qe.Connection.QueryFirstOrDefaultAsync<AxServiceDtoReserve>("select * from UserActiveFoodPlans WHERE pid = @pid", new { pid = req.Id });
             if (plan == null)
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "رزرو یافت نشد");
 
-            if (plan.Reservable <= 0)
+            if (plan.RemainingBookable <= 0)
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "ظرفیت غذای مورد نظر تکمیل شد");
 
             var reserve = await qe.Connection.QueryFirstOrDefaultAsync<AxReserveRequest>("Select * from Res_PersonnelFoodReservation WHERE Personnel = @personnel and PersonnelDailyReservationDetails =@pid", new { personnel, pid = req.Id });
