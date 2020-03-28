@@ -10,6 +10,7 @@ using System.Net;
 using Common.Exception;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using WebFramework.Api;
 
@@ -26,10 +27,10 @@ namespace WebFramework.Middlewares
     public class CustomExceptionHandlerMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly IHostingEnvironment _env;
+        private readonly IWebHostEnvironment _env;
         private readonly ILogger<CustomExceptionHandlerMiddleware> _logger;
 
-        public CustomExceptionHandlerMiddleware(RequestDelegate next, IHostingEnvironment env, ILogger<CustomExceptionHandlerMiddleware> logger)
+        public CustomExceptionHandlerMiddleware(RequestDelegate next, IWebHostEnvironment env, ILogger<CustomExceptionHandlerMiddleware> logger)
         {
             _next = next;
             _env = env;

@@ -102,7 +102,7 @@ namespace API.Controllers.v1.Basic
             #endregion
 
             if (user == null)
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "نام کاربری و یا رمز عبور اشتباه است");
+                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "نام کاربری و یا رمز عبور اشتباه است");
 
             loginlog.ValidSignIn = true;
             loginlog.InvalidPassword = string.Empty;

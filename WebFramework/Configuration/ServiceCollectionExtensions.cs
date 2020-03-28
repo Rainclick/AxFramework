@@ -90,7 +90,7 @@ namespace WebFramework.Configuration
                     OnAuthenticationFailed = context =>
                     {
                         if (context.Exception != null)
-                            throw new AppException(ApiResultStatusCode.UnAuthorized, "عدم احراز هویت", HttpStatusCode.Unauthorized, context.Exception);
+                            throw new AppException(ApiResultStatusCode.UnAuthenticated, "عدم احراز هویت", HttpStatusCode.Unauthorized, context.Exception);
                         return Task.CompletedTask;
                     },
                     OnChallenge = context =>
@@ -99,8 +99,8 @@ namespace WebFramework.Configuration
                         //logger.LogError("OnChallenge error", context.Error, context.ErrorDescription);
 
                         if (context.AuthenticateFailure != null)
-                            throw new AppException(ApiResultStatusCode.UnAuthorized, "خطای احراز هویت", HttpStatusCode.Unauthorized, context.AuthenticateFailure);
-                        throw new AppException(ApiResultStatusCode.UnAuthorized, "شما برای دسترسی به منابع احراز هویت نشده اید", HttpStatusCode.Unauthorized);
+                            throw new AppException(ApiResultStatusCode.UnAuthenticated, "خطای احراز هویت", HttpStatusCode.Unauthorized, context.AuthenticateFailure);
+                        throw new AppException(ApiResultStatusCode.UnAuthenticated, "شما برای دسترسی به منابع احراز هویت نشده اید", HttpStatusCode.Unauthorized);
 
                         //return Task.CompletedTask;
                     },

@@ -16,7 +16,9 @@ namespace Common
         Empty = 5,
         [Display(Name = "خطای منطقی رخ داده است")]
         LogicError = 6,
+        [Display(Name = "خطای احراز دسترسی")]
+        UnAuthorized = 7,
         [Display(Name = "خطای احراز هویت")]
-        UnAuthorized = 7
+        UnAuthenticated = 8
     }
 }

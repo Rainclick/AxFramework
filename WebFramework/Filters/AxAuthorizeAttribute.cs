@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using Common;
 using Common.Exception;
 using Common.Utilities;
@@ -34,7 +35,7 @@ namespace WebFramework.Filters
             var memoryCache = filterContext.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
             var userId = context.User.Identity.GetUserId<int>();
             if (StateType == StateType.OnlyToken && userId <= 0)
-                throw new AppException(ApiResultStatusCode.UnAuthorized, "شما برای دسترسی به منابع مرود نظر احراز هویت نشده اید");
+                throw new AppException(ApiResultStatusCode.UnAuthenticated, "شما برای دسترسی به منابع مورد نظر احراز هویت نشده اید", HttpStatusCode.Unauthorized);
 
             if (StateType == StateType.Authorized)
             {
@@ -48,11 +49,11 @@ namespace WebFramework.Filters
                         var haveAccessToParent = keys.Any(key => key == ParentAxOp.GetAxKey());
                         if (!haveAccessToParent)
                         {
-                            throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید");
+                            throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید", HttpStatusCode.Unauthorized);
                         }
                     }
                     else
-                        throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید");
+                        throw new AppException(ApiResultStatusCode.UnAuthorized, "شما دسترسی برای عملیات درخواست شده را ندارید", HttpStatusCode.Unauthorized);
                 }
             }
         }
