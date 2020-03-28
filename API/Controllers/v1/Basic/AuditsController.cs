@@ -6,6 +6,7 @@ using AutoMapper.QueryableExtensions;
 using Common;
 using Data.Repositories;
 using Entities.Framework;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
