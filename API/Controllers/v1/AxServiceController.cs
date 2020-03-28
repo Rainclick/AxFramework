@@ -93,7 +93,16 @@ namespace API.Controllers.v1
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "رزرو یافت نشد");
 
             if (plan.RemainingBookable <= 0)
-                return new ApiResult(false, ApiResultStatusCode.NotFound, "ظرفیت غذای مورد نظر تکمیل شد");
+                return new ApiResult(false, ApiResultStatusCode.NotFound, "ظرفیت غذای مورد نظر تکمیل شده است");
+
+            if (plan.QuotaControl)
+            {
+
+            }
+            else
+            {
+
+            }
 
             var reserve = await qe.Connection.QueryFirstOrDefaultAsync<AxReserveRequest>("Select * from Res_PersonnelFoodReservation WHERE Personnel = @personnel and PersonnelDailyReservationDetails =@pid", new { personnel = personnelSettingId, pid = plan.Pid });
             if (reserve == null)

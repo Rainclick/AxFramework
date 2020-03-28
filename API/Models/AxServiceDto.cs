@@ -33,6 +33,7 @@ namespace API.Models
         public long Restaurant { get; set; }
         public int WeekDay { get; set; }
         public long Pid { get; set; }
+        public bool QuotaControl { get; set; }
     }
 
 
