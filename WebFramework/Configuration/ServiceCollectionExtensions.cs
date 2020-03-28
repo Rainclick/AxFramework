@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
@@ -73,13 +74,13 @@ namespace WebFramework.Configuration
                     RequireExpirationTime = true,
                     ValidateLifetime = true,
 
-                    ValidateAudience = true, //default : false
+                    ValidateAudience = false, //default : false
                     ValidAudience = jwtSettings.Audience,
 
-                    ValidateIssuer = true, //default : false
+                    ValidateIssuer = false, //default : false
                     ValidIssuer = jwtSettings.Issuer,
 
-                    TokenDecryptionKey = new SymmetricSecurityKey(encryptKey)
+                    TokenDecryptionKey = new SymmetricSecurityKey(encryptKey),
                 };
 
                 options.RequireHttpsMetadata = false;
@@ -89,8 +90,11 @@ namespace WebFramework.Configuration
                 {
                     OnAuthenticationFailed = context =>
                     {
-                        if (context.Exception != null)
-                            throw new AppException(ApiResultStatusCode.UnAuthorized, "عدم احراز هویت", HttpStatusCode.Unauthorized, context.Exception);
+                        if (context.Exception?.GetType() == typeof(SecurityTokenExpiredException))
+                        {
+                            context.Response.Headers.Add("Token-Expired", "true");
+                            //throw new AppException(ApiResultStatusCode.UnAuthorized, "عدم احراز هویت", HttpStatusCode.Unauthorized, context.Exception);
+                        }
                         return Task.CompletedTask;
                     },
                     OnChallenge = context =>

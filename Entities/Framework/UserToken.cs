@@ -7,6 +7,7 @@ namespace Entities.Framework
     public class UserToken : BaseEntity
     {
         public string Token { get; set; }
+        public string RefreshToken { get; set; }
         public bool Active { get; set; }
         public string DeviceName { get; set; }
         public string Ip { get; set; }

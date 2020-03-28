@@ -34,7 +34,7 @@ namespace WebFramework.Filters
             var memoryCache = filterContext.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
             var userId = context.User.Identity.GetUserId<int>();
             if (StateType == StateType.OnlyToken && userId <= 0)
-                throw new AppException(ApiResultStatusCode.UnAuthorized, "شما برای دسترسی به منابع مرود نظر احراز هویت نشده اید");
+                throw new AppException(ApiResultStatusCode.UnAuthorized, "شما برای دسترسی به منابع مورد نظر احراز هویت نشده اید");
 
             if (StateType == StateType.Authorized)
             {

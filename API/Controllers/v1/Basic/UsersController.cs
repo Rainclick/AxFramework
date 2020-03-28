@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Models;
-using Autofac.Core;
 using AutoMapper.QueryableExtensions;
 using Common;
 using Common.Exception;
@@ -13,9 +12,11 @@ using Common.Utilities;
 using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IdentityModel.Tokens;
 using Services;
 using Services.Services.Services;
 using UAParser;
@@ -122,12 +123,11 @@ namespace API.Controllers.v1.Basic
                 ClientId = clientId,
                 CreatorUserId = user.Id,
                 InsertDateTime = DateTime.Now,
+                RefreshToken = token.refresh_token,
                 Browser = info.UA.ToString(),
                 ExpireDateTime = DateTime.Now.AddSeconds(token.expires_in)
             };
 
-
-            //Response.Cookies.Append("AxToken", token.access_token);
             await _userTokenRepository.AddAsync(userToken, cancellationToken);
 
             await Task.Run(() =>
@@ -186,6 +186,70 @@ namespace API.Controllers.v1.Basic
             }, cancellationToken);
 
             return token;
+        }
+
+
+        [HttpPost]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public async Task<ApiResult<AccessToken>> Refresh(string token, string refreshToken, CancellationToken cancellationToken)
+        {
+            var username = User.Identity.GetUserName();
+            var clientId = User.Identity.GetClientId();
+            var tokenDb = _userTokenRepository.GetFirst(x => x.ClientId == clientId);
+            if (tokenDb.RefreshToken != refreshToken && tokenDb.Token != token)
+                throw new SecurityTokenException("Invalid refresh token");
+
+            var user = new User { Id = tokenDb.UserId, UserName = username };
+            var newJwtToken = await _jwtService.GenerateAsync(user, clientId);
+
+            var address = Request.HttpContext.Connection.RemoteIpAddress;
+            var computerName = address.GetDeviceName();
+            var ip = address.GetIp();
+            var userAgent = Request.Headers["User-Agent"].ToString();
+            var uaParser = Parser.GetDefault();
+            var info = uaParser.Parse(userAgent);
+            var config = _memoryCache.Get<ConfigData>(CacheKeys.ConfigData);
+            var loginlog = new LoginLog
+            {
+                AppVersion = config.VersionName,
+                Browser = info.UA.Family,
+                BrowserVersion = info.UA.Major + "." + info.UA.Minor,
+                UserId = user.Id,
+                CreatorUserId = 1,
+                Ip = ip,
+                MachineName = computerName,
+                Os = info.Device + " " + info.OS,
+                UserName = username,
+                ValidSignIn = false
+            };
+            _loginlogRepository.Add(loginlog);
+
+
+            var userToken = new UserToken
+            {
+                Active = true,
+                Token = newJwtToken.access_token,
+                UserAgent = userAgent,
+                Ip = ip,
+                DeviceName = computerName,
+                UserId = user.Id,
+                ClientId = clientId,
+                CreatorUserId = user.Id,
+                InsertDateTime = DateTime.Now,
+                RefreshToken = newJwtToken.refresh_token,
+                Browser = info.UA.ToString(),
+                ExpireDateTime = DateTime.Now.AddSeconds(newJwtToken.expires_in)
+            };
+
+            await _userTokenRepository.AddAsync(userToken, cancellationToken);
+
+            await Task.Run(() =>
+            {
+                var oldTokens = _userTokenRepository.GetAll(t => t.ExpireDateTime < DateTime.Now);
+                _userTokenRepository.DeleteRange(oldTokens);
+            }, cancellationToken);
+
+            return Ok(newJwtToken);
         }
 
 
@@ -285,9 +349,9 @@ namespace API.Controllers.v1.Basic
             var parameter = Expression.Parameter(typeof(User), "x");
             if (keyValue1 != null)
             {
-                var member = Expression.Property(parameter, keyValue1[0]); 
+                var member = Expression.Property(parameter, keyValue1[0]);
                 var constant = Expression.Constant(keyValue1[1]);
-                var body = Expression.Equal(member, constant); 
+                var body = Expression.Equal(member, constant);
                 var finalExpression = Expression.Lambda<Func<User, bool>>(body, parameter);
 
                 var users = _userRepository.GetAll(finalExpression).ProjectTo<UserSelectDto>();
