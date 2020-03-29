@@ -93,7 +93,9 @@ namespace Data.Repositories
 
         public virtual IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
         {
-            return TableNoTracking.Where(predicate);
+            if (predicate != null)
+                return TableNoTracking.Where(predicate);
+            return TableNoTracking;
         }
 
         public virtual IQueryable<TEntity> GetAll()
