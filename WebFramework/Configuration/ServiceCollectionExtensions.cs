@@ -9,6 +9,7 @@ using Common.Exception;
 using Common.Utilities;
 using Data;
 using Data.Repositories;
+using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -104,15 +105,15 @@ namespace WebFramework.Configuration
                     },
                     OnTokenValidated = async context =>
                     {
-                        //var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
-                        var _userTokenRepository = context.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserToken>>();
+                        var userRepository = context.HttpContext.RequestServices.GetRequiredService<IUserRepository>();
+                        var userTokenRepository = context.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserToken>>();
 
                         var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
                         if (claimsIdentity != null && claimsIdentity.Claims?.Any() != true)
                             context.Fail("This token has no claims.");
 
                         var clientId = claimsIdentity.GetClientId();
-                        var userToken = await _userTokenRepository.GetAll(x => x.ClientId == clientId).Include(x => x.User)
+                        var userToken = await userTokenRepository.GetAll(x => x.ClientId == clientId).Include(x => x.User)
                             .Select(x => new UserToken { User = new User { IsActive = x.User.IsActive } })
                             .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
 
@@ -122,7 +123,7 @@ namespace WebFramework.Configuration
                         if (!userToken.User.IsActive)
                             context.Fail("کاربری شما غیرفعال شده است");
 
-                        //await userRepository.UpdateLastLoginDateAsync(userToken.User, context.HttpContext.RequestAborted);
+                        await userRepository.UpdateLastLoginDateAsync(userToken.User, context.HttpContext.RequestAborted);
                     }
                 };
 
