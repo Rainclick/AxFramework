@@ -82,29 +82,58 @@ namespace API.Controllers.v1
 
         [HttpPost("[action]")]
         [Authorize]
-        public async Task<ApiResult> AddAxReserve(AxReserveRequest req)
+        public ApiResult AddAxReserve(AxReserveRequest req)
         {
             var userId = User.Identity.GetUserId<long>();
+            var userName = User.Identity.GetUserName();
             using var qe = new QueryExecutor();
 
-            var personnelSettingId = await qe.Connection.ExecuteScalarAsync<long>("select Id  from Res_PersonelRestaurantSetting WHERE UserId = @userId", new { userId });
-            var plan = await qe.Connection.QueryFirstOrDefaultAsync<AxServiceDtoReserve>("select * from UserActiveFoodPlans WHERE Id = @Id", new { req.Id });
+            var personnelSettingId = qe.Connection.ExecuteScalar<long>("select Id  from Res_PersonelRestaurantSetting WHERE UserId = @userId", new { userId });
+            var plan = qe.Connection.QueryFirstOrDefault<AxServiceDtoReserve>("select * from UserActiveFoodPlans WHERE Id = @Id", new { req.Id });
             if (plan == null)
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "رزرو یافت نشد");
 
             if (plan.RemainingBookable <= 0)
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "ظرفیت غذای مورد نظر تکمیل شده است");
 
+            var userLimit = qe.Connection.QueryFirstOrDefault<AxResUserOrgLimit>(@"SELECT A.Personel,A.Quota,A.Meal, A_Meal.Title as MealTitle FROMRes_PersonelMealQuota AS A left outer join Res_Meal A_Meal on (A_Meal.id=A.Meal) left outer join Res_PersonelRestaurantSetting A_Personel on (A_Personel.id=A.Personel)
+            WHERE
+            (
+                A.Meal = @meal AND 
+            A_Personel.UserId = @userId)
+            SELECT * from Res_Meal", new { meal = plan.Meal, userId });
+
+            if (userLimit != null && userLimit.Quota < req.Num)
+                return new ApiResult(false, ApiResultStatusCode.NotFound, $"کاربر گرامی {userName} گرامی سهمیه ی شما در وعده  {userLimit.MealTitle} حداکثر {userLimit.Quota} می باشد");
+
             if (plan.QuotaControl)
             {
+                var orgLimit = qe.Connection.QueryFirstOrDefault<AxResUserOrgLimit>(@"SELECT
+                A.MealGroup,--گروه وعده غذایی
+                A_MealGroup.Title as AMealGroupTitle,
+                A.PercentageOuQuota-- درصد سهمیه واحد سازمانی کاربر
+                   FROM
+                Res_OrganizationMealQuota AS A
+                    left outer join Res_MealGroup A_MealGroup on(A_MealGroup.id = A.MealGroup)
+                left outer join Res_RestaurantUnitShare A_F1 on(A_F1.id= A.F1)
+                left outer join OrganizationalStructure A_F1_Unit on(A_F1_Unit.id= A_F1.Unit)
+                left outer join Personel A_F1_Unit_F16_R on(A_F1_Unit_F16_R.F16= A_F1_Unit.id)
+                left outer join Res_PersonelRestaurantSetting A_F1_Unit_F16_R_Personnel_R on(A_F1_Unit_F16_R_Personnel_R.Personnel= A_F1_Unit_F16_R.id)
+                WHERE
+                (
+                    A.MealGroup = @mealGroup AND
+                A_F1_Unit_F16_R_Personnel_R.UserId = @userId)", new { mealGroup = plan.MealGroup, userId });
 
+
+                if (orgLimit != null)
+                {
+                    var limit = orgLimit.PercentageOuQuota * plan.RemainingBookable;
+                    if (limit < req.Num)
+                        return new ApiResult(false, ApiResultStatusCode.NotFound, $"کاربر گرامی سهمیه واحد شما در این گروه غذایی به اتمام رسیده است");
+                }
             }
-            else
-            {
 
-            }
-
-            var reserve = await qe.Connection.QueryFirstOrDefaultAsync<AxReserveRequest>("Select * from Res_PersonnelFoodReservation WHERE Personnel = @personnel and PersonnelDailyReservationDetails =@pid", new { personnel = personnelSettingId, pid = plan.Pid });
+            var reserve = qe.Connection.QueryFirstOrDefault<AxReserveRequest>("Select * from Res_PersonnelFoodReservation WHERE Personnel = @personnel and PersonnelDailyReservationDetails =@pid", new { personnel = personnelSettingId, pid = plan.Pid });
             if (reserve == null)
             {
                 var nextId = qe.Connection.ExecuteScalar<long>("SELECT NEXT VALUE FOR [dbo].idseq_$1207113500000010123");
@@ -132,11 +161,11 @@ namespace API.Controllers.v1
 
             if (req.Num == 0)
             {
-                await qe.Connection.DeleteAsync(reserve);
+                qe.Connection.DeleteAsync(reserve);
                 return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت حذف شد");
             }
             reserve.Num = req.Num;
-            await qe.Connection.UpdateAsync(reserve);
+            qe.Connection.UpdateAsync(reserve);
             return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت ویرایش شد");
         }
     }

@@ -34,6 +34,7 @@ namespace API.Models
         public int WeekDay { get; set; }
         public long Pid { get; set; }
         public bool QuotaControl { get; set; }
+        public long MealGroup { get; set; }
     }
 
 
@@ -56,6 +57,17 @@ namespace API.Models
         public string CategoryCaption { get; set; }
         public string Progress { get; set; }
         public DateTime Date { get; set; }
+    }
+
+    public class AxResUserOrgLimit
+    {
+        public long Personel { get; set; }
+        public long Meal { get; set; }
+        public string MealTitle { get; set; }
+        public string AMealGroupTitle { get; set; }
+        public long MealGroup { get; set; }
+        public int Quota { get; set; }
+        public int PercentageOuQuota { get; set; }
     }
 
 }
