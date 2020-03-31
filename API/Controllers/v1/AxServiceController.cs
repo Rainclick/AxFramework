@@ -46,13 +46,24 @@ namespace API.Controllers.v1
         }
 
 
-        [HttpGet("[action]")]
-        [Authorize]
-        public async Task<IEnumerable<AxServiceDtoReserve>> GetData()
+        [HttpGet("[action]/{date1?}/{date2?}")]
+        [AllowAnonymous]
+        public async Task<IEnumerable<AxServiceDtoReserve>> GetData(DateTime? date1 = null, DateTime? date2 = null)
         {
             var userId = User.Identity.GetUserId<long>();
             using var qe = new QueryExecutor();
-            var data = await qe.Connection.QueryAsync<AxServiceDtoReserve>(@"select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate DESC", new { userId });
+            var str = "";
+            IEnumerable<AxServiceDtoReserve> data = null;
+            if (!date1.HasValue && !date2.HasValue)
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate DESC";
+            if (date1.HasValue && !date2.HasValue)
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate >= @date1 ORDER BY DeliveryDate DESC";
+            if (!date1.HasValue && date2.HasValue)
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate <= @date2 ORDER BY DeliveryDate DESC";
+            if (date1.HasValue && date2.HasValue)
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate >= @date1 And DeliveryDate <= @date2 ORDER BY DeliveryDate DESC";
+
+            data = await qe.Connection.QueryAsync<AxServiceDtoReserve>(str, new { userId, date1, date2 });
             return data;
         }
 
@@ -96,7 +107,7 @@ namespace API.Controllers.v1
             if (plan.RemainingBookable <= 0)
                 return new ApiResult(false, ApiResultStatusCode.NotFound, "ظرفیت غذای مورد نظر تکمیل شده است");
 
-            var userLimit = qe.Connection.QueryFirstOrDefault<AxResUserOrgLimit>(@"SELECT A.Personel,A.Quota,A.Meal, A_Meal.Title as MealTitle FROMRes_PersonelMealQuota AS A left outer join Res_Meal A_Meal on (A_Meal.id=A.Meal) left outer join Res_PersonelRestaurantSetting A_Personel on (A_Personel.id=A.Personel)
+            var userLimit = qe.Connection.QueryFirstOrDefault<AxResUserOrgLimit>(@"SELECT A.Personel,A.Quota,A.Meal, A_Meal.Title as MealTitle FROM Res_PersonelMealQuota AS A left outer join Res_Meal A_Meal on (A_Meal.id=A.Meal) left outer join Res_PersonelRestaurantSetting A_Personel on (A_Personel.id=A.Personel)
             WHERE
             (
                 A.Meal = @meal AND 
@@ -104,7 +115,7 @@ namespace API.Controllers.v1
             SELECT * from Res_Meal", new { meal = plan.Meal, userId });
 
             if (userLimit != null && userLimit.Quota < req.Num)
-                return new ApiResult(false, ApiResultStatusCode.NotFound, $"کاربر گرامی {userName} گرامی سهمیه ی شما در وعده  {userLimit.MealTitle} حداکثر {userLimit.Quota} می باشد");
+                return new ApiResult(false, ApiResultStatusCode.NotFound, $"کاربر عزیز {userName} گرامی، سهمیه ی شما در وعده  {userLimit.MealTitle} حداکثر {userLimit.Quota} عدد می باشد");
 
             if (plan.QuotaControl)
             {

@@ -34,42 +34,17 @@ namespace API.Controllers.v1
         [AllowAnonymous]
         public async Task<ApiResult<AccessToken>> AxToken(string username, string password, string device, bool isAgain)
         {
-            dynamic data = new { un = username, pwd = password };
-            Model<Token> resInvoke = WebServiceConsumer.Invoke<Model<Token>>("http://185.211.57.94/api/auth/ServiceLogin3", data, MethodType.Post, null);
+            using var qe = new QueryExecutor();
+            password = password.Hash();
+            var barsaUserId = await qe.Connection.ExecuteScalarAsync<long>("Select ID from Spl_Users WHERE USERNAME = @username and PASSWORD = @password", new { username, password });
 
-            if (!resInvoke.succeed)
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, resInvoke.error.userMessage);
-            Model<string> barsaUser;
-            try
-            {
-                var options = new RequestOptions
-                {
-                    Authorization = resInvoke.data.token,
-                    Headers = new Dictionary<string, string> { { "sth", resInvoke.data.sth } }
-                };
-                barsaUser = WebServiceConsumer.Invoke<Model<string>>($"http://185.211.57.94/api/custom/checkUser?username={username}&password={password}", null, MethodType.Get, options);
-            }
-            catch
-            {
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "خطا در SSO برسا نوین رای");
-            }
 
-            if (barsaUser == null)
+            if (barsaUserId == 0)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "نام کاربری و یا رمز عبور اشتباه است");
 
-            var axUser = new AxUser { UserName = username, Password = password, Id = long.Parse(barsaUser.data) };
-            using var qe = new QueryExecutor();
+            var axUser = new AxUser { UserName = username, Password = password, Id = barsaUserId };
+
             var tokenBag = qe.Connection.QueryFirstOrDefault<TokenBag>("Select * from AxToken where UserId = @userId", new { userId = axUser.Id });
-
-            var requestOptions = new RequestOptions
-            {
-                Authorization = resInvoke.data.token,
-                Headers = new Dictionary<string, string> { { "sth", resInvoke.data.sth } }
-            };
-
-            var res = WebServiceConsumer.Invoke<Model<dynamic>>("http://185.211.57.94/api/auth/logout", null, MethodType.Post, requestOptions);
-            if (!res.succeed)
-                return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "مشکل از logout برسا");
 
             if (tokenBag != null && !isAgain)
             {
