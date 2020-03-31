@@ -38,7 +38,6 @@ namespace API.Controllers.v1
             password = password.Hash();
             var barsaUserId = await qe.Connection.ExecuteScalarAsync<long>("Select ID from Spl_Users WHERE USERNAME = @username and PASSWORD = @password", new { username, password });
 
-
             if (barsaUserId == 0)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthorized, null, "نام کاربری و یا رمز عبور اشتباه است");
 
