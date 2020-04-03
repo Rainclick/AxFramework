@@ -47,7 +47,7 @@ namespace API.Controllers.v1
 
 
         [HttpGet("[action]/{date1?}/{date2?}")]
-        [AllowAnonymous]
+        [Authorize]
         public async Task<IEnumerable<AxServiceDtoReserve>> GetData(DateTime? date1 = null, DateTime? date2 = null)
         {
             var userId = User.Identity.GetUserId<long>();
@@ -55,38 +55,35 @@ namespace API.Controllers.v1
             var str = "";
             IEnumerable<AxServiceDtoReserve> data = null;
             if (!date1.HasValue && !date2.HasValue)
-                str = "select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate DESC";
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate";
             if (date1.HasValue && !date2.HasValue)
-                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate >= @date1 ORDER BY DeliveryDate DESC";
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate >= @date1 ORDER BY DeliveryDate";
             if (!date1.HasValue && date2.HasValue)
-                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate <= @date2 ORDER BY DeliveryDate DESC";
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate <= @date2 ORDER BY DeliveryDate";
             if (date1.HasValue && date2.HasValue)
-                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate >= @date1 And DeliveryDate <= @date2 ORDER BY DeliveryDate DESC";
+                str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate >= @date1 And DeliveryDate <= @date2 ORDER BY DeliveryDate";
 
             data = await qe.Connection.QueryAsync<AxServiceDtoReserve>(str, new { userId, date1, date2 });
             return data;
         }
 
-        [HttpGet("[action]/{page}/{month}")]
+        [HttpGet("[action]/{page?}/{date1?}/{date2?}")]
         [Authorize]
-        public async Task<ApiResult<IEnumerable<AxServiceDtoHistory>>> GetReservesHistory(int page, int month)
+        public async Task<ApiResult<IEnumerable<AxServiceDtoHistory>>> GetReservesHistory(int? page = 0, DateTime? date1 = null, DateTime? date2 = null)
         {
-            IEnumerable<AxServiceDtoHistory> data;
             var pageCount = 10;
             var userId = User.Identity.GetUserId<long>();
             var offset = page * pageCount;
             using var qe = new QueryExecutor();
-            if (month > 0 && month <= 12)
-            {
-                var p = new PersianCalendar();
-                var year = p.GetYear(DateTime.Now);
-                var fDate = DateExtensionMethods.GetMiladiDate(year + "-" + month + "-1");
-                var tDate = month < 12 ? DateExtensionMethods.GetMiladiDate(year + "-" + (month + 1) + "-1") : DateExtensionMethods.GetMiladiDate((year + 1) + "-1-1");
+            var whereClause = "";
+            if (date1.HasValue && !date2.HasValue)
+                whereClause = " And [Date] >= @date1 ";
+            if (!date1.HasValue && date2.HasValue)
+                whereClause = " And [Date] <= @date2 ";
+            if (date1.HasValue && date2.HasValue)
+                whereClause = " And [Date] >= @date1 And [Date] <= @date2";
 
-                data = await qe.Connection.QueryAsync<AxServiceDtoHistory>("SELECT * FROM UserReservationHistory WHERE UserId = @userId And [Date] >= @fDate and [Date] < @tDate ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount, fDate, tDate });
-            }
-            else
-                data = await qe.Connection.QueryAsync<AxServiceDtoHistory>("SELECT * FROM UserReservationHistory WHERE UserId = @userId ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount });
+            var data = await qe.Connection.QueryAsync<AxServiceDtoHistory>($"SELECT * FROM UserReservationHistory WHERE UserId = @userId {whereClause} ORDER BY [Date] DESC OFFSET (@offset) ROWS FETCH NEXT (@pageCount) ROWS ONLY", new { userId, offset, pageCount, date1, date2 });
             return new ApiResult<IEnumerable<AxServiceDtoHistory>>(true, ApiResultStatusCode.Success, data);
         }
 

@@ -169,7 +169,37 @@ namespace API.Controllers.v1
         }
 
 
+        [HttpGet("[action]")]
+        [Authorize]
+        public async Task<ApiResult<AxReserveSettings>> GetSettings(CancellationToken cancellationToken)
+        {
+            var userId = User.Identity.GetUserId<long>();
+            using var qe = new QueryExecutor();
+            var settings = await qe.Connection.QueryFirstOrDefaultAsync<AxReserveSettings>(@"SELECT
+            A.Id,
+            A.DefaultMealGroup,-- گروه وعده غذایی پیشفرض کاربر
+            A_DefaultMealGroup.Title as FoodGroupTitle,
+            A.DefaultFoodType,-- نوع غذای پیشفرض
+            A_DefaultFoodType.Title as FoodTypeTitle,
+            A.DefaultRestaurant,-- رستوران پیشفرض
+            A_DefaultRestaurant.Title as FoodRestaurantTitle,
+            A.DefaultServeMethod,-- نحوه سرو پیشفرض
+            A_DefaultServeMethod.Title as ServeTypeTitle,
+            A.GuestShareNum,-- سهمیه میهمان
+            A.GustShareType,-- نوع محاسبه بازه سهمیه میهمان 
+            A.FamilyNum, -- سهمیه اعضای خانواده
+            A.FamilyShareType
+                FROM
+            Res_PersonelRestaurantSetting AS A left outer join Res_MealGroup A_DefaultMealGroup on (A_DefaultMealGroup.id=A.DefaultMealGroup) left outer join Res_FoodType A_DefaultFoodType on (A_DefaultFoodType.id=A.DefaultFoodType) left outer join Res_Restaurant A_DefaultRestaurant on (A_DefaultRestaurant.id=A.DefaultRestaurant) left outer join Res_ServeFoodPlace A_DefaultServeMethod on (A_DefaultServeMethod.id=A.DefaultServeMethod)
+            WHERE
+            A.UserId = @userId
+            ", new { userId });
+
+            if (settings != null)
+                settings.Username = User.Identity.GetUserName();
+
+            return settings;
+        }
+
     }
-
-
 }
