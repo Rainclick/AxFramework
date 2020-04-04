@@ -17,9 +17,10 @@ namespace API.Models
     public class AxServiceDtoHistory : AxServiceDto
     {
         public DateTime Date { get; set; }
-        public string DateString => Date.ToPerDateString("MM/dd") + " " + WeekDayTitle;
+        public string DateString => Date.ToPerDateString("yyyy/MM/dd") ;
         public string ServePlace { get; set; }
         public string StatusTxt { get; set; }
+        public int Status { get; set; }
     }
 
     public class AxServiceDtoReserve : AxServiceDto
