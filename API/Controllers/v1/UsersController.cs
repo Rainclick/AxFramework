@@ -90,14 +90,33 @@ namespace API.Controllers.v1
             else
                 return new ApiResult<UserInfo>(false, ApiResultStatusCode.NotFound, null, "کاربری یافت نشد!");
 
-
             var loginLog = await qe.Connection.QueryFirstOrDefaultAsync<AxUserLoginLog>("Select * from AxUserLoginLogs where UserId=@userId ORDER BY [DateTime] DESC OFFSET (1) ROWS FETCH NEXT (1) ROWS ONLY", new { userId });
             if (loginLog != null)
                 userInfo.LastLogin = loginLog.DateTime.ToString("yyyy-MM-dd'T'HH:mm:ss", CultureInfo.InvariantCulture);
 
             var msgCount = await qe.Connection.ExecuteScalarAsync<int>("Select count(*) from AxNotification where UserId = @userId And IsSeen = 0", new { userId });
             userInfo.MsgCount = msgCount;
+            userInfo.FileName = (string)await GetUserFile(userId, true);
+            userInfo.MsgCount = msgCount;
             return userInfo;
+        }
+
+        private async Task<object> GetUserFile(long userId, bool name = false)
+        {
+            using var qe = new QueryExecutor();
+            var personelId = await qe.Connection.ExecuteScalarAsync<long>("select Personnel from Res_PersonelRestaurantSetting WHERE UserId = @userId", new { userId });
+            var attId = await qe.Connection.ExecuteScalarAsync<long>("select FILEATTACHMENTID from Shr_FileAttachmentObject WHERE OBJECTID = @personelId", new { personelId });
+            var fileAttachment = await qe.Connection.QueryFirstOrDefaultAsync<FileAttachment>("select Size FROM Shr_FileAttachment WHERE id=@attId", new { attId });
+
+            if (fileAttachment != null)
+            {
+                if (name)
+                    return fileAttachment.Size + ".png";
+                fileAttachment = await qe.Connection.QueryFirstOrDefaultAsync<FileAttachment>("select * FROM Shr_FileAttachment WHERE id=@attId", new { attId });
+                if (fileAttachment?.Content?.Length > 0)
+                    return fileAttachment.Content;
+            }
+            return null;
         }
 
         [HttpGet("[action]")]
@@ -201,5 +220,18 @@ namespace API.Controllers.v1
             return settings;
         }
 
+        [HttpGet("[action]/{fileName}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserImg(string fileName)
+        {
+            var userId = User.Identity.GetUserId<long>();
+            var content = (byte[])await GetUserFile(userId);
+            if (content != null)
+                return File(content, Util.GetContentType("a.png"), "a.png");
+            return NotFound();
+        }
+
     }
+
+
 }
