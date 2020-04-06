@@ -54,6 +54,7 @@ namespace API
             app.UseHosts(env);
             app.UseHttpsRedirection();
             app.UseAuthentication();
+            app.UseCors("MyPolicy");
             app.UseMvc();
             this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
             using var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope();
