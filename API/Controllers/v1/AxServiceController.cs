@@ -169,11 +169,17 @@ namespace API.Controllers.v1
 
             if (req.Num == 0)
             {
-                qe.Connection.DeleteAsync(reserve);
+                qe.Connection.Delete(reserve);
                 return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت حذف شد");
             }
             reserve.Num = req.Num;
-            qe.Connection.UpdateAsync(reserve);
+            reserve.Food = plan.Food;
+            reserve.DayOfWeek = plan.WeekDay;
+            reserve.Food = plan.Food;
+            reserve.Meal = plan.Meal;
+            reserve.Restaurant = plan.Restaurant;
+            reserve.Date = plan.DeliveryDate;
+            qe.Connection.Update(reserve);
             return new ApiResult(true, ApiResultStatusCode.NotFound, "رزرو با موفقیت ویرایش شد");
         }
     }
