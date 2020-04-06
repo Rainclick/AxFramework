@@ -10,6 +10,8 @@ namespace WebFramework.Api
         [Display(Name = "شناسه")]
         public TKey Id { get; set; }
 
+        public int Count { get; set; }
+
         public TEntity ToEntity()
         {
             return Mapper.Map<TEntity>(CastToDerivedClass(this));
