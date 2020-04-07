@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Pluralize.NET.Core;
@@ -84,18 +85,17 @@ namespace Common.Utilities
         /// <param name="assemblies">Assemblies contains Entities</param>
         public static void RegisterEntityTypeConfiguration(this ModelBuilder modelBuilder, params Assembly[] assemblies)
         {
-            MethodInfo applyGenericMethod = typeof(ModelBuilder).GetMethods().First(m => m.Name == nameof(ModelBuilder.ApplyConfiguration));
+            var applyGenericMethod = typeof(ModelBuilder).GetMethods().First(m => m.Name == nameof(ModelBuilder.ApplyConfiguration));
 
-            IEnumerable<Type> types = assemblies.SelectMany(a => a.GetExportedTypes())
-                .Where(c => c.IsClass && !c.IsAbstract && c.IsPublic);
+            var types = assemblies.SelectMany(a => a.GetExportedTypes()).Where(c => c.IsClass && !c.IsAbstract && c.IsPublic);
 
-            foreach (Type type in types)
+            foreach (var type in types)
             {
-                foreach (Type iface in type.GetInterfaces())
+                foreach (var iface in type.GetInterfaces())
                 {
+                    var applyConcreteMethod = applyGenericMethod.MakeGenericMethod(iface.GenericTypeArguments[0]);
                     if (iface.IsConstructedGenericType && iface.GetGenericTypeDefinition() == typeof(IEntityTypeConfiguration<>))
                     {
-                        MethodInfo applyConcreteMethod = applyGenericMethod.MakeGenericMethod(iface.GenericTypeArguments[0]);
                         applyConcreteMethod.Invoke(modelBuilder, new[] { Activator.CreateInstance(type) });
                     }
                 }
@@ -109,8 +109,7 @@ namespace Common.Utilities
         /// <param name="assemblies">Assemblies contains Entities</param>
         public static void RegisterAllEntities<TBaseType>(this ModelBuilder modelBuilder, params Assembly[] assemblies)
         {
-           var types = assemblies.SelectMany(a => a.GetExportedTypes()).Where(c => c.IsClass && !c.IsAbstract && c.IsPublic && typeof(TBaseType).IsAssignableFrom(c));
-
+            var types = assemblies.SelectMany(a => a.GetExportedTypes()).Where(c => c.IsClass && !c.IsAbstract && c.IsPublic && typeof(TBaseType).IsAssignableFrom(c));
             foreach (var type in types)
             {
                 modelBuilder.Entity(type);
