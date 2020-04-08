@@ -11,11 +11,11 @@ using WebFramework.Filters;
 namespace API.Controllers.v1.Chart
 {
     [ApiVersion("1")]
-    public class BarChartController : BaseController
+    public class ChartController : BaseController
     {
-        private readonly IBaseRepository<BarChart> _repository;
+        private readonly IBaseRepository<AxChart> _repository;
         private IHubContext<ChartHub> _hub;
-        public BarChartController(IBaseRepository<BarChart> repository,IHubContext<ChartHub> hub)
+        public ChartController(IBaseRepository<AxChart> repository,IHubContext<ChartHub> hub)
         {
             _repository = repository;
             _hub = hub;

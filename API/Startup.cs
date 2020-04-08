@@ -69,11 +69,11 @@ namespace API
             app.UseMvc();
             app.UseSwaggerAndUi();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHub<ChartHub>("/chart");
-            });
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapControllers();
+            //    endpoints.MapHub<ChartHub>("/chart");
+            //});
 
             var configurationVariable = Configuration.GetConnectionString("SqlServer");
             LogManager.Configuration.Variables["ConnectionString"] = configurationVariable;

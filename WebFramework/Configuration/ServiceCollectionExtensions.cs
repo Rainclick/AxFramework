@@ -123,7 +123,7 @@ namespace WebFramework.Configuration
                         if (!userToken.User.IsActive)
                             context.Fail("کاربری شما غیرفعال شده است");
 
-                        await userRepository.UpdateLastLoginDateAsync(userToken.User, context.HttpContext.RequestAborted);
+                        //await userRepository.UpdateLastLoginDateAsync(userToken.User, context.HttpContext.RequestAborted);
                     }
                 };
 

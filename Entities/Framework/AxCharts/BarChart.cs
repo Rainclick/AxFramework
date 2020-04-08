@@ -4,7 +4,7 @@ using Entities.Framework.AxCharts.Common;
 
 namespace Entities.Framework.AxCharts
 {
-    public class BarChart : AxChart
+    public class BarChart : BaseEntity
     {
         public string XField { get; set; }
         [NotMapped]
@@ -14,5 +14,9 @@ namespace Entities.Framework.AxCharts
         public ICollection<object> YData { get; set; }
         public virtual ICollection<AxSeries> Series { get; set; }
         public virtual ICollection<Legend> Legends { get; set; }
+
+        public int AxChartId { get; set; }
+        [ForeignKey("AxChartId")]
+        public AxChart AxChart { get; set; }
     }
 }
