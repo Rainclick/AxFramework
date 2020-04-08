@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using API.Models;
+﻿using System.Reflection;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common;
-using Data;
-using Data.Repositories;
-using Entities.Framework;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
-using WebFramework.Filters;
 using WebFramework.Middlewares;
 using WebFramework.Swagger;
 
