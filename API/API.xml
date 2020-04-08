@@ -89,11 +89,5 @@
             <param name="app"></param>
             <param name="env"></param>
         </member>
-        <member name="M:API.Startup.ConfigureContainer(Autofac.ContainerBuilder)">
-            <summary>
-            
-            </summary>
-            <param name="builder"></param>
-        </member>
     </members>
 </doc>
