@@ -10,6 +10,7 @@ namespace Entities.Framework
         public AxChartType Type { get; set; }
         public int OrderIndex { get; set; }
         public int Width { get; set; }
+        public bool Active { get; set; }
         public int Height { get; set; }
         [ForeignKey("UserId")]
         public User User { get; set; }

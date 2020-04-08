@@ -10,8 +10,7 @@ using WebFramework.Filters;
 
 namespace API.Controllers.v1.Chart
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    [ApiVersion("1")]
     public class BarChartController : BaseController
     {
         private readonly IBaseRepository<BarChart> _repository;

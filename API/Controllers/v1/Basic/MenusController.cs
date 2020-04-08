@@ -24,6 +24,7 @@ namespace API.Controllers.v1.Basic
         private readonly IMemoryCache _memoryCache;
         private readonly IBaseRepository<Permission> _permissionRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
+        private readonly IBaseRepository<UserChart> _userChartsRepository;
 
         /// <summary>
         /// 
@@ -32,12 +33,13 @@ namespace API.Controllers.v1.Basic
         /// <param name="memoryCache"></param>
         /// <param name="permissionRepository"></param>
         /// <param name="userGroupRepository"></param>
-        public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache, IBaseRepository<Permission> permissionRepository, IBaseRepository<UserGroup> userGroupRepository)
+        public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache, IBaseRepository<Permission> permissionRepository, IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserChart> userChartsRepository)
         {
             _repository = repository;
             _memoryCache = memoryCache;
             _permissionRepository = permissionRepository;
             _userGroupRepository = userGroupRepository;
+            _userChartsRepository = userChartsRepository;
         }
 
         /// <summary>
@@ -49,7 +51,6 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public virtual ApiResult<List<MenuDto>> GetSystemMenus(int systemId)
         {
-            var userId = User.Identity.GetUserId<int>();
             var menus = _repository.GetAll(x => x.ParentId == systemId && x.Active).Include(x => x.Children).Select(x => new
             {
                 x.Key,
@@ -63,7 +64,7 @@ namespace API.Controllers.v1.Basic
                 })
             }).ProjectTo<MenuDto>();
 
-            var keys = _memoryCache.GetOrCreate("user" + userId, GetKeysFromDb);
+            var keys = _memoryCache.GetOrCreate("user" + UserId, GetKeysFromDb);
             if (keys == null)
                 return NotFound();
 
@@ -82,18 +83,26 @@ namespace API.Controllers.v1.Basic
             return Ok(output);
         }
 
+        [HttpGet("[action]/{systemId}")]
+        [AxAuthorize(StateType = StateType.OnlyToken)]
+        public virtual ApiResult<List<UserChart>> GetDashboardCharts(int systemId)
+        {
+            var charts = _userChartsRepository.GetAll(x => x.UserId == UserId && x.Active);
+            return Ok(charts);
+        }
+
+
         private HashSet<string> GetKeysFromDb(ICacheEntry arg)
         {
-            var userId = User.Identity.GetUserId<int>();
             var hashSet = new HashSet<string>();
-            var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == userId).Include(x => x.Menu);
+            var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == UserId).Include(x => x.Menu);
             foreach (var item in userPermissions)
             {
                 if (!string.IsNullOrWhiteSpace(item.Menu.Key))
                     hashSet.Add(item.Menu.Key);
             }
 
-            var userGroups = _userGroupRepository.GetAll(x => x.UserId == userId);
+            var userGroups = _userGroupRepository.GetAll(x => x.UserId == UserId);
             foreach (var item in userGroups)
             {
                 var groupPermissions = _permissionRepository.GetAll(x => x.GroupId == item.GroupId && x.Access)
@@ -105,7 +114,7 @@ namespace API.Controllers.v1.Basic
                 }
             }
 
-            var userDenied = _permissionRepository.GetAll(x => x.UserId == userId && !x.Access)
+            var userDenied = _permissionRepository.GetAll(x => x.UserId == UserId && !x.Access)
                 .Select(x => x.Menu.Key);
             foreach (var item in userDenied)
             {

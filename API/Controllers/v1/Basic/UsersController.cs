@@ -218,8 +218,7 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public async Task<ApiResult<UserInfo>> GetInitData(CancellationToken cancellationToken)
         {
-            var userId = User.Identity.GetUserId<int>();
-            var user = await _userRepository.GetFirstAsync(x => x.Id == userId, cancellationToken);
+            var user = await _userRepository.GetFirstAsync(x => x.Id == UserId, cancellationToken);
             _userRepository.LoadReference(user, t => t.UserSettings);
 
 
@@ -266,8 +265,7 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public ApiResult<List<string>> GetUserPermissions(CancellationToken cancellationToken)
         {
-            var userId = User.Identity.GetUserId<int>();
-            var keys = _memoryCache.Get<HashSet<string>>("user" + userId).ToList();
+            var keys = _memoryCache.Get<HashSet<string>>("user" + UserId).ToList();
             return keys;
         }
 
