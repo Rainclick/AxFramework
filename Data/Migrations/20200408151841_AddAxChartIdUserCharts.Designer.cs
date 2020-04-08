@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200408151841_AddAxChartIdUserCharts")]
+    partial class AddAxChartIdUserCharts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -221,9 +223,6 @@ namespace Data.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("int");
 
@@ -236,23 +235,12 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReportId")
-                        .HasColumnType("int");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int?>("SystemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("SystemId");
 
                     b.ToTable("PieCharts");
                 });
@@ -848,13 +836,6 @@ namespace Data.Migrations
                     b.HasOne("Entities.Framework.AxCharts.PieChart", null)
                         .WithMany("Legends")
                         .HasForeignKey("PieChartId");
-                });
-
-            modelBuilder.Entity("Entities.Framework.AxCharts.PieChart", b =>
-                {
-                    b.HasOne("Entities.Framework.Menu", "System")
-                        .WithMany()
-                        .HasForeignKey("SystemId");
                 });
 
             modelBuilder.Entity("Entities.Framework.LoginLog", b =>

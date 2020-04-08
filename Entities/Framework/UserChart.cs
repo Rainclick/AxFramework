@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Entities.Framework.AxCharts;
 using Entities.Framework.AxCharts.Common;
 
 namespace Entities.Framework

@@ -14,7 +14,7 @@
             Fetch Menus or Systems for user 
             </summary>
         </member>
-        <member name="M:API.Controllers.v1.Basic.MenusController.#ctor(Data.Repositories.IBaseRepository{Entities.Framework.Menu},Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup})">
+        <member name="M:API.Controllers.v1.Basic.MenusController.#ctor(Data.Repositories.IBaseRepository{Entities.Framework.Menu},Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup},Data.Repositories.IBaseRepository{Entities.Framework.UserChart})">
             <summary>
             
             </summary>
