@@ -17,6 +17,7 @@ namespace Entities.Framework.AxCharts
         public int? SystemId { get; set; }
         [ForeignKey("SystemId")]
         public Menu System { get; set; }
+        public int? ReportId { get; set; }
         public virtual ICollection<AxSeries> Series { get; set; }
         public virtual ICollection<Legend> Legends { get; set; }
     }

@@ -276,7 +276,7 @@ namespace API.Controllers.v1.Basic
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Ignore, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
         public ApiResult<IQueryable<UserSelectDto>> Get([FromQuery] DataRequest request)
         {
             var predicate = request.GetFilter<User>();
