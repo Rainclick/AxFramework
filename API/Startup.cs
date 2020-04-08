@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using API.Hubs;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common;
@@ -48,7 +49,7 @@ namespace API
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
             services.AddSwagger();
-
+            services.AddSignalR();
 
         }
 
@@ -68,7 +69,11 @@ namespace API
             app.UseMvc();
             app.UseSwaggerAndUi();
 
-
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHub<ChartHub>("/chart");
+            });
 
             var configurationVariable = Configuration.GetConnectionString("SqlServer");
             LogManager.Configuration.Variables["ConnectionString"] = configurationVariable;
