@@ -32,7 +32,7 @@ namespace API.Models
         public long Food { get; set; }
         public long Meal { get; set; }
         public long Restaurant { get; set; }
-        public int WeekDay { get; set; }
+        public long WeekDay { get; set; }
         public long Pid { get; set; }
         public bool QuotaControl { get; set; }
         public long MealGroup { get; set; }
@@ -50,7 +50,7 @@ namespace API.Models
         public long Personnel { get; set; }
         public long Meal { get; set; }
         public long Restaurant { get; set; }
-        public int DayOfWeek { get; set; }
+        public long DayOfWeek { get; set; }
         public int Category { get; set; }
         public int Status { get; set; }
         public int Num { get; set; }

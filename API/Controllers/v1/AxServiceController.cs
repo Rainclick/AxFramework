@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Threading.Tasks;
 using API.Models;
 using Common;
@@ -8,11 +7,9 @@ using Common.Utilities;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Data.Repositories;
-using Entities.Framework;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebFramework.Api;
-using Log = NLog.Fluent.Log;
 
 namespace API.Controllers.v1
 {
@@ -53,7 +50,6 @@ namespace API.Controllers.v1
             var userId = User.Identity.GetUserId<long>();
             using var qe = new QueryExecutor();
             var str = "";
-            IEnumerable<AxServiceDtoReserve> data = null;
             if (!date1.HasValue && !date2.HasValue)
                 str = "select * from UserActiveFoodPlans WHERE UserId = @userId ORDER BY DeliveryDate";
             if (date1.HasValue && !date2.HasValue)
@@ -63,7 +59,7 @@ namespace API.Controllers.v1
             if (date1.HasValue && date2.HasValue)
                 str = "select * from UserActiveFoodPlans WHERE UserId = @userId And DeliveryDate >= @date1 And DeliveryDate <= @date2 ORDER BY DeliveryDate";
 
-            data = await qe.Connection.QueryAsync<AxServiceDtoReserve>(str, new { userId, date1, date2 });
+            var data = await qe.Connection.QueryAsync<AxServiceDtoReserve>(str, new { userId, date1, date2 });
             return data;
         }
 
