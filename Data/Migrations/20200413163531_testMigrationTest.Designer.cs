@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200413163531_testMigrationTest")]
+    partial class testMigrationTest
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,7 +275,7 @@ namespace Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int>("SeriesId")
+                    b.Property<int?>("SeriesId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -892,9 +894,7 @@ namespace Data.Migrations
 
                     b.HasOne("Entities.Framework.AxCharts.Common.AxSeries", "Series")
                         .WithMany()
-                        .HasForeignKey("SeriesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SeriesId");
                 });
 
             modelBuilder.Entity("Entities.Framework.LoginLog", b =>

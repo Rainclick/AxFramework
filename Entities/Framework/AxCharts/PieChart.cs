@@ -6,8 +6,10 @@ namespace Entities.Framework.AxCharts
 {
     public class PieChart : BaseEntity
     {
-        public virtual ICollection<AxSeries> Series { get; set; }
-        public virtual ICollection<Legend> Legends { get; set; }
+        [ForeignKey("SeriesId")]
+        public virtual AxSeries Series { get; set; }
+        public int SeriesId { get; set; }
+        public virtual ICollection<Legend> Labels { get; set; }
 
         public int AxChartId { get; set; }
         [ForeignKey("AxChartId")]

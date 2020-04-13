@@ -94,7 +94,8 @@ namespace API.Controllers.v1.Basic
                 x.AxChart.ChartType,
                 x.Width,
                 x.Height,
-                x.OrderIndex
+                x.OrderIndex,
+                x.AxChart.Id
             });
             return Ok(charts);
         }

@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Entities.Framework.AxCharts.Common
+﻿namespace Entities.Framework.AxCharts.Common
 {
 
     public class Legend : BaseEntity
@@ -14,8 +11,6 @@ namespace Entities.Framework.AxCharts.Common
     {
         public string Name { get; set; }
         public AxChartType Type { get; set; }
-        [NotMapped]
-        public ICollection<object> Data { get; set; }
         public int AxChartId { get; set; }
     }
 
