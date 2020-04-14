@@ -57,6 +57,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>C:\Users\Amir\source\repos\AxFramework\API\API.xml</DocumentationFile>
     <OutputPath>bin\Debug\netcoreapp3.1\</OutputPath>
+    <NoWarn>1701;1702;1591</NoWarn>
   </PropertyGroup>
 
 </Project>

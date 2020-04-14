@@ -11,6 +11,8 @@ namespace Entities.Framework.AxCharts
         [ForeignKey("SystemId")]
         public Menu System { get; set; }
         public int? ReportId { get; set; }
+        public int? NextChartId { get; set; }
+        public AxChartType? NextChartType { get; set; }
         public AxChartType ChartType { get; set; }
     }
 }

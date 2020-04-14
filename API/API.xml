@@ -14,15 +14,6 @@
             Fetch Menus or Systems for user 
             </summary>
         </member>
-        <member name="M:API.Controllers.v1.Basic.MenusController.#ctor(Data.Repositories.IBaseRepository{Entities.Framework.Menu},Microsoft.Extensions.Caching.Memory.IMemoryCache,Data.Repositories.IBaseRepository{Entities.Framework.Permission},Data.Repositories.IBaseRepository{Entities.Framework.UserGroup},Data.Repositories.IBaseRepository{Entities.Framework.UserChart})">
-            <summary>
-            
-            </summary>
-            <param name="repository"></param>
-            <param name="memoryCache"></param>
-            <param name="permissionRepository"></param>
-            <param name="userGroupRepository"></param>
-        </member>
         <member name="M:API.Controllers.v1.Basic.MenusController.GetSystemMenus(System.Int32)">
             <summary>
             Get Systems And Menus for Signed User

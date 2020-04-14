@@ -3,7 +3,6 @@ using System.Linq;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
-using Common.Utilities;
 using Data.Repositories;
 using Entities.Framework;
 using Microsoft.AspNetCore.Mvc;
@@ -26,13 +25,6 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
         private readonly IBaseRepository<UserChart> _userChartsRepository;
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="repository"></param>
-        /// <param name="memoryCache"></param>
-        /// <param name="permissionRepository"></param>
-        /// <param name="userGroupRepository"></param>
         public MenusController(IBaseRepository<Menu> repository, IMemoryCache memoryCache, IBaseRepository<Permission> permissionRepository, IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserChart> userChartsRepository)
         {
             _repository = repository;
