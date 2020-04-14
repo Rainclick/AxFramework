@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Common;
 using Data.Repositories;
 using Entities.Framework.AxCharts;
@@ -7,6 +8,7 @@ using System.Linq;
 using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
+using Common.Utilities;
 using Entities.Framework.AxCharts.Common;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +22,13 @@ namespace API.Controllers.v1.Chart
     {
         private readonly IBaseRepository<AxChart> _repository;
         private readonly IBaseRepository<PieChart> _pieRepository;
+        private readonly IBaseRepository<NumericWidget> _numericWidgetRepository;
         private IHubContext<ChartHub> _hub;
-        public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IHubContext<ChartHub> hub)
+        public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<NumericWidget> numericWidgetRepository, IHubContext<ChartHub> hub)
         {
             _repository = repository;
             _pieRepository = pieRepository;
+            _numericWidgetRepository = numericWidgetRepository;
             _hub = hub;
         }
 
@@ -44,6 +48,17 @@ namespace API.Controllers.v1.Chart
                 }
 
                 return Ok(pieChart);
+            }
+
+            if (chart.ChartType == AxChartType.NumericWidget)
+            {
+                var numericWidget = _numericWidgetRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<NumericWidgetDto>().FirstOrDefault();
+                if (numericWidget != null)
+                {
+                    numericWidget.Data = 285;
+                    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm");
+                    return Ok(numericWidget);
+                }
             }
             return Ok(chart);
         }

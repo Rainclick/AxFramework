@@ -25,7 +25,7 @@
         Line,
         Bar,
         Area,
-        Widget
+        NumericWidget
     }
 
 }

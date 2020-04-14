@@ -10,7 +10,6 @@ namespace Entities.Framework.AxCharts
         public virtual AxSeries Series { get; set; }
         public int SeriesId { get; set; }
         public virtual ICollection<Legend> Labels { get; set; }
-
         public int AxChartId { get; set; }
         [ForeignKey("AxChartId")]
         public AxChart AxChart { get; set; }
