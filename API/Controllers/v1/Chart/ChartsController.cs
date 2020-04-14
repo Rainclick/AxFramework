@@ -46,7 +46,6 @@ namespace API.Controllers.v1.Chart
                     if (filter != null)
                         pieChart.Labels = pieChart.Labels.Where(x => x.ParentId == filter).ToList();
                 }
-
                 return Ok(pieChart);
             }
 
