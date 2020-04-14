@@ -13,6 +13,7 @@
         public string Name { get; set; }
         public AxChartType Type { get; set; }
         public int AxChartId { get; set; }
+        public int OrderIndex { get; set; }
     }
 
 

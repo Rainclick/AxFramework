@@ -22,12 +22,14 @@ namespace API.Controllers.v1.Chart
     {
         private readonly IBaseRepository<AxChart> _repository;
         private readonly IBaseRepository<PieChart> _pieRepository;
+        private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IBaseRepository<NumericWidget> _numericWidgetRepository;
         private IHubContext<ChartHub> _hub;
-        public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<NumericWidget> numericWidgetRepository, IHubContext<ChartHub> hub)
+        public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numericWidgetRepository, IHubContext<ChartHub> hub)
         {
             _repository = repository;
             _pieRepository = pieRepository;
+            _barChartRepository = barChartRepository;
             _numericWidgetRepository = numericWidgetRepository;
             _hub = hub;
         }
@@ -57,6 +59,23 @@ namespace API.Controllers.v1.Chart
                     numericWidget.Data = 285;
                     numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm");
                     return Ok(numericWidget);
+                }
+            }
+            if (chart.ChartType == AxChartType.Bar)
+            {
+                var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
+                if (barChart != null && barChart.Series?.Count > 0)
+                {
+                    for (var i = 0; i < barChart.Series.Count; i++)
+                    {
+                        if (i == 0)
+                            barChart.Series[i].Data = new List<object> { 15, 10 };
+                        if (i == 1)
+                            barChart.Series[i].Data = new List<object> { 12, 8 };
+                        if (i == 2)
+                            barChart.Series[i].Data = new List<object> { 16, 9 };
+                    }
+                    return Ok(barChart);
                 }
             }
             return Ok(chart);
