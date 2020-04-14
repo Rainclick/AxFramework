@@ -30,20 +30,25 @@ namespace API.Controllers.v1.Chart
 
         [HttpGet("[action]/{chartId}/{filter?}")]
         [AxAuthorize(StateType = StateType.Ignore)]
-        public ApiResult<dynamic> GetChart(int chartId, string filter = null)
+        public ApiResult<dynamic> GetChart(int chartId, int? filter = null)
         {
             var chart = _repository.GetFirst(x => x.Id == chartId);
             if (chart.ChartType == AxChartType.Pie)
             {
                 var pieChart = _pieRepository.GetAll(x => x.AxChartId == chartId).Include(x => x.Series).Include(x => x.Labels).ProjectTo<PieChartDto>().FirstOrDefault();
                 if (pieChart != null)
-                    pieChart.Series.Data = GetChartData(chart.ReportId, filter);//where filter
+                {
+                    pieChart.Series.Data = GetChartData(chart.ReportId, filter); //where filter
+                    if (filter != null)
+                        pieChart.Labels = pieChart.Labels.Where(x => x.ParentId == filter).ToList();
+                }
+
                 return Ok(pieChart);
             }
             return Ok(chart);
         }
 
-        private List<object> GetChartData(int? reportId, string filter)
+        private List<object> GetChartData(int? reportId, int? filter)
         {
             if (reportId == 1)
             {
@@ -51,7 +56,12 @@ namespace API.Controllers.v1.Chart
             }
             if (reportId == 2)
             {
-                return new List<object> { 15, 10 };
+                if (filter == 2)
+                    return new List<object> { 15, 10 };
+                if (filter == 3)
+                    return new List<object> { 65 };
+                if (filter == 7)
+                    return new List<object> { 7, 3 };
             }
             return null;
         }

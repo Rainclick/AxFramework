@@ -53,8 +53,10 @@
         BasicSystemReports,
         //[AxDisplay("گزارشات اشخاص", "01", BasicSystemReports)]
         //PersonReports,
-        [AxDisplay("گزارش لیست اشخاص", "01", BasicSystemReports)]
-        PersonListReports,
+        [AxDisplay("گزارش لیست کاربران", "01", BasicSystemReports)]
+        UserListReport,
+        [AxDisplay("گزارش ورود های ناموفق", "02", BasicSystemReports)]
+        UnSuccessfullyLoginReport,
         [AxDisplay("مدیریت حقوق دسترسی", "04", Basic)]
         AuthorizationManagement,
         [AxDisplay("حقوق دسترسی عملیات ها", "01", AuthorizationManagement)]

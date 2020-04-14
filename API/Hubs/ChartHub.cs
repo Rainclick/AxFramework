@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.Hubs
 {
-    public class ChartHub: Hub
+    public class ChartHub : Hub
     {
-        public async Task SendMessage( string message)
+        public async Task SendMessageToAll(string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", message);
         }

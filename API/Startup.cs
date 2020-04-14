@@ -68,12 +68,12 @@ namespace API
             app.UseCors("MyPolicy");
             app.UseMvc();
             app.UseSwaggerAndUi();
-
-            //app.UseEndpoints(endpoints =>
-            //{
-            //    endpoints.MapControllers();
-            //    endpoints.MapHub<ChartHub>("/chart");
-            //});
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHub<ChartHub>("/chart");
+            });
 
             var configurationVariable = Configuration.GetConnectionString("SqlServer");
             LogManager.Configuration.Variables["ConnectionString"] = configurationVariable;

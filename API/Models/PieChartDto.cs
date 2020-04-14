@@ -29,6 +29,7 @@ namespace API.Models
                 dest => dest.NextChartType,
                 config => config.MapFrom(src => src.AxChart.ChartType)
             );
+
         }
     }
 
