@@ -40,9 +40,9 @@ namespace Services.Services
             {
                 Issuer = _siteSetting.JwtSettings.Issuer,
                 Audience = _siteSetting.JwtSettings.Audience,
-                IssuedAt = DateTime.UtcNow,
-                NotBefore = DateTime.UtcNow.AddMinutes(_siteSetting.JwtSettings.NotBeforeMinutes),
-                Expires = DateTime.UtcNow.AddMinutes(_siteSetting.JwtSettings.ExpirationMinutes),
+                IssuedAt = DateTime.Now,
+                NotBefore = DateTime.Now.AddMinutes(_siteSetting.JwtSettings.NotBeforeMinutes),
+                Expires = DateTime.Now.AddMinutes(_siteSetting.JwtSettings.ExpirationMinutes),
                 SigningCredentials = signingCredentials,
                 EncryptingCredentials = encryptingCredentials,
                 Subject = new ClaimsIdentity(claims)

@@ -14,8 +14,8 @@ namespace Services
         {
             access_token = new JwtSecurityTokenHandler().WriteToken(securityToken);
             token_type = "Bearer";
-            var datetime = DateTime.Parse("1970-01-01T00:00:00");
-            expires_in = (long)(securityToken.ValidTo - datetime.ToUniversalTime()).TotalSeconds;
+            long unixTimestamp = (long)(securityToken.ValidTo.ToUniversalTime().Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            expires_in = unixTimestamp;
         }
     }
 }
