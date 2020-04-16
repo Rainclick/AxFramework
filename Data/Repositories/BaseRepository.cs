@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Entities.Framework;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Data.Repositories
 {
@@ -45,7 +46,6 @@ namespace Data.Repositories
 
         public virtual async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken, bool saveNow = true)
         {
-            Assert.NotNull(entities, nameof(entities));
             await Entities.AddRangeAsync(entities, cancellationToken).ConfigureAwait(false);
             if (saveNow)
                 await DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -62,7 +62,6 @@ namespace Data.Repositories
 
         public virtual async Task UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken, bool saveNow = true)
         {
-            Assert.NotNull(entities, nameof(entities));
             Entities.UpdateRange(entities);
             if (saveNow)
                 await DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -78,7 +77,6 @@ namespace Data.Repositories
 
         public virtual async Task DeleteRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken, bool saveNow = true)
         {
-            Assert.NotNull(entities, nameof(entities));
             Entities.RemoveRange(entities);
             if (saveNow)
                 await DbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
@@ -120,15 +118,14 @@ namespace Data.Repositories
             //System.Web.HttpContext.Current.User.Identity.GetUserId();
             Entities.Add(entity);
             if (saveNow)
-                DbContext.SaveChanges();
+                SaveChanges(AuditType.Add);
         }
 
         public virtual void AddRange(IEnumerable<TEntity> entities, bool saveNow = true)
         {
-            Assert.NotNull(entities, nameof(entities));
             Entities.AddRange(entities);
             if (saveNow)
-                DbContext.SaveChanges();
+                SaveChanges(AuditType.Add, true);
         }
 
         public virtual void Update(TEntity entity, bool saveNow = true)
@@ -139,8 +136,53 @@ namespace Data.Repositories
             entity.ModifiedDateTime = DateTime.Now;
             Entities.Update(entity);
             if (saveNow)
-                DbContext.SaveChanges();
+                SaveChanges(AuditType.Edit);
         }
+
+        private void SaveChanges(AuditType type, bool isRange = false)
+        {
+            DbContext.SaveChanges();
+
+            foreach (var entry in DbContext.ChangeTracker.Entries().ToList())
+            {
+                var tableName = entry.Entity.GetType().Name;
+                var mustLog = DbContext.Set<AuditTable>().Any(x => x.TableName == tableName);
+                if (tableName != "Audit")
+                {
+                    var row = new Audit
+                    {
+                        CreatorUserId = 1,
+                        InsertDateTime = DateTime.Now,
+                        PrimaryKey = 0,
+                        HistoryType = type,
+                        TableName = tableName,
+                        Value = GetValueAsString(entry, type)
+                    };
+                    DbContext.Set<Audit>().Add(row);
+                    DbContext.SaveChanges();
+                }
+            }
+        }
+
+        private string GetValueAsString(EntityEntry entry, AuditType type)
+        {
+            var str = string.Empty;
+            foreach (var property in entry.Properties)
+            {
+                var value = property.CurrentValue;
+                var value2 = property.OriginalValue;
+                if (value != null && value2 != null)
+                {
+                    if (type == AuditType.Edit)
+                        str += property.Metadata.Name + " : " + value + " ===> " + value2 + "\r\n";
+                    else
+                        str += property.Metadata.Name + " : " + value + "\r\n";
+                }
+            }
+
+            return str;
+        }
+
 
         private void AttachEntity(TEntity entity)
         {
@@ -156,10 +198,9 @@ namespace Data.Repositories
 
         public virtual void UpdateRange(IEnumerable<TEntity> entities, bool saveNow = true)
         {
-            Assert.NotNull(entities, nameof(entities));
             Entities.UpdateRange(entities);
             if (saveNow)
-                DbContext.SaveChanges();
+                SaveChanges(AuditType.Edit, true);
         }
 
         public virtual void Delete(TEntity entity, bool saveNow = true)
@@ -167,15 +208,14 @@ namespace Data.Repositories
             Assert.NotNull(entity, nameof(entity));
             Entities.Remove(entity);
             if (saveNow)
-                DbContext.SaveChanges();
+                SaveChanges(AuditType.Remove);
         }
 
         public virtual void DeleteRange(IEnumerable<TEntity> entities, bool saveNow = true)
         {
-            Assert.NotNull(entities, nameof(entities));
             Entities.RemoveRange(entities);
             if (saveNow)
-                DbContext.SaveChanges();
+                SaveChanges(AuditType.Remove, true);
         }
         #endregion
 

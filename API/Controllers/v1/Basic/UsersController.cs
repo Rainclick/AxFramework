@@ -89,7 +89,6 @@ namespace API.Controllers.v1.Basic
                 BrowserVersion = info.UA.Major + "." + info.UA.Minor,
                 UserId = user?.Id,
                 CreatorUserId = 1,
-                InvalidPassword = loginDto.Password,
                 Ip = ip,
                 MachineName = computerName,
                 Os = info.Device + " " + info.OS,
@@ -103,7 +102,6 @@ namespace API.Controllers.v1.Basic
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "نام کاربری و یا رمز عبور اشتباه است");
 
             loginlog.ValidSignIn = true;
-            loginlog.InvalidPassword = string.Empty;
             loginlog.ModifierUserId = 1;
 
             var clientId = Guid.NewGuid().ToString();
