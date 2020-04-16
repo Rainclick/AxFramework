@@ -69,12 +69,13 @@ namespace API.Controllers.v1.Chart
                     for (var i = 0; i < barChart.Series.Count; i++)
                     {
                         if (i == 0)
-                            barChart.Series[i].Data = new List<object> { 15, 10 };
+                            barChart.Series[i].Data = new List<object> { 15, 10, 8 };
                         if (i == 1)
-                            barChart.Series[i].Data = new List<object> { 12, 8 };
+                            barChart.Series[i].Data = new List<object> { 12, 8, 5 };
                         if (i == 2)
                             barChart.Series[i].Data = new List<object> { 16, 9 };
                     }
+                    barChart.Labels = new List<string> { "لیبل 1", "لیبل 2", "لیبل 3" };
                     return Ok(barChart);
                 }
             }

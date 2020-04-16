@@ -13,6 +13,7 @@ namespace Entities.Framework
         public Menu Parent { get; set; }
         public string Key { get; set; }
         public string Icon { get; set; }
+        public string Name { get; set; }
         public virtual ICollection<Menu> Children { get; set; }
         public AxOp AxOp { get; set; }
         public int OrderId { get; set; }

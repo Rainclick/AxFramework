@@ -12,6 +12,7 @@ namespace API.Models
         public string XField { get; set; }
         public string YField { get; set; }
         public virtual List<AxSeriesDto> Series { get; set; }
+        public virtual List<string> Labels { get; set; }
         public int? NextChartId { get; set; }
         public AxChartType NextChartType { get; set; }
         public string Title { get; set; }
