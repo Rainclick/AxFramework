@@ -22,7 +22,7 @@ namespace Common.Utilities
                 throw new NotSupportedException();
 
             foreach (var value in Enum.GetValues(input.GetType()))
-                if (input is Enum @enum && @enum.HasFlag(value as Enum))
+                if (input is Enum @enum && @enum.HasFlag(value as Enum ?? throw new InvalidOperationException()))
                     yield return (T)value;
         }
 
@@ -36,8 +36,8 @@ namespace Common.Utilities
             if (attribute == null)
                 return value.ToString();
 
-            var propValue = attribute.GetType().GetProperty(property.ToString()).GetValue(attribute, null);
-            return propValue.ToString();
+            var propValue = attribute.GetType().GetProperty(property.ToString())?.GetValue(attribute, null);
+            return propValue?.ToString();
         }
 
         public static Dictionary<int, string> ToDictionary(this Enum value)

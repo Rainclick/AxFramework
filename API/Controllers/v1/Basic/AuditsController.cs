@@ -6,48 +6,59 @@ using AutoMapper.QueryableExtensions;
 using Common;
 using Data.Repositories;
 using Entities.Framework;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
+using Common.Utilities;
 
 namespace API.Controllers.v1.Basic
 {
     [ApiVersion("1")]
     public class AuditsController : BaseController
     {
-        private readonly IBaseRepository<Log> _repository;
+        private readonly IBaseRepository<Audit> _repository;
+        private readonly IBaseRepository<Log> _logRepository;
 
-        public AuditsController(IBaseRepository<Log> repository)
+        public AuditsController(IBaseRepository<Audit> repository, IBaseRepository<Log> logRepository)
         {
             _repository = repository;
+            _logRepository = logRepository;
         }
 
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.LogList, ShowInMenu = true)]
-        public virtual ApiResult<IQueryable<LogDto>> Get()
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.ChangeTracker, ShowInMenu = true)]
+        public virtual ApiResult<IQueryable<AuditDto>> Get([FromQuery] DataRequest request)
         {
-            var data = _repository.GetAll().ProjectTo<LogDto>();
+            var predicate = request.GetFilter<Audit>();
+            var data = _repository.GetAll(predicate).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<AuditDto>();
             return Ok(data);
         }
 
-        [HttpGet]
-        [Route("{id}")]
-        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.LogItem)]
-        public ApiResult<Log> Get(int id)
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.LogList, ShowInMenu = true)]
+        public virtual ApiResult<IQueryable<LogDto>> GetLogs([FromQuery] DataRequest request)
         {
-            var user = _repository.GetAll(x => x.Id == id).FirstOrDefault();
-            return Ok(user);
+            var predicate = request.GetFilter<Log>();
+            var data = _logRepository.GetAll(predicate).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<LogDto>();
+            return Ok(data);
+        }
+
+        [HttpGet("[action]/{id}")]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.LogItem)]
+        public ApiResult<LogDto> GetLog(int id)
+        {
+            var log = _logRepository.GetAll(x => x.Id == id).FirstOrDefault();
+            return Ok(log);
         }
 
 
         [HttpPost]
         [AxAuthorize(StateType = StateType.OnlyToken)]
-        public virtual async Task<ApiResult<LogDto>> Create(Log dto, CancellationToken cancellationToken)
+        public virtual async Task<ApiResult<LogDto>> CreateLog(Log dto, CancellationToken cancellationToken)
         {
-            await _repository.AddAsync(dto, cancellationToken);
-            var resultDto = await _repository.TableNoTracking.ProjectTo<LogDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
+            await _logRepository.AddAsync(dto, cancellationToken);
+            var resultDto = await _logRepository.TableNoTracking.ProjectTo<LogDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
         }
     }

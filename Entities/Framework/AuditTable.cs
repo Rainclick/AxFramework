@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Framework
@@ -26,8 +27,11 @@ namespace Entities.Framework
 
     public enum AuditType
     {
+        [Display(Name = "درج شده")]
         Add = 1,
+        [Display(Name = "ویرایش شده")]
         Update = 2,
+        [Display(Name = "حذف  شده")]
         Delete = 3
     }
 }

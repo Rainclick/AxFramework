@@ -40,7 +40,8 @@ namespace WebFramework.Filters
             if (StateType == StateType.Authorized)
             {
                 var keys = memoryCache.Get<HashSet<string>>("user" + userId);
-                var haveAccess = keys.Any(x => x.ToLower() == AxOp.GetAxKey());
+                var axKey = AxOp.GetAxKey();
+                var haveAccess = keys != null && keys.Any(x => x.ToLower() == axKey);
 
                 if (!haveAccess)
                 {
