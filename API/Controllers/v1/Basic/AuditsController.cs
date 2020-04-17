@@ -53,7 +53,7 @@ namespace API.Controllers.v1.Basic
         }
 
 
-        [HttpPost]
+        [HttpPost("[action]")]
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public virtual async Task<ApiResult<LogDto>> CreateLog(Log dto, CancellationToken cancellationToken)
         {

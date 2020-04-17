@@ -23,7 +23,7 @@ namespace API.Controllers.v1.Basic
 
 
         [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.OnlyToken)]
+        [AxAuthorize(StateType = StateType.Ignore)]
         public async Task<IActionResult> GetOrganizationLogo(CancellationToken cancellationToken)
         {
             var data = await _repository.GetFirstAsync(x => x.Active, cancellationToken);
