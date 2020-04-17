@@ -3,11 +3,13 @@ using API.Hubs;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common;
+using Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
+using Services.Services;
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
 using WebFramework.Middlewares;
@@ -48,6 +50,7 @@ namespace API
             }).AddNewtonsoftJson();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
+            services.AddHostedService<TimedHostedService>();
             services.AddSwagger();
             services.AddSignalR();
 
@@ -77,11 +80,14 @@ namespace API
 
             var configurationVariable = Configuration.GetConnectionString("SqlServer");
             LogManager.Configuration.Variables["ConnectionString"] = configurationVariable;
+            ConnSingleton.Instance.Value = configurationVariable;
+            ConnSingleton.Instance.Name = "SqlServer";
 
             this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
 
             var assembly = Assembly.GetAssembly(typeof(Startup));
             app.UseAutomaticMenus(assembly);
+            app.UseSetStaticVariables();
         }
 
 

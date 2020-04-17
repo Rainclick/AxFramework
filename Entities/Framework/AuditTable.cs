@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Framework
@@ -20,25 +19,15 @@ namespace Entities.Framework
         public int? UserId { get; set; }
         [ForeignKey("UserId")]
         public User User { get; set; }
-        public AuditType HistoryType { get; set; }
+        public AuditType AuditType { get; set; }
         public string Value { get; set; }
-        public ICollection<AuditDetail> AuditDetails { get; set; }
-    }
-
-    public class AuditDetail : BaseEntity
-    {
-        public string ColumnName { get; set; }
-        public string OldValue { get; set; }
-        public string NewValue { get; set; }
-        public int AuditId { get; set; }
-        [ForeignKey("AuditId")]
-        public Audit Audit { get; set; }
+        public DateTime EntityInsertDateTime { get; set; }
     }
 
     public enum AuditType
     {
         Add = 1,
-        Edit = 2,
-        Remove = 3
+        Update = 2,
+        Delete = 3
     }
 }

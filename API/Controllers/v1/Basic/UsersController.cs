@@ -88,21 +88,19 @@ namespace API.Controllers.v1.Basic
                 Browser = info.UA.Family,
                 BrowserVersion = info.UA.Major + "." + info.UA.Minor,
                 UserId = user?.Id,
-                CreatorUserId = 1,
+                CreatorUserId = user?.Id ?? 0,
+                InvalidPassword = user == null ? loginDto.Password : null,
                 Ip = ip,
                 MachineName = computerName,
                 Os = info.Device + " " + info.OS,
                 UserName = loginDto.Username,
-                ValidSignIn = false
+                ValidSignIn = user != null
             };
-            _loginlogRepository.Add(loginlog);
+            await _loginlogRepository.AddAsync(loginlog, cancellationToken);
             #endregion
 
             if (user == null)
                 return new ApiResult<AccessToken>(false, ApiResultStatusCode.UnAuthenticated, null, "نام کاربری و یا رمز عبور اشتباه است");
-
-            loginlog.ValidSignIn = true;
-            loginlog.ModifierUserId = 1;
 
             var clientId = Guid.NewGuid().ToString();
             var token = await _jwtService.GenerateAsync(user, clientId);
@@ -121,8 +119,6 @@ namespace API.Controllers.v1.Basic
                 Browser = info.UA.ToString(),
                 ExpireDateTime = DateTime.Now.AddSeconds(token.expires_in)
             };
-
-
 
             //Response.Cookies.Append("AxToken", token.access_token);
             await _userTokenRepository.AddAsync(userToken, cancellationToken);
@@ -176,12 +172,6 @@ namespace API.Controllers.v1.Basic
 
                 }, cancellationToken);
             }
-
-            await Task.Run(() =>
-            {
-                _loginlogRepository.Update(loginlog);
-            }, cancellationToken);
-
             return token;
         }
 

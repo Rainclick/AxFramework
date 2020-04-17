@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -37,7 +38,8 @@ namespace Data.Repositories
         IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate);
         IQueryable<TEntity> GetAll();
         Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken);
-        TEntity GetFirst(Expression<Func<TEntity, bool>> predicate);
-        IQueryable<TEntity> Run(string query);
+        TEntity GetFirst(Expression<Func<TEntity, bool>> predicate); 
+        int Run(string query, params object[] parameters);
+        DbConnection GetDbConnection();
     }
 }
