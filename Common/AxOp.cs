@@ -25,6 +25,8 @@
         UserUpdate,
         [AxDisplay("حذف کاربر", "05", UserManagement)]
         UserDelete,
+        [AxDisplay("حقوق دسترسی", "11", UserManagement)]
+        PermissionTree,
         [AxDisplay("لیست آدرس ها", "02", UserItem)]
         AddressList,
         [AxDisplay("فرم آدرس", "03", UserItem)]
@@ -47,6 +49,7 @@
         ChangeTracker,
         [AxDisplay("جزئیات تاریخچه تغییرات", "01", ChangeTracker)]
         ChangeTrackerItem,
+
         [AxDisplay("گزارشات", "99", None)]
         Reports,
         [AxDisplay("گزارشات اطلاعات پایه", "01", Reports)]

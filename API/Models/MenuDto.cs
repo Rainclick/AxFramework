@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+using AutoMapper;
 using Entities.Framework;
 using WebFramework.Api;
 
@@ -11,6 +11,8 @@ namespace API.Models
         public int? ParentId { get; set; }
         public string Key { get; set; }
         public string Icon { get; set; }
+        public bool Active { get; set; }
         public virtual ICollection<MenuDto> Children { get; set; }
+
     }
 }
