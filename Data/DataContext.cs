@@ -61,14 +61,16 @@ namespace Data
                 var tableName = entry.Entity.GetType().Name;
                 if (tableName != "Audit" && AuditSingleton.AuditTables.Any(x => x == tableName))
                 {
+                    var creatorUserId = entry.CurrentValues.GetValue<int>("CreatorUserId");
                     var audit = new Audit
                     {
-                        CreatorUserId = entry.CurrentValues.GetValue<int>("CreatorUserId"),
+                        CreatorUserId = creatorUserId,
                         InsertDateTime = DateTime.Now,
                         PrimaryKey = type == AuditType.Add ? 0 : entry.CurrentValues.GetValue<int>("Id"),
                         AuditType = type,
                         EntityInsertDateTime = entry.CurrentValues.GetValue<DateTime>("InsertDateTime"),
                         TableName = tableName,
+                        UserId = creatorUserId,
                         Value = GetValueAsString(entry, type)
                     };
                     if (!string.IsNullOrWhiteSpace(audit.Value))
