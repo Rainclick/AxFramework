@@ -6,6 +6,7 @@ using Common;
 using Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NLog;
@@ -77,6 +78,12 @@ namespace API
                 endpoints.MapControllers();
                 endpoints.MapHub<ChartHub>("/chart");
             });
+
+            //using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
+            //{
+            //    var context = serviceScope.ServiceProvider.GetRequiredService<DataContext>();
+            //    context.Database.Migrate();
+            //}
 
             var configurationVariable = Configuration.GetConnectionString("SqlServer");
             LogManager.Configuration.Variables["ConnectionString"] = configurationVariable;
