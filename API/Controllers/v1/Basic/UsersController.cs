@@ -19,6 +19,7 @@ using Services.Services.Services;
 using UAParser;
 using WebFramework.Api;
 using WebFramework.Filters;
+using WebFramework.UserData;
 
 namespace API.Controllers.v1.Basic
 {
@@ -130,48 +131,11 @@ namespace API.Controllers.v1.Basic
             }, cancellationToken);
 
 
-            var keys = _memoryCache.Get("user" + user.Id);
-            if (keys == null)
-            {
-                await Task.Run(() =>
-                {
-                    var hashSet = new HashSet<string>();
-                    var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == user.Id).Include(x => x.Menu);
-                    foreach (var item in userPermissions)
-                    {
-                        if (!string.IsNullOrWhiteSpace(item.Menu.Key))
-                            hashSet.Add(item.Menu.Key);
-                    }
+            await _memoryCache.GetOrCreateAsync("user" + user.Id, entry =>
+              {
+                  return Task.Run(() => PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, user.Id), cancellationToken);
+              });
 
-                    var userGroups = _userGroupRepository.GetAll(x => x.UserId == user.Id);
-                    foreach (var item in userGroups)
-                    {
-                        var groupPermissions = _permissionRepository.GetAll(x => x.GroupId == item.GroupId && x.Access)
-                            .Include(x => x.Menu);
-                        foreach (var groupPermission in groupPermissions)
-                        {
-                            if (!string.IsNullOrWhiteSpace(groupPermission.Menu.Key))
-                                hashSet.Add(groupPermission.Menu.Key);
-                        }
-                    }
-
-                    var userDenied = _permissionRepository.GetAll(x => x.UserId == user.Id && !x.Access)
-                        .Select(x => x.Menu.Key);
-                    foreach (var item in userDenied)
-                    {
-                        hashSet.Remove(item);
-                    }
-
-                    //var NotShowInTreeKeys = _permissionRepository.GetAll(x => !x.ShowInTree && keys.Contains(x.ParentKey) && !x.Key.Contains("GetList")).ToList().Select(x=>x.Key);
-                    //foreach (var item in NotShowInTreeKeys)
-                    //{
-                    //    keys.Add(item);
-                    //}
-
-                    _memoryCache.Set("user" + user.Id, hashSet);
-
-                }, cancellationToken);
-            }
             return token;
         }
 
@@ -253,7 +217,11 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public ApiResult<List<string>> GetUserPermissions(CancellationToken cancellationToken)
         {
-            var keys = _memoryCache.Get<HashSet<string>>("user" + UserId).ToList();
+            var keys = _memoryCache.GetOrCreate("user" + UserId, entry =>
+            {
+                var data = PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, UserId);
+                return data;
+            }).ToList();
             return keys;
         }
 

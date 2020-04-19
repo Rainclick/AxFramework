@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using WebFramework.Api;
 using WebFramework.Filters;
+using WebFramework.UserData;
 
 namespace API.Controllers.v1.Basic
 {
@@ -56,7 +57,7 @@ namespace API.Controllers.v1.Basic
                 })
             }).ProjectTo<MenuDto>();
 
-            var keys = _memoryCache.GetOrCreate("user" + UserId, GetKeysFromDb);
+            var keys = _memoryCache.GetOrCreate("user" + UserId, entry => PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, UserId));
             if (keys == null)
                 return NotFound();
 
@@ -90,45 +91,6 @@ namespace API.Controllers.v1.Basic
                 x.AxChart.Id
             });
             return Ok(charts);
-        }
-
-
-        private HashSet<string> GetKeysFromDb(ICacheEntry arg)
-        {
-            var hashSet = new HashSet<string>();
-            var userPermissions = _permissionRepository.GetAll(x => x.Access && x.UserId == UserId).Include(x => x.Menu);
-            foreach (var item in userPermissions)
-            {
-                if (!string.IsNullOrWhiteSpace(item.Menu.Key))
-                    hashSet.Add(item.Menu.Key);
-            }
-
-            var userGroups = _userGroupRepository.GetAll(x => x.UserId == UserId);
-            foreach (var item in userGroups)
-            {
-                var groupPermissions = _permissionRepository.GetAll(x => x.GroupId == item.GroupId && x.Access)
-                    .Include(x => x.Menu);
-                foreach (var groupPermission in groupPermissions)
-                {
-                    if (!string.IsNullOrWhiteSpace(groupPermission.Menu.Key))
-                        hashSet.Add(groupPermission.Menu.Key);
-                }
-            }
-
-            var userDenied = _permissionRepository.GetAll(x => x.UserId == UserId && !x.Access)
-                .Select(x => x.Menu.Key);
-            foreach (var item in userDenied)
-            {
-                hashSet.Remove(item);
-            }
-
-            //var NotShowInTreeKeys = _permissionRepository.GetAll(x => !x.ShowInTree && keys.Contains(x.ParentKey) && !x.Key.Contains("GetList")).ToList().Select(x=>x.Key);
-            //foreach (var item in NotShowInTreeKeys)
-            //{
-            //    keys.Add(item);
-            //}
-            return hashSet;
-
         }
     }
 }

@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using Common;
 using Common.Exception;
 using Common.Utilities;
+using Data.Repositories;
+using Entities.Framework;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using WebFramework.UserData;
 
 namespace WebFramework.Filters
 {
@@ -33,15 +35,22 @@ namespace WebFramework.Filters
         {
             var context = filterContext.HttpContext;
             var memoryCache = filterContext.HttpContext.RequestServices.GetRequiredService<IMemoryCache>();
+          
             var userId = context.User.Identity.GetUserId<int>();
             if (StateType == StateType.OnlyToken && userId <= 0)
                 throw new AppException(ApiResultStatusCode.UnAuthenticated, "شما برای دسترسی به منابع مورد نظر احراز هویت نشده اید", HttpStatusCode.Unauthorized);
 
             if (StateType == StateType.Authorized)
             {
-                var keys = memoryCache.Get<HashSet<string>>("user" + userId);
+                var keys = memoryCache.GetOrCreate("user" + userId, entry =>
+                {
+                    var permissionRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IBaseRepository<Permission>>();
+                    var userGroupRepository = filterContext.HttpContext.RequestServices.GetRequiredService<IBaseRepository<UserGroup>>();
+                    var data = PermissionHelper.GetKeysFromDb(permissionRepository, userGroupRepository, userId);
+                    return data;
+                }).ToList();
                 var axKey = AxOp.GetAxKey();
-                var haveAccess = keys != null && keys.Any(x => x.ToLower() == axKey);
+                var haveAccess = keys.Any(x => x.ToLower() == axKey);
 
                 if (!haveAccess)
                 {
