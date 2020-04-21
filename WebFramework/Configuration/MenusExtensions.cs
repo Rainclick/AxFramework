@@ -62,6 +62,7 @@ namespace WebFramework.Configuration
 
                         if (dbMenu == null)
                         {
+                            menu.OrderId = item.AxAuthorizeAttribute.Order;
                             menu.ParentId = parentId;
                             menuRepository.Add(menu);
                         }

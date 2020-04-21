@@ -94,7 +94,8 @@ namespace API.Controllers.v1.Basic
                 MachineName = computerName,
                 Os = info.Device + " " + info.OS,
                 UserName = loginDto.Username,
-                ValidSignIn = user != null
+                ValidSignIn = user != null,
+                InsertDateTime = DateTime.Now
             };
             await _loginlogRepository.AddAsync(loginlog, cancellationToken);
             #endregion
@@ -134,6 +135,8 @@ namespace API.Controllers.v1.Basic
               {
                   return Task.Run(() => PermissionHelper.GetKeysFromDb(_permissionRepository, _userGroupRepository, user.Id), cancellationToken);
               });
+
+            await _userRepository.UpdateLastLoginDateAsync(user, cancellationToken);
 
             return token;
         }

@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200421105902_LineChartTableAdded")]
+    partial class LineChartTableAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -212,8 +214,6 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReportId");
-
                     b.HasIndex("SystemId");
 
                     b.ToTable("AxCharts");
@@ -278,6 +278,9 @@ namespace Data.Migrations
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("LineChartId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ModifiedDateTime")
                         .HasColumnType("datetime2");
 
@@ -301,6 +304,8 @@ namespace Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BarChartId");
+
+                    b.HasIndex("LineChartId");
 
                     b.ToTable("AxSeries");
                 });
@@ -783,38 +788,6 @@ namespace Data.Migrations
                     b.ToTable("Permissions");
                 });
 
-            modelBuilder.Entity("Entities.Framework.Reports.Report", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Reports");
-                });
-
             modelBuilder.Entity("Entities.Framework.User", b =>
                 {
                     b.Property<int>("Id")
@@ -1078,10 +1051,6 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.AxCharts.AxChart", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.Report", "Report")
-                        .WithMany()
-                        .HasForeignKey("ReportId");
-
                     b.HasOne("Entities.Framework.Menu", "System")
                         .WithMany()
                         .HasForeignKey("SystemId");
@@ -1101,6 +1070,10 @@ namespace Data.Migrations
                     b.HasOne("Entities.Framework.AxCharts.BarChart", null)
                         .WithMany("Series")
                         .HasForeignKey("BarChartId");
+
+                    b.HasOne("Entities.Framework.AxCharts.LineChart", null)
+                        .WithMany("Series")
+                        .HasForeignKey("LineChartId");
                 });
 
             modelBuilder.Entity("Entities.Framework.AxCharts.Common.Legend", b =>

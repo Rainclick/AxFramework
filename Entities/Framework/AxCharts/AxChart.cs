@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework.AxCharts.Common;
+using Entities.Framework.Reports;
 
 namespace Entities.Framework.AxCharts
 {
@@ -14,5 +15,7 @@ namespace Entities.Framework.AxCharts
         public int? NextChartId { get; set; }
         public AxChartType? NextChartType { get; set; }
         public AxChartType ChartType { get; set; }
+        [ForeignKey("ReportId")]
+        public Report Report { get; set; }
     }
 }

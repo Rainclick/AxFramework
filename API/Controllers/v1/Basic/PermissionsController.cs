@@ -25,7 +25,7 @@ namespace API.Controllers.v1.Basic
         }
 
         [HttpGet("[action]")]
-        [AxAuthorize(StateType = StateType.Ignore, ShowInMenu = true, AxOp = AxOp.PermissionTree, Order = 0)]
+        [AxAuthorize(StateType = StateType.Authorized, ShowInMenu = true, AxOp = AxOp.PermissionTree, Order = 2)]
         public ApiResult<dynamic> GetTree()
         {
             var permissions = _menuRepository.GetAll(x => x.Active)

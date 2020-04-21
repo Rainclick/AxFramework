@@ -39,12 +39,12 @@ namespace API
         {
             services.Configure<SiteSettings>(Configuration.GetSection(nameof(SiteSettings)));
             services.AddDbContext(Configuration);
-            services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
-            {
-                builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
-            }));
+            //services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
+            //{
+            //    builder.AllowAnyOrigin()
+            //        .AllowAnyMethod()
+            //        .AllowAnyHeader();
+            //}));
             services.AddMvc(options =>
             {
                 options.EnableEndpointRouting = false;
@@ -69,7 +69,7 @@ namespace API
             app.UseHosts(env);
             app.UseHttpsRedirection();
             app.UseAuthentication();
-            app.UseCors("MyPolicy");
+            //app.UseCors("MyPolicy");
             app.UseMvc();
             app.UseSwaggerAndUi();
             app.UseRouting();

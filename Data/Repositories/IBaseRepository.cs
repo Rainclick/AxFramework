@@ -35,10 +35,12 @@ namespace Data.Repositories
         Task UpdateAsync(TEntity entity, CancellationToken cancellationToken, bool saveNow = true);
         void UpdateRange(IEnumerable<TEntity> entities, bool saveNow = true);
         Task UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken, bool saveNow = true);
+        int Count(Expression<Func<TEntity, bool>> predicate);
+        int Count();
         IQueryable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate);
         IQueryable<TEntity> GetAll();
         Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken);
-        TEntity GetFirst(Expression<Func<TEntity, bool>> predicate); 
+        TEntity GetFirst(Expression<Func<TEntity, bool>> predicate);
         int Run(string query, params object[] parameters);
         DbConnection GetDbConnection();
     }

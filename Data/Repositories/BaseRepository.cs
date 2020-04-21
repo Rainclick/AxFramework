@@ -44,6 +44,7 @@ namespace Data.Repositories
         public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken, bool saveNow = true)
         {
             Assert.NotNull(entity, nameof(entity));
+            entity.InsertDateTime = DateTime.Now;
             await Entities.AddAsync(entity, cancellationToken).ConfigureAwait(false);
             if (saveNow)
                 await DbContext.SaveChangesAsync(AuditType.Add, cancellationToken).ConfigureAwait(false);
@@ -59,6 +60,7 @@ namespace Data.Repositories
         public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken, bool saveNow = true)
         {
             Assert.NotNull(entity, nameof(entity));
+            entity.ModifiedDateTime = DateTime.Now;
             AttachEntity(entity);
             Entities.Update(entity);
             if (saveNow)
@@ -70,6 +72,16 @@ namespace Data.Repositories
             Entities.UpdateRange(entities);
             if (saveNow)
                 await DbContext.SaveChangesAsync(AuditType.Update, cancellationToken).ConfigureAwait(false);
+        }
+
+        public int Count(Expression<Func<TEntity, bool>> predicate)
+        {
+            return TableNoTracking.Count(predicate);
+        }
+
+        public int Count()
+        {
+            return TableNoTracking.Count();
         }
 
         public virtual async Task DeleteAsync(TEntity entity, CancellationToken cancellationToken, bool saveNow = true)

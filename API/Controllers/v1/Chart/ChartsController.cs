@@ -9,6 +9,7 @@ using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common.Utilities;
+using Entities.Framework;
 using Entities.Framework.AxCharts.Common;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -24,13 +25,23 @@ namespace API.Controllers.v1.Chart
         private readonly IBaseRepository<PieChart> _pieRepository;
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IBaseRepository<NumericWidget> _numericWidgetRepository;
+        private readonly IBaseRepository<LoginLog> _loginlogRepository;
+        private readonly IBaseRepository<User> _userRepository;
+        private readonly IBaseRepository<LineChart> _lineRepository;
+        private readonly IBaseRepository<Log> _logRepository;
         private IHubContext<ChartHub> _hub;
-        public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numericWidgetRepository, IHubContext<ChartHub> hub)
+        public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository,
+            IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<User> userRepository,
+            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository, IHubContext<ChartHub> hub)
         {
             _repository = repository;
             _pieRepository = pieRepository;
             _barChartRepository = barChartRepository;
             _numericWidgetRepository = numericWidgetRepository;
+            _loginlogRepository = loginlogRepository;
+            _userRepository = userRepository;
+            _lineRepository = lineRepository;
+            _logRepository = logRepository;
             _hub = hub;
         }
 
@@ -38,7 +49,7 @@ namespace API.Controllers.v1.Chart
         [AxAuthorize(StateType = StateType.Ignore)]
         public ApiResult<dynamic> GetChart(int chartId, int? filter = null)
         {
-            var chart = _repository.GetFirst(x => x.Id == chartId);
+            var chart = _repository.GetAll(x => x.Id == chartId).Include(x=> x.Report).FirstOrDefault();
             if (chart.ChartType == AxChartType.Pie)
             {
                 var pieChart = _pieRepository.GetAll(x => x.AxChartId == chartId).Include(x => x.Series).Include(x => x.Labels).ProjectTo<PieChartDto>().FirstOrDefault();
@@ -54,11 +65,58 @@ namespace API.Controllers.v1.Chart
             if (chart.ChartType == AxChartType.NumericWidget)
             {
                 var numericWidget = _numericWidgetRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<NumericWidgetDto>().FirstOrDefault();
-                if (numericWidget != null)
+                if (numericWidget != null && numericWidget.Id == 1)
                 {
-                    numericWidget.Data = 285;
-                    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm");
+                    numericWidget.Data = _userRepository.Count();
+                    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
                     return Ok(numericWidget);
+                }
+                if (numericWidget != null && numericWidget.Id == 2)
+                {
+                    numericWidget.Data = _loginlogRepository.Count(x => x.ValidSignIn == false);
+                    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
+                    return Ok(numericWidget);
+                }
+                if (numericWidget != null && numericWidget.Id == 5)
+                {
+                    numericWidget.Data = _logRepository.Count(x => x.Level == "Error" && x.Logged.Date == DateTime.Now.Date);
+                    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
+                    return Ok(numericWidget);
+                }
+                if (numericWidget != null && numericWidget.Id == 9)
+                {
+                    var lastHour = DateTime.Now.AddHours(-1);
+                    numericWidget.Data = _userRepository.Count(x => x.LastLoginDate.HasValue && x.LastLoginDate.Value >= lastHour);
+                    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
+                    return Ok(numericWidget);
+                }
+            }
+            if (chart.ChartType == AxChartType.Line)
+            {
+                var lineChart = _lineRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<LineChartDto>().FirstOrDefault();
+                if (lineChart != null)
+                {
+                    lineChart.Series = new List<AxSeriesDto>();
+                    for (var i = 0; i < 7; i++)
+                    {
+                        if (i == 0)
+                        {
+                            lineChart.Series.Add(new AxSeriesDto { Name = "شنبه", Id = i });
+                            lineChart.Series[i].Data = new List<object> { 15, 10, 8 };
+                        }
+                        if (i == 1)
+                        {
+                            lineChart.Series.Add(new AxSeriesDto { Name = "یکشنبه", Id = i });
+                            lineChart.Series[i].Data = new List<object> { 12, 8, 5 };
+                        }
+                        if (i == 2)
+                        {
+                            lineChart.Series.Add(new AxSeriesDto { Name = "دوشنبه", Id = i });
+                            lineChart.Series[i].Data = new List<object> { 10, 9 };
+                        }
+                    }
+                    lineChart.Labels = new List<string> { "خطا", "هشدار", "اطلاعات" };
+                    return Ok(lineChart);
                 }
             }
             if (chart.ChartType == AxChartType.Bar)
@@ -78,6 +136,20 @@ namespace API.Controllers.v1.Chart
                     barChart.Labels = new List<string> { "لیبل 1", "لیبل 2", "لیبل 3" };
                     return Ok(barChart);
                 }
+            }
+            if (chart.ChartType == AxChartType.List)
+            {
+                chart.Report.Action = () =>
+                  {
+                      var projectTo = _loginlogRepository.GetAll(x => x.ValidSignIn == false)
+                          .OrderByDescending(x => x.InsertDateTime).Take(10).ProjectTo<LoginLogDto>();
+               
+                      return projectTo;
+                  };
+                var data = chart.Report.Execute<IQueryable<object>>();
+                var columns = typeof(LoginLogDto).GetCustomAttributesOfType();
+                var listChart = new ListChartDto { Id = chartId, Title = chart.Title, NextChartId = chart.NextChartId, NextChartType = chart.NextChartType, Data = data, Columns = columns };
+                return Ok(listChart);
             }
             return Ok(chart);
         }

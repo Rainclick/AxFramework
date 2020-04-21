@@ -21,12 +21,12 @@
 
     public enum AxChartType
     {
-        List,
-        Pie,
-        Line,
-        Bar,
-        Area,
-        NumericWidget
+        List = 0,
+        Pie = 1,
+        Line = 2,
+        Bar = 3,
+        Area = 4,
+        NumericWidget = 5
     }
 
 }
