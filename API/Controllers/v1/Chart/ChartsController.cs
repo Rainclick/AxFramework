@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
+using WebFramework.UserData;
 
 namespace API.Controllers.v1.Chart
 {
@@ -49,8 +50,8 @@ namespace API.Controllers.v1.Chart
         [AxAuthorize(StateType = StateType.Ignore)]
         public ApiResult<dynamic> GetChart(int chartId, int? filter = null)
         {
-            var chart = _repository.GetAll(x => x.Id == chartId).Include(x=> x.Report).FirstOrDefault();
-            if (chart.ChartType == AxChartType.Pie)
+            var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x=> x.Filters).FirstOrDefault();
+            if (chart?.ChartType == AxChartType.Pie)
             {
                 var pieChart = _pieRepository.GetAll(x => x.AxChartId == chartId).Include(x => x.Series).Include(x => x.Labels).ProjectTo<PieChartDto>().FirstOrDefault();
                 if (pieChart != null)
@@ -62,12 +63,13 @@ namespace API.Controllers.v1.Chart
                 return Ok(pieChart);
             }
 
-            if (chart.ChartType == AxChartType.NumericWidget)
+            if (chart?.ChartType == AxChartType.NumericWidget)
             {
                 var numericWidget = _numericWidgetRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<NumericWidgetDto>().FirstOrDefault();
-                if (numericWidget != null && numericWidget.Id == 1)
+                if (numericWidget != null)
                 {
-                    numericWidget.Data = _userRepository.Count();
+                    var data = chart.Report.Execute();
+                    numericWidget.Data = (int)data;
                     numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
                     return Ok(numericWidget);
                 }
@@ -91,7 +93,7 @@ namespace API.Controllers.v1.Chart
                     return Ok(numericWidget);
                 }
             }
-            if (chart.ChartType == AxChartType.Line)
+            if (chart?.ChartType == AxChartType.Line)
             {
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<LineChartDto>().FirstOrDefault();
                 if (lineChart != null)
@@ -119,7 +121,7 @@ namespace API.Controllers.v1.Chart
                     return Ok(lineChart);
                 }
             }
-            if (chart.ChartType == AxChartType.Bar)
+            if (chart?.ChartType == AxChartType.Bar)
             {
                 var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
                 if (barChart != null && barChart.Series?.Count > 0)
@@ -137,17 +139,14 @@ namespace API.Controllers.v1.Chart
                     return Ok(barChart);
                 }
             }
-            if (chart.ChartType == AxChartType.List)
+            if (chart?.ChartType == AxChartType.List)
             {
-                chart.Report.Action = () =>
-                  {
-                      var projectTo = _loginlogRepository.GetAll(x => x.ValidSignIn == false)
-                          .OrderByDescending(x => x.InsertDateTime).Take(10).ProjectTo<LoginLogDto>();
-               
-                      return projectTo;
-                  };
-                var data = chart.Report.Execute<IQueryable<object>>();
-                var columns = typeof(LoginLogDto).GetCustomAttributesOfType();
+                var assembly = typeof(UserDto).Assembly;
+                var resultDtoType = assembly.GetType(chart.Report.ResultTypeName);
+
+                var data0 = chart.Report.Execute();
+                var data = typeof(ReportExtensions).GetMethod("AxProjectTo")?.MakeGenericMethod(resultDtoType).Invoke(null, new object[] { data0 });
+                var columns = resultDtoType.GetCustomAttributesOfType();
                 var listChart = new ListChartDto { Id = chartId, Title = chart.Title, NextChartId = chart.NextChartId, NextChartType = chart.NextChartType, Data = data, Columns = columns };
                 return Ok(listChart);
             }

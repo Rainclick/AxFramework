@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200421144801_AddFilterTODBTable")]
+    partial class AddFilterTODBTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -842,9 +844,6 @@ namespace Data.Migrations
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ExecuteType")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
@@ -854,22 +853,10 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ResultTypeName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
-
-                    b.Property<string>("Sort")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SortType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TakeSize")
-                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
@@ -1251,7 +1238,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.Reports.AxFilter", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.Report", "Report")
+                    b.HasOne("Entities.Framework.Reports.Report", null)
                         .WithMany("Filters")
                         .HasForeignKey("ReportId");
                 });

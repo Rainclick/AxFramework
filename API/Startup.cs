@@ -15,6 +15,7 @@ using WebFramework.Configuration;
 using WebFramework.CustomMapping;
 using WebFramework.Middlewares;
 using WebFramework.Swagger;
+using WebFramework.UserData;
 
 namespace API
 {
@@ -95,6 +96,7 @@ namespace API
             var assembly = Assembly.GetAssembly(typeof(Startup));
             app.UseAutomaticMenus(assembly);
             app.UseSetStaticVariables();
+            AutoFacSingleton.Instance = AutofacContainer;
         }
 
 

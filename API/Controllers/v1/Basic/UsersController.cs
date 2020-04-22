@@ -11,6 +11,7 @@ using Common.Utilities;
 using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
+using Entities.Framework.Reports;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Services;

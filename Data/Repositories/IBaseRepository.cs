@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories
 {
-    public interface IBaseRepository<TEntity> where TEntity : class, IEntity
+    public interface IBaseRepository<TEntity> where TEntity : BaseEntity, IEntity
     {
         DbSet<TEntity> Entities { get; }
         IQueryable<TEntity> Table { get; }

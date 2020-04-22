@@ -76,7 +76,9 @@ namespace Data.Repositories
 
         public int Count(Expression<Func<TEntity, bool>> predicate)
         {
-            return TableNoTracking.Count(predicate);
+            if (predicate != null)
+                return TableNoTracking.Count(predicate);
+            return TableNoTracking.Count();
         }
 
         public int Count()
@@ -120,12 +122,16 @@ namespace Data.Repositories
 
         public Task<TEntity> GetFirstAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken)
         {
-            return TableNoTracking.FirstOrDefaultAsync(predicate, cancellationToken);
+            if (predicate != null)
+                return TableNoTracking.FirstOrDefaultAsync(predicate, cancellationToken);
+            return TableNoTracking.FirstOrDefaultAsync(cancellationToken);
         }
 
         public TEntity GetFirst(Expression<Func<TEntity, bool>> predicate)
         {
-            return TableNoTracking.FirstOrDefault(predicate);
+            if (predicate != null)
+                return TableNoTracking.FirstOrDefault(predicate);
+            return TableNoTracking.FirstOrDefault();
         }
 
         public virtual void Add(TEntity entity, bool saveNow = true)

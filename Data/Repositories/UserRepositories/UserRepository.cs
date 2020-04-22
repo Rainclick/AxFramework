@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 using Common.Exception;
 using Common.Utilities;
 using Entities.Framework;
@@ -38,4 +39,5 @@ namespace Data.Repositories.UserRepositories
             await base.AddAsync(user, cancellationToken);
         }
     }
+
 }

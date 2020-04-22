@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
 using Common.Utilities;
+using Entities.Framework.Reports;
 
 namespace API.Controllers.v1.Basic
 {

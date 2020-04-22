@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using Common;
 using Common.Exception;
 using ExpressionBuilder.Common;
 using ExpressionBuilder.Generics;
 using ExpressionBuilder.Interfaces;
 using ExpressionBuilder.Operations;
 
-namespace Common
+namespace Entities.Framework.Reports
 {
 
     public class DataRequest
@@ -22,13 +23,16 @@ namespace Common
         public int PageIndex { get; set; }
     }
 
-    public class AxFilter
+    public class AxFilter : BaseEntity
     {
         public string Property { get; set; }
         public OperationType Operation { get; set; }
         public string Value1 { get; set; }
         public string Value2 { get; set; }
         public Connector Connector { get; set; }
+        public int? ReportId { get; set; }
+        [ForeignKey("ReportId")]
+        public Report Report { get; set; }
     }
 
     public enum OperationType
