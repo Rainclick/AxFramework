@@ -9,6 +9,7 @@ using ExpressionBuilder.Common;
 using ExpressionBuilder.Generics;
 using ExpressionBuilder.Interfaces;
 using ExpressionBuilder.Operations;
+using Z.Expressions;
 
 namespace Entities.Framework.Reports
 {
@@ -33,6 +34,8 @@ namespace Entities.Framework.Reports
         public int? ReportId { get; set; }
         [ForeignKey("ReportId")]
         public Report Report { get; set; }
+        public bool IsCalculation { get; set; }
+
         //public string Type { get; set; }
     }
 
@@ -98,6 +101,7 @@ namespace Entities.Framework.Reports
                 case OperationType.NotEqualTo:
                     return Operation.NotEqualTo;
                 case OperationType.StartsWith:
+                    return Operation.StartsWith;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
@@ -116,6 +120,15 @@ namespace Entities.Framework.Reports
                         throw new AppException(ApiResultStatusCode.BadRequest, $"{requestFilter.Property} not found in {entityType.Name}");
 
                     var type = Nullable.GetUnderlyingType(property.GetType()) ?? property.PropertyType;
+
+                    if (requestFilter.IsCalculation)
+                    {
+                        if (!string.IsNullOrWhiteSpace(requestFilter.Value1))
+                            requestFilter.Value1 = Eval.Execute<string>(requestFilter.Value1);
+                        if (!string.IsNullOrWhiteSpace(requestFilter.Value2))
+                            requestFilter.Value2 = Eval.Execute<string>(requestFilter.Value2);
+                    }
+
                     var typeConverter = TypeDescriptor.GetConverter(type);
                     var value1 = typeConverter.ConvertFromString(requestFilter.Value1);
                     object value2 = null;
