@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autofac;
 using AutoMapper.QueryableExtensions;
@@ -18,8 +19,8 @@ namespace WebFramework.UserData
             object data;
             Filter<T> predicate = null;
             if (report.Filters != null && report.Filters.Any())
-            {         
-                var request = new DataRequest();
+            {
+                var request = new DataRequest { Filters = new List<AxFilter>() };
                 request.Filters.AddRange(report.Filters);
                 predicate = request.GetFilter<T>();
             }

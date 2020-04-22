@@ -33,6 +33,7 @@ namespace Entities.Framework.Reports
         public int? ReportId { get; set; }
         [ForeignKey("ReportId")]
         public Report Report { get; set; }
+        //public string Type { get; set; }
     }
 
     public enum OperationType
@@ -120,8 +121,27 @@ namespace Entities.Framework.Reports
                     object value2 = null;
                     if (!string.IsNullOrWhiteSpace(requestFilter.Value2))
                         value2 = typeConverter.ConvertFromString(requestFilter.Value2);
-
                     predicate.By(requestFilter.Property, requestFilter.Operation.GetOperation(), value1, value2, requestFilter.Connector);
+
+
+                    //if (requestFilter.Type == "Decimal")
+                    //{
+                    //    Decimal fieldValue = Convert.ToDecimal(requestFilter.Value1);
+                    //    predicate.By(requestFilter.Property, Operation.ByName(requestFilter.Value1), fieldValue, default(Decimal), requestFilter.Connector);
+                    //} else if (criteria.Type == "DateTime")
+                    //{
+                    //    DateTimeOffset fieldValue = new DateTimeOffset(DateTime.Parse(criteria.FieldValue.ToString()));
+                    //    predicate.By(item, Operation.ByName(criteria.OperationName), fieldValue, default(DateTimeOffset?), criteria.Connector);
+                    //} else if (criteria.Type == "Int16")
+                    //{
+                    //    Int16 fieldValue = Convert.ToInt16(criteria.FieldValue);
+                    //    predicate.By(item, Operation.ByName(criteria.OperationName), fieldValue, default(Int16), criteria.Connector);
+                    //}
+                    //else
+                    //{
+                    //    // String
+                    //    predicate.By(item, Operation.ByName(criteria.OperationName), criteria.FieldValue, null, criteria.Connector);
+                    //}
                 }
                 return predicate;
             }
@@ -133,5 +153,6 @@ namespace Entities.Framework.Reports
         {
             return enumerable.Count() > 3;
         }
+
     }
 }

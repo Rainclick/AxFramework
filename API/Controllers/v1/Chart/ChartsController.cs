@@ -73,12 +73,6 @@ namespace API.Controllers.v1.Chart
                     numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
                     return Ok(numericWidget);
                 }
-                if (numericWidget != null && numericWidget.Id == 2)
-                {
-                    numericWidget.Data = _loginlogRepository.Count(x => x.ValidSignIn == false);
-                    numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
-                    return Ok(numericWidget);
-                }
                 if (numericWidget != null && numericWidget.Id == 5)
                 {
                     numericWidget.Data = _logRepository.Count(x => x.Level == "Error" && x.Logged.Date == DateTime.Now.Date);
