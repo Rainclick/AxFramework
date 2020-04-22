@@ -28,7 +28,7 @@ namespace WebFramework.Configuration
             {
                 options.UseSqlServer(configuration.GetConnectionString("SqlServer"))
                     .ConfigureWarnings(warning => warning.Throw(RelationalEventId.QueryClientEvaluationWarning));
-            });
+            }, ServiceLifetime.Scoped);
         }
 
         //public static void AddMinimalMvc(this IServiceCollection services)
