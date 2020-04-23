@@ -50,7 +50,7 @@ namespace API.Controllers.v1.Chart
         [AxAuthorize(StateType = StateType.Ignore)]
         public ApiResult<dynamic> GetChart(int chartId, int? filter = null)
         {
-            var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x=> x.Filters).FirstOrDefault();
+            var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
             if (chart?.ChartType == AxChartType.Pie)
             {
                 var pieChart = _pieRepository.GetAll(x => x.AxChartId == chartId).Include(x => x.Series).Include(x => x.Labels).ProjectTo<PieChartDto>().FirstOrDefault();
@@ -84,21 +84,21 @@ namespace API.Controllers.v1.Chart
                     {
                         if (i == 0)
                         {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "شنبه", Id = i });
+                            lineChart.Series.Add(new AxSeriesDto { Name = "خطا", Id = i });
                             lineChart.Series[i].Data = new List<object> { 15, 10, 8 };
                         }
                         if (i == 1)
                         {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "یکشنبه", Id = i });
+                            lineChart.Series.Add(new AxSeriesDto { Name = "هشدار", Id = i });
                             lineChart.Series[i].Data = new List<object> { 12, 8, 5 };
                         }
                         if (i == 2)
                         {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "دوشنبه", Id = i });
-                            lineChart.Series[i].Data = new List<object> { 10, 9 };
+                            lineChart.Series.Add(new AxSeriesDto { Name = "اطلاعات", Id = i });
+                            lineChart.Series[i].Data = new List<object> { 10, 9, 0 };
                         }
                     }
-                    lineChart.Labels = new List<string> { "خطا", "هشدار", "اطلاعات" };
+                    lineChart.Labels = new List<string> { "شنبه", "یکشنبه", "دوشنبه" };
                     return Ok(lineChart);
                 }
             }
@@ -107,16 +107,26 @@ namespace API.Controllers.v1.Chart
                 var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
                 if (barChart != null && barChart.Series?.Count > 0)
                 {
-                    for (var i = 0; i < barChart.Series.Count; i++)
-                    {
-                        if (i == 0)
-                            barChart.Series[i].Data = new List<object> { 15, 10, 8 };
-                        if (i == 1)
-                            barChart.Series[i].Data = new List<object> { 12, 8, 5 };
-                        if (i == 2)
-                            barChart.Series[i].Data = new List<object> { 16, 9 };
-                    }
-                    barChart.Labels = new List<string> { "لیبل 1", "لیبل 2", "لیبل 3" };
+                    var date = DateTime.Now.AddDays(-7);
+                    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).GroupBy(x => x.InsertDateTime.Date).Select(x => new { Count = x.Count() as object, x.Key }).ToList();
+                    //var data = chart.Report.Execute();
+                    var a = data0.Select(x => x.Count).ToList();
+                    barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
+                    //foreach (var item in data0)
+                    //{
+
+                    //}
+                    //for (var i = 0; i < barChart.Series.Count; i++)
+                    //{
+
+                    //    if (i == 0)
+                    //        barChart.Series[i].Data = new List<object> { 15, 10, 8 };
+                    //    if (i == 1)
+                    //        barChart.Series[i].Data = new List<object> { 12, 8, 5 };
+                    //    if (i == 2)
+                    //        barChart.Series[i].Data = new List<object> { 16, 9 };
+                    //}
+                    barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
                     return Ok(barChart);
                 }
             }
@@ -124,11 +134,14 @@ namespace API.Controllers.v1.Chart
             {
                 var assembly = typeof(UserDto).Assembly;
                 var resultDtoType = assembly.GetType(chart.Report.ResultTypeName);
-
-                var data0 = chart.Report.Execute();
-                var data = typeof(ReportExtensions).GetMethod("AxProjectTo")?.MakeGenericMethod(resultDtoType).Invoke(null, new object[] { data0 });
+                var scope = AutoFacSingleton.Instance.BeginLifetimeScope();
+                var data0 = chart.Report.Execute(scope);
+                var data = typeof(ReportExtensions).GetMethod("AxProjectTo")?.MakeGenericMethod(resultDtoType).Invoke(null, new[] { data0 });
+                if (data is IQueryable<dynamic> data2)
+                    data = data2.ToList();
                 var columns = resultDtoType.GetCustomAttributesOfType();
                 var listChart = new ListChartDto { Id = chartId, Title = chart.Title, NextChartId = chart.NextChartId, NextChartType = chart.NextChartType, Data = data, Columns = columns };
+                scope.Dispose();
                 return Ok(listChart);
             }
             return Ok(chart);

@@ -13,43 +13,43 @@ namespace WebFramework.UserData
 {
     public static class ReportExtensions
     {
-        public static object Execute0<T>(this Report report) where T : BaseEntity
+        public static object Execute0<T>(this Report report, ILifetimeScope scope = null) where T : BaseEntity
         {
             object data;
-            using (var threadLifetime = AutoFacSingleton.Instance.BeginLifetimeScope())
-            {
-                var repository = threadLifetime.Resolve<IBaseRepository<T>>();
-                Filter<T> predicate = null;
-                if (report.Filters != null && report.Filters.Any())
-                {
-                    var request = new DataRequest { Filters = new List<AxFilter>() };
-                    request.Filters.AddRange(report.Filters);
-                    predicate = request.GetFilter<T>();
-                }
+            if (scope == null)
+                scope = AutoFacSingleton.Instance.BeginLifetimeScope();
 
-                switch (report.ExecuteType)
-                {
-                    case ReportType.All:
-                        data = !string.IsNullOrWhiteSpace(report.Sort) ? repository.GetAll(predicate).OrderBy(report.Sort, report.SortType).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue) : repository.GetAll(predicate).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue);
-                        break;
-                    case ReportType.First:
-                        data = !string.IsNullOrWhiteSpace(report.Sort) ? repository.GetAll(predicate).OrderBy(report.Sort, report.SortType).Take(1) : repository.GetAll(predicate).Take(1);
-                        break;
-                    case ReportType.Count:
-                        data = repository.Count(predicate);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"report '{report.Title}' executeType is not valid");
-                }
+            var repository = scope.Resolve<IBaseRepository<T>>();
+            Filter<T> predicate = null;
+            if (report.Filters != null && report.Filters.Any())
+            {
+                var request = new DataRequest { Filters = new List<AxFilter>() };
+                request.Filters.AddRange(report.Filters);
+                predicate = request.GetFilter<T>();
+            }
+
+            switch (report.ExecuteType)
+            {
+                case ReportType.All:
+                    data = !string.IsNullOrWhiteSpace(report.Sort) ? repository.GetAll(predicate).OrderBy(report.Sort, report.SortType).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue) : repository.GetAll(predicate).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue);
+                    break;
+                case ReportType.First:
+                    data = !string.IsNullOrWhiteSpace(report.Sort) ? repository.GetAll(predicate).OrderBy(report.Sort, report.SortType).Take(1) : repository.GetAll(predicate).Take(1);
+                    break;
+                case ReportType.Count:
+                    data = repository.Count(predicate);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException($"report '{report.Title}' executeType is not valid");
             }
             return data;
         }
 
-        public static object Execute(this Report report)
+        public static object Execute(this Report report, ILifetimeScope scope = null)
         {
             var assembly = typeof(BaseEntity).Assembly;
             var type = assembly.GetType(report.TypeName);
-            var data = typeof(ReportExtensions).GetMethod("Execute0")?.MakeGenericMethod(type).Invoke(null, new object[] { report });
+            var data = typeof(ReportExtensions).GetMethod("Execute0")?.MakeGenericMethod(type).Invoke(null, new object[] { report, scope });
             return data;
         }
 
