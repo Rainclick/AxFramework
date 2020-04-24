@@ -49,8 +49,11 @@ namespace WebFramework.Middlewares
             }
             catch (AppException exception)
             {
-                _logger.LogError(exception, exception.Message);
                 httpStatusCode = exception.HttpStatusCode;
+                if (httpStatusCode == HttpStatusCode.Unauthorized)
+                    _logger.LogWarning(exception, exception.Message);
+                else
+                    _logger.LogError(exception, exception.Message);
                 apiStatusCode = exception.ApiStatusCode;
 
                 if (_env.IsDevelopment())
@@ -90,6 +93,8 @@ namespace WebFramework.Middlewares
             }
             catch (Exception exception)
             {
+                if (exception.ToString().Contains("A task was canceled."))
+                    return;
                 _logger.LogError(exception, exception.Message);
 
                 if (_env.IsDevelopment())

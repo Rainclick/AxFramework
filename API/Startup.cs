@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using NLog;
 using Services.Services;
 using WebFramework.Configuration;
@@ -48,7 +49,8 @@ namespace API
             services.AddMvc(options =>
             {
                 options.EnableEndpointRouting = false;
-            }).AddNewtonsoftJson();
+            }).AddNewtonsoftJson(options => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
+
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
             services.AddHostedService<TimedHostedService>();

@@ -28,7 +28,7 @@ namespace WebFramework.Swagger
                 options.IncludeXmlComments(xmlDocPath, true);
 
                 options.EnableAnnotations();
-                options.DescribeAllEnumsAsStrings();
+                options?.DescribeAllEnumsAsStrings();
                 //options.DescribeAllParametersInCamelCase();
                 //options.DescribeStringEnumsInCamelCase()
                 //options.UseReferencedDefinitionsForEnums()

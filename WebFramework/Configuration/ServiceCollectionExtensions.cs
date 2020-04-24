@@ -118,7 +118,7 @@ namespace WebFramework.Configuration
                             .FirstOrDefaultAsync(context.HttpContext.RequestAborted);
 
                         if (userToken == null)
-                            throw new AppException("عدم احراز هویت");
+                            throw new AppException(ApiResultStatusCode.UnAuthenticated, "عدم احراز هویت", HttpStatusCode.Unauthorized);
 
                         if (!userToken.User.IsActive)
                             context.Fail("کاربری شما غیرفعال شده است");

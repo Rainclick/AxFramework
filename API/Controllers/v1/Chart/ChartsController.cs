@@ -139,7 +139,7 @@ namespace API.Controllers.v1.Chart
                 var data = typeof(ReportExtensions).GetMethod("AxProjectTo")?.MakeGenericMethod(resultDtoType).Invoke(null, new[] { data0 });
                 if (data is IQueryable<dynamic> data2)
                     data = data2.ToList();
-                var columns = resultDtoType.GetCustomAttributesOfType();
+                var columns = resultDtoType.GetCustomAttributesOfType(new List<string> { "Id" });
                 var listChart = new ListChartDto { Id = chartId, Title = chart.Title, NextChartId = chart.NextChartId, NextChartType = chart.NextChartType, Data = data, Columns = columns };
                 scope.Dispose();
                 return Ok(listChart);
