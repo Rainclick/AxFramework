@@ -31,7 +31,15 @@ namespace WebFramework.UserData
             switch (report.ExecuteType)
             {
                 case ReportType.All:
-                    data = !string.IsNullOrWhiteSpace(report.Sort) ? repository.GetAll(predicate).OrderBy(report.Sort, report.SortType).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue) : repository.GetAll(predicate).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue);
+                    {
+                        data = !string.IsNullOrWhiteSpace(report.Sort) ? repository.GetAll(predicate).OrderBy(report.Sort, report.SortType).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue) : repository.GetAll(predicate).Take(report.TakeSize > 0 ? report.TakeSize : int.MaxValue);
+                        if (!string.IsNullOrWhiteSpace(report.GroupBy) && data is IQueryable<T> queryable)
+                        {
+                            var lambda = GroupByUtility.GroupByExpression<T>(new[] { report.GroupBy });
+                            var func = lambda.Compile();
+                            data = queryable.AsEnumerable().GroupBy(func);
+                        }
+                    }
                     break;
                 case ReportType.First:
                     data = !string.IsNullOrWhiteSpace(report.Sort) ? repository.GetAll(predicate).OrderBy(report.Sort, report.SortType).Take(1) : repository.GetAll(predicate).Take(1);
@@ -53,10 +61,14 @@ namespace WebFramework.UserData
             return data;
         }
 
-        public static IQueryable<T> AxProjectTo<T>(this IQueryable queryable)
+        public static object AxProjectTo<T>(this object data)
         {
-            return queryable.ProjectTo<T>();
+            if (data is IQueryable queryable)
+                return queryable.ProjectTo<T>();
+
+            return data;
         }
+
 
     }
 }

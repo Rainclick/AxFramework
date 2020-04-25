@@ -5,7 +5,7 @@ using WebFramework.CustomMapping;
 
 namespace WebFramework.Api
 {
-    public abstract class BaseDto<TDto, TEntity, TKey> : IHaveCustomMapping where TDto : class, new() where TEntity : BaseEntity<TKey>, new()
+    public abstract class BaseDto<TDto, TEntity, TKey> : IHaveCustomMapping where TDto : class, new() where TEntity : class
     {
         [Display(Name = "شناسه")]
         public TKey Id { get; set; }

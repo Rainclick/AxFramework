@@ -18,6 +18,7 @@ namespace Entities.Framework.Reports
         public string Sort { get; set; }
         public SortType SortType { get; set; }
         public ReportType ExecuteType { get; set; }
+        public string GroupBy { get; set; }
     }
 
     public class Column

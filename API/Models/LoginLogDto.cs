@@ -1,7 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using AutoMapper;
 using Common.Utilities;
 using Entities.Framework;
+using Microsoft.VisualBasic.CompilerServices;
 using WebFramework.Api;
 
 namespace API.Models
@@ -49,5 +52,4 @@ namespace API.Models
             mapping.ForMember(dest => dest.Id, config => config.Ignore());
         }
     }
-
 }
