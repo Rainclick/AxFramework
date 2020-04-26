@@ -8,6 +8,6 @@ namespace API.Models
     public class AxSeriesDto : BaseDto<AxSeriesDto, AxSeries, int>
     {
         public string Name { get; set; }
-        public ICollection<object> Data { get; set; }
+        public object Data { get; set; }
     }
 }

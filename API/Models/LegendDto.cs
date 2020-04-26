@@ -6,6 +6,7 @@ namespace API.Models
     public class LegendDto : BaseDto<LegendDto, Legend, int>
     {
         public string Name { get; set; }
-        public int? ParentId { get; set; }
+        public string ParentId { get; set; }
+        public string Tag { get; set; }
     }
 }

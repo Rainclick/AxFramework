@@ -40,7 +40,7 @@ namespace API.Models
         [Display(Name = "آی پی")]
         public string Ip { get; set; }
 
-        [Display(Name = "زمان")]
+        [Display(Name = "زمان", Description = "DateTime")]
         public string DateTime { get; set; }
 
         public override void CustomMappings(IMappingExpression<LoginLog, LoginLogChartDto> mapping)

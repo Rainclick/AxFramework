@@ -9,5 +9,6 @@ namespace API.Models
         public string Icon { get; set; }
         public string LastUpdated { get; set; }
         public long Data { get; set; }
+        public string Color { get; set; }
     }
 }

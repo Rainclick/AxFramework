@@ -8,14 +8,15 @@ namespace Common.Utilities
 {
     public static class AttributeExtensions
     {
-        public static Dictionary<string, string> GetCustomAttributesOfType(this Type type, List<string> ignoreList, bool ignoreOnlyGetter = false)
+        public static List<Column> GetCustomAttributesOfType(this Type type, List<string> ignoreList, bool ignoreOnlyGetter = false)
         {
-            var dict = new Dictionary<string, string>();
+            var columns = new List<Column>();
 
             var props = type.GetProperties();
             foreach (var prop in props)
             {
                 var propName = prop.Name.ToLowerFirstChar();
+                var propType = prop.PropertyType.Name;
                 if (ignoreOnlyGetter)
                 {
                     var setter = prop.GetSetMethod(true);
@@ -35,11 +36,21 @@ namespace Common.Utilities
                 if (attr != null)
                 {
                     var name = attr.Name;
-                    dict.Add(propName, name);
+                    var attrType= attr.Description;
+                    if (!string.IsNullOrWhiteSpace(attrType))
+                        propType = attrType;
+                    columns.Add(new Column { Name = propName, Type = propType, Title = name });
                 }
             }
 
-            return dict;
+            return columns;
         }
+    }
+
+    public class Column
+    {
+        public string Name { get; set; }
+        public string Title { get; set; }
+        public string Type { get; set; }
     }
 }

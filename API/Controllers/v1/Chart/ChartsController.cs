@@ -48,17 +48,27 @@ namespace API.Controllers.v1.Chart
 
         [HttpGet("[action]/{chartId}/{filter?}")]
         [AxAuthorize(StateType = StateType.Ignore)]
-        public ApiResult<dynamic> GetChart(int chartId, int? filter = null)
+        public ApiResult<dynamic> GetChart(int chartId, string filter = null)
         {
             var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
             if (chart?.ChartType == AxChartType.Pie)
             {
-                var pieChart = _pieRepository.GetAll(x => x.AxChartId == chartId).Include(x => x.Series).Include(x => x.Labels).ProjectTo<PieChartDto>().FirstOrDefault();
+                var pieChart = _pieRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<PieChartDto>().FirstOrDefault();
                 if (pieChart != null)
                 {
-                    pieChart.Series.Data = GetChartData(chart.ReportId, filter); //where filter
-                    if (filter != null)
-                        pieChart.Labels = pieChart.Labels.Where(x => x.ParentId == filter).ToList();
+                    if (string.IsNullOrWhiteSpace(filter))
+                    {
+                        var data = _loginlogRepository.GetAll().GroupBy(x => x.Browser)
+                            .Select(x => new { x.Key, Count = x.Count() }).ToList();
+                        pieChart.Series.Data = data.Select(x => x.Count);
+                        pieChart.Labels = data.Select(x => new LegendDto { Name = x.Key, Tag = x.Key }).ToList();
+                    }
+                    else
+                    {
+                        var data = _loginlogRepository.GetAll(x => x.Browser == filter).GroupBy(x => x.BrowserVersion).Select(x => new { x.Key, Count = x.Count() }).ToList();
+                        pieChart.Series.Data = data.Select(x => x.Count);
+                        pieChart.Labels = data.Select(x => new LegendDto { Name = x.Key }).ToList();
+                    }
                 }
                 return Ok(pieChart);
             }
@@ -77,6 +87,13 @@ namespace API.Controllers.v1.Chart
             if (chart?.ChartType == AxChartType.Line)
             {
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<LineChartDto>().FirstOrDefault();
+                var data = _logRepository.GetAll().OrderBy(x => x.Logged).ToList().GroupBy(x => x.Logged.Date).Select(x => new
+                {
+                    ErrorCount = x.Count(c => c.Level == "Error"),
+                    InfoCount = x.Count(c => c.Level == "Info"),
+                    WarnCount = x.Count(c => c.Level == "Warn"),
+                    x.Key
+                }).ToList();
                 if (lineChart != null)
                 {
                     lineChart.Series = new List<AxSeriesDto>();
@@ -85,20 +102,20 @@ namespace API.Controllers.v1.Chart
                         if (i == 0)
                         {
                             lineChart.Series.Add(new AxSeriesDto { Name = "خطا", Id = i });
-                            lineChart.Series[i].Data = new List<object> { 15, 10, 8 };
-                        }
-                        if (i == 1)
-                        {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "هشدار", Id = i });
-                            lineChart.Series[i].Data = new List<object> { 12, 8, 5 };
+                            lineChart.Series[i].Data = data.Select(c => c.ErrorCount);
                         }
                         if (i == 2)
                         {
+                            lineChart.Series.Add(new AxSeriesDto { Name = "هشدار", Id = i });
+                            lineChart.Series[i].Data = data.Select(c => c.WarnCount);
+                        }
+                        if (i == 1)
+                        {
                             lineChart.Series.Add(new AxSeriesDto { Name = "اطلاعات", Id = i });
-                            lineChart.Series[i].Data = new List<object> { 10, 9, 0 };
+                            lineChart.Series[i].Data = data.Select(c => c.InfoCount);
                         }
                     }
-                    lineChart.Labels = new List<string> { "شنبه", "یکشنبه", "دوشنبه" };
+                    lineChart.Labels = data.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
                     return Ok(lineChart);
                 }
             }
@@ -107,11 +124,13 @@ namespace API.Controllers.v1.Chart
                 var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
                 if (barChart != null && barChart.Series?.Count > 0)
                 {
-                    var date = DateTime.Now.AddDays(-7);
-                    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).GroupBy(x => x.InsertDateTime.Date).Select(x => new { Count = x.Count() as object, x.Key }).ToList();
+                    var date = DateTime.Now.AddDays(-15);
+                    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList().GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) });
                     //var data = chart.Report.Execute();
                     var a = data0.Select(x => x.Count).ToList();
+                    var b = data0.Select(x => x.UnScuccessCount).ToList();
                     barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
+                    barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
                     //foreach (var item in data0)
                     //{
 
@@ -147,20 +166,20 @@ namespace API.Controllers.v1.Chart
             return Ok(chart);
         }
 
-        private List<object> GetChartData(int? reportId, int? filter)
+        private List<int> GetChartData(int? reportId, int? filter)
         {
             if (reportId == 1)
             {
-                return new List<object> { 25, 65, 10 };
+                return new List<int> { 25, 65, 10 };
             }
             if (reportId == 2)
             {
                 if (filter == 2)
-                    return new List<object> { 15, 10 };
+                    return new List<int> { 15, 10 };
                 if (filter == 3)
-                    return new List<object> { 65 };
+                    return new List<int> { 65 };
                 if (filter == 7)
-                    return new List<object> { 7, 3 };
+                    return new List<int> { 7, 3 };
             }
             return null;
         }

@@ -8,7 +8,7 @@ namespace API.Models
 {
     public class PieChartDto : BaseDto<PieChartDto, PieChart, int>
     {
-        public virtual ICollection<LegendDto> Labels { get; set; }
+        public virtual List<LegendDto> Labels { get; set; }
         public virtual AxSeriesDto Series { get; set; }
         public string Title { get; set; }
         public int? NextChartId { get; set; }
