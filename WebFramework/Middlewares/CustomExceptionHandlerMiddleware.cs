@@ -11,8 +11,10 @@ using Common.Exception;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using NLog;
+using NLog.Web;
 using WebFramework.Api;
+using LogLevel = NLog.LogLevel;
 
 namespace WebFramework.Middlewares
 {
@@ -28,20 +30,21 @@ namespace WebFramework.Middlewares
     {
         private readonly RequestDelegate _next;
         private readonly IWebHostEnvironment _env;
-        private readonly ILogger<CustomExceptionHandlerMiddleware> _logger;
+        private readonly Logger _logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
 
-        public CustomExceptionHandlerMiddleware(RequestDelegate next, IWebHostEnvironment env, ILogger<CustomExceptionHandlerMiddleware> logger)
+        public CustomExceptionHandlerMiddleware(RequestDelegate next, IWebHostEnvironment env)
         {
             _next = next;
             _env = env;
-            _logger = logger;
         }
 
         public async Task Invoke(HttpContext context)
         {
             string message = null;
-            HttpStatusCode httpStatusCode = HttpStatusCode.InternalServerError;
-            ApiResultStatusCode apiStatusCode = ApiResultStatusCode.ServerError;
+            var httpStatusCode = HttpStatusCode.InternalServerError;
+            var apiStatusCode = ApiResultStatusCode.ServerError;
+            var theEvent = new LogEventInfo(LogLevel.Error, "Exception Handler", "");
+            theEvent.Properties["LogType"] = apiStatusCode.ToString();
 
             try
             {
@@ -50,11 +53,12 @@ namespace WebFramework.Middlewares
             catch (AppException exception)
             {
                 httpStatusCode = exception.HttpStatusCode;
-                if (httpStatusCode == HttpStatusCode.Unauthorized)
-                    _logger.LogWarning(exception, exception.Message);
-                else
-                    _logger.LogError(exception, exception.Message);
                 apiStatusCode = exception.ApiStatusCode;
+                theEvent.Message = exception.Message;
+                theEvent.Exception = exception;
+                theEvent.Properties["LogType"] = apiStatusCode.ToString();
+                theEvent.Level = httpStatusCode == HttpStatusCode.Unauthorized ? LogLevel.Warn : LogLevel.Error;
+                _logger.Log(theEvent);
 
                 if (_env.IsDevelopment())
                 {
@@ -81,22 +85,28 @@ namespace WebFramework.Middlewares
             }
             catch (SecurityTokenExpiredException exception)
             {
-                _logger.LogError(exception, exception.Message);
+                theEvent.Message = exception.Message;
+                theEvent.Exception = exception;
+                _logger.Error(theEvent);
                 SetUnAuthorizeResponse(exception);
                 await WriteToResponseAsync();
             }
             catch (UnauthorizedAccessException exception)
             {
-                _logger.LogError(exception, exception.Message);
+                theEvent.Message = exception.Message;
+                theEvent.Exception = exception;
+                _logger.Error(theEvent);
                 SetUnAuthorizeResponse(exception);
                 await WriteToResponseAsync();
             }
             catch (Exception exception)
             {
-                if (exception.ToString().Contains("A task was canceled."))
-                    return;
-                _logger.LogError(exception, exception.Message);
-
+                theEvent.Message = exception.Message;
+                theEvent.Exception = exception;
+                if (!exception.ToString().Contains("A task was canceled."))
+                    _logger.Error(theEvent);
+                else
+                    _logger.Info(theEvent);
                 if (_env.IsDevelopment())
                 {
                     var dic = new Dictionary<string, string>
@@ -106,7 +116,9 @@ namespace WebFramework.Middlewares
                     };
                     message = JsonConvert.SerializeObject(dic);
                 }
+
                 await WriteToResponseAsync();
+
             }
 
             async Task WriteToResponseAsync()

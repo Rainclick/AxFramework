@@ -5,6 +5,8 @@ using Data.Repositories;
 using Entities.Framework.AxCharts;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
@@ -92,10 +94,15 @@ namespace API.Controllers.v1.Chart
                     ErrorCount = x.Count(c => c.Level == "Error"),
                     InfoCount = x.Count(c => c.Level == "Info"),
                     WarnCount = x.Count(c => c.Level == "Warn"),
+                    FatalCount = x.Count(c => c.Level == "Fatal"),
                     x.Key
                 }).ToList();
                 if (lineChart != null)
                 {
+                    var s = new CancellationTokenSource();
+                    var token = s.Token;
+                    var t = Task.Run(() => { Thread.Sleep(50000); }, token);
+                    s.Cancel(true);
                     lineChart.Series = new List<AxSeriesDto>();
                     for (var i = 0; i < 7; i++)
                     {
@@ -113,6 +120,11 @@ namespace API.Controllers.v1.Chart
                         {
                             lineChart.Series.Add(new AxSeriesDto { Name = "اطلاعات", Id = i });
                             lineChart.Series[i].Data = data.Select(c => c.InfoCount);
+                        }
+                        if (i == 3)
+                        {
+                            lineChart.Series.Add(new AxSeriesDto { Name = "بحرانی", Id = i });
+                            lineChart.Series[i].Data = data.Select(c => c.FatalCount);
                         }
                     }
                     lineChart.Labels = data.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();

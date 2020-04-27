@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Configuration;
 using System.IO;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Web;
 
 namespace API
@@ -15,7 +17,7 @@ namespace API
             var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             try
             {
-                logger.Debug("init main");
+                // logger.Debug("init main");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
