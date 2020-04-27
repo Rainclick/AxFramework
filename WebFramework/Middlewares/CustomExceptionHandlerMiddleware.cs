@@ -58,8 +58,10 @@ namespace WebFramework.Middlewares
                 theEvent.Exception = exception;
                 theEvent.Properties["LogType"] = apiStatusCode.ToString();
                 theEvent.Level = httpStatusCode == HttpStatusCode.Unauthorized ? LogLevel.Warn : LogLevel.Error;
-                _logger.Log(theEvent);
+                if (exception.ToString().Contains("A task was canceled."))
+                    theEvent.Level = LogLevel.Info;
 
+                _logger.Log(theEvent);
                 if (_env.IsDevelopment())
                 {
                     var dic = new Dictionary<string, string>
