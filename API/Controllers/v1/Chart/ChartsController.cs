@@ -60,14 +60,14 @@ namespace API.Controllers.v1.Chart
                 {
                     if (string.IsNullOrWhiteSpace(filter))
                     {
-                        var data = _loginlogRepository.GetAll().GroupBy(x => x.Browser)
+                        var data = _loginlogRepository.GetAll(x => x.InsertDateTime.Date == DateTime.Now.Date).GroupBy(x => x.Browser)
                             .Select(x => new { x.Key, Count = x.Count() }).ToList();
                         pieChart.Series.Data = data.Select(x => x.Count);
                         pieChart.Labels = data.Select(x => new LegendDto { Name = x.Key, Tag = x.Key }).ToList();
                     }
                     else
                     {
-                        var data = _loginlogRepository.GetAll(x => x.Browser == filter).GroupBy(x => x.BrowserVersion).Select(x => new { x.Key, Count = x.Count() }).ToList();
+                        var data = _loginlogRepository.GetAll(x => x.InsertDateTime.Date == DateTime.Now.Date && x.Browser == filter).GroupBy(x => x.BrowserVersion).Select(x => new { x.Key, Count = x.Count() }).ToList();
                         pieChart.Series.Data = data.Select(x => x.Count);
                         pieChart.Labels = data.Select(x => new LegendDto { Name = x.Key }).ToList();
                     }
