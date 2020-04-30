@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Data.Migrations
 {
-    public partial class InitMigration : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -133,6 +133,26 @@ namespace Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "NewReports",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    TypeName = table.Column<string>(nullable: true),
+                    TakeSize = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NewReports", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RS",
                 columns: table => new
                 {
@@ -180,6 +200,90 @@ namespace Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ColumnReports",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    FieldId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: true),
+                    ReportId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ColumnReports", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ColumnReports_NewReports_ReportId",
+                        column: x => x.ReportId,
+                        principalTable: "NewReports",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Filters",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Property = table.Column<string>(nullable: true),
+                    Operation = table.Column<int>(nullable: false),
+                    Value1 = table.Column<string>(nullable: true),
+                    Value2 = table.Column<string>(nullable: true),
+                    Connector = table.Column<int>(nullable: false),
+                    ReportId = table.Column<int>(nullable: true),
+                    IsCalculation = table.Column<bool>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Filters", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Filters_NewReports_ReportId",
+                        column: x => x.ReportId,
+                        principalTable: "NewReports",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderByReports",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InsertDateTime = table.Column<DateTime>(nullable: false),
+                    ModifiedDateTime = table.Column<DateTime>(nullable: true),
+                    CreatorUserId = table.Column<int>(nullable: false),
+                    ModifierUserId = table.Column<int>(nullable: true),
+                    RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    OrderIndex = table.Column<int>(nullable: false),
+                    Column = table.Column<string>(nullable: true),
+                    OrderByType = table.Column<int>(nullable: false),
+                    ReportId = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderByReports", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderByReports_NewReports_ReportId",
+                        column: x => x.ReportId,
+                        principalTable: "NewReports",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -715,6 +819,16 @@ namespace Data.Migrations
                 column: "AxChartId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ColumnReports_ReportId",
+                table: "ColumnReports",
+                column: "ReportId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Filters_ReportId",
+                table: "Filters",
+                column: "ReportId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Legends_BarChartId",
                 table: "Legends",
                 column: "BarChartId");
@@ -743,6 +857,11 @@ namespace Data.Migrations
                 name: "IX_NumericWidgets_AxChartId",
                 table: "NumericWidgets",
                 column: "AxChartId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderByReports_ReportId",
+                table: "OrderByReports",
+                column: "ReportId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Permissions_GroupId",
@@ -821,7 +940,13 @@ namespace Data.Migrations
                 name: "AxFilters");
 
             migrationBuilder.DropTable(
+                name: "ColumnReports");
+
+            migrationBuilder.DropTable(
                 name: "ConfigData");
+
+            migrationBuilder.DropTable(
+                name: "Filters");
 
             migrationBuilder.DropTable(
                 name: "Legends");
@@ -834,6 +959,9 @@ namespace Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "NumericWidgets");
+
+            migrationBuilder.DropTable(
+                name: "OrderByReports");
 
             migrationBuilder.DropTable(
                 name: "Permissions");
@@ -855,6 +983,9 @@ namespace Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "LineCharts");
+
+            migrationBuilder.DropTable(
+                name: "NewReports");
 
             migrationBuilder.DropTable(
                 name: "AxSeries");

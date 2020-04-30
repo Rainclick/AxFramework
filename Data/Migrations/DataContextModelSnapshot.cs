@@ -892,6 +892,9 @@ namespace Data.Migrations
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsCalculation")
                         .HasColumnType("bit");
 
@@ -1009,7 +1012,7 @@ namespace Data.Migrations
                     b.ToTable("OrderByReports");
                 });
 
-            modelBuilder.Entity("Entities.Framework.Reports.R", b =>
+            modelBuilder.Entity("Entities.Framework.Reports.Report", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1059,7 +1062,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RS");
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Entities.Framework.User", b =>
@@ -1325,7 +1328,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.AxCharts.AxChart", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.R", "Report")
+                    b.HasOne("Entities.Framework.Reports.Report", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId");
 
@@ -1427,7 +1430,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.Reports.AxFilter", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.R", "Report")
+                    b.HasOne("Entities.Framework.Reports.Report", "Report")
                         .WithMany("Filters")
                         .HasForeignKey("ReportId");
                 });

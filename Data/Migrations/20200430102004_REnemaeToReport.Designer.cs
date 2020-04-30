@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200429091808_AddNewReport2")]
-    partial class AddNewReport2
+    [Migration("20200430102004_REnemaeToReport")]
+    partial class REnemaeToReport
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -878,6 +878,61 @@ namespace Data.Migrations
                     b.ToTable("ColumnReports");
                 });
 
+            modelBuilder.Entity("Entities.Framework.Reports.Filter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Connector")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCalculation")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Operation")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Property")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Value1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("Filters");
+                });
+
             modelBuilder.Entity("Entities.Framework.Reports.NewReport", b =>
                 {
                     b.Property<int>("Id")
@@ -959,7 +1014,7 @@ namespace Data.Migrations
                     b.ToTable("OrderByReports");
                 });
 
-            modelBuilder.Entity("Entities.Framework.Reports.R", b =>
+            modelBuilder.Entity("Entities.Framework.Reports.Report", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -1009,7 +1064,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RS");
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("Entities.Framework.User", b =>
@@ -1275,7 +1330,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.AxCharts.AxChart", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.R", "Report")
+                    b.HasOne("Entities.Framework.Reports.Report", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId");
 
@@ -1377,7 +1432,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.Reports.AxFilter", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.R", "Report")
+                    b.HasOne("Entities.Framework.Reports.Report", "Report")
                         .WithMany("Filters")
                         .HasForeignKey("ReportId");
                 });
@@ -1389,6 +1444,13 @@ namespace Data.Migrations
                         .HasForeignKey("ReportId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.Filter", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.NewReport", "Report")
+                        .WithMany()
+                        .HasForeignKey("ReportId");
                 });
 
             modelBuilder.Entity("Entities.Framework.Reports.OrderByReport", b =>

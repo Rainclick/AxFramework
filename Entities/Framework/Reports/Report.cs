@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.Collections.Generic;
 using Common;
 
 namespace Entities.Framework.Reports
 {
-    public class R : BaseEntity
+    public class Report : BaseEntity
     {
         public string Title { get; set; }
         public ICollection<AxFilter> Filters { get; set; }

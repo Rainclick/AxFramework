@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200429111600_addFilterToNewReport")]
-    partial class addFilterToNewReport
+    [Migration("20200430092818_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -893,6 +893,9 @@ namespace Data.Migrations
 
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsCalculation")
                         .HasColumnType("bit");

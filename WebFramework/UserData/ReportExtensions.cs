@@ -13,7 +13,7 @@ namespace WebFramework.UserData
 {
     public static class ReportExtensions
     {
-        public static object Execute0<T>(this R report, ILifetimeScope scope = null) where T : BaseEntity
+        public static object Execute0<T>(this Report report, ILifetimeScope scope = null) where T : BaseEntity
         {
             object data;
             if (scope == null)
@@ -53,7 +53,7 @@ namespace WebFramework.UserData
             return data;
         }
 
-        public static object Execute(this R report, ILifetimeScope scope = null)
+        public static object Execute(this Report report, ILifetimeScope scope = null)
         {
             var assembly = typeof(BaseEntity).Assembly;
             var type = assembly.GetType(report.TypeName);
