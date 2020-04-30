@@ -5,15 +5,11 @@ using Data.Repositories;
 using Entities.Framework.AxCharts;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common.Utilities;
 using Entities.Framework;
 using Entities.Framework.AxCharts.Common;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
@@ -29,29 +25,33 @@ namespace API.Controllers.v1.Chart
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IBaseRepository<NumericWidget> _numericWidgetRepository;
         private readonly IBaseRepository<LoginLog> _loginlogRepository;
-        private readonly IBaseRepository<User> _userRepository;
         private readonly IBaseRepository<LineChart> _lineRepository;
         private readonly IBaseRepository<Log> _logRepository;
-        private IHubContext<ChartHub> _hub;
+        //private IHubContext<ChartHub> _hub;
         public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository,
-            IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<User> userRepository,
-            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository, IHubContext<ChartHub> hub)
+            IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository,
+            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository/*, IHubContext<ChartHub> hub*/)
         {
             _repository = repository;
             _pieRepository = pieRepository;
             _barChartRepository = barChartRepository;
             _numericWidgetRepository = numericWidgetRepository;
             _loginlogRepository = loginlogRepository;
-            _userRepository = userRepository;
             _lineRepository = lineRepository;
             _logRepository = logRepository;
-            _hub = hub;
+            //_hub = hub;
         }
 
         [HttpGet("[action]/{chartId}/{filter?}")]
         [AxAuthorize(StateType = StateType.Ignore)]
-        public ApiResult<dynamic> GetChart(int chartId, string filter = null)
+        public ApiResult<dynamic> GetChart(int chartId, string filter = null, DateTime? date1 = null, DateTime? date2 = null)
         {
+            bool flag = date1 == null || date2 == null;
+            if (date1 == null)
+                date1 = DateTime.Now;
+            if (date2 == null)
+                date2 = DateTime.Now.AddDays(1);
+
             var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
             if (chart?.ChartType == AxChartType.Pie)
             {
@@ -60,16 +60,17 @@ namespace API.Controllers.v1.Chart
                 {
                     if (string.IsNullOrWhiteSpace(filter))
                     {
-                        var data = _loginlogRepository.GetAll(x => x.InsertDateTime.Date == DateTime.Now.Date).GroupBy(x => x.Browser)
+                        var data = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date1.Value.Date && x.InsertDateTime <= date2.Value.Date).GroupBy(x => x.Browser)
                             .Select(x => new { x.Key, Count = x.Count() }).ToList();
                         pieChart.Series.Data = data.Select(x => x.Count);
                         pieChart.Labels = data.Select(x => new LegendDto { Name = x.Key, Tag = x.Key }).ToList();
                     }
                     else
                     {
-                        var data = _loginlogRepository.GetAll(x => x.InsertDateTime.Date == DateTime.Now.Date && x.Browser == filter).GroupBy(x => x.BrowserVersion).Select(x => new { x.Key, Count = x.Count() }).ToList();
+                        var data = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date1.Value.Date && x.InsertDateTime <= date2.Value.Date && x.Browser == filter).GroupBy(x => x.BrowserVersion).Select(x => new { x.Key, Count = x.Count() }).ToList();
                         pieChart.Series.Data = data.Select(x => x.Count);
                         pieChart.Labels = data.Select(x => new LegendDto { Name = x.Key }).ToList();
+                        pieChart.Title = "s";
                     }
                 }
                 return Ok(pieChart);
@@ -88,8 +89,10 @@ namespace API.Controllers.v1.Chart
             }
             if (chart?.ChartType == AxChartType.Line)
             {
+                if (flag)
+                    date1 = date1.Value.AddDays(-30);
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<LineChartDto>().FirstOrDefault();
-                var data = _logRepository.GetAll().OrderBy(x => x.Logged).ToList().GroupBy(x => x.Logged.Date).Select(x => new
+                var data = _logRepository.GetAll(x => x.Logged.Date >= date1.Value.Date && x.Logged <= date2.Value.Date).OrderBy(x => x.Logged).ToList().GroupBy(x => x.Logged.Date).Select(x => new
                 {
                     ErrorCount = x.Count(c => c.Level == "Error"),
                     InfoCount = x.Count(c => c.Level == "Info"),
@@ -99,10 +102,6 @@ namespace API.Controllers.v1.Chart
                 }).ToList();
                 if (lineChart != null)
                 {
-                    var s = new CancellationTokenSource();
-                    var token = s.Token;
-                    var t = Task.Run(() => { Thread.Sleep(50000); }, token);
-                    s.Cancel(true);
                     lineChart.Series = new List<AxSeriesDto>();
                     for (var i = 0; i < 7; i++)
                     {
@@ -137,28 +136,17 @@ namespace API.Controllers.v1.Chart
                 if (barChart != null && barChart.Series?.Count > 0)
                 {
                     var date = DateTime.Now.AddDays(-15);
-                    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList().GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) });
+                    var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
+                        .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
+                            { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
                     //var data = chart.Report.Execute();
                     var a = data0.Select(x => x.Count).ToList();
                     var b = data0.Select(x => x.UnScuccessCount).ToList();
                     barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
                     barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
-                    //foreach (var item in data0)
-                    //{
-
-                    //}
-                    //for (var i = 0; i < barChart.Series.Count; i++)
-                    //{
-
-                    //    if (i == 0)
-                    //        barChart.Series[i].Data = new List<object> { 15, 10, 8 };
-                    //    if (i == 1)
-                    //        barChart.Series[i].Data = new List<object> { 12, 8, 5 };
-                    //    if (i == 2)
-                    //        barChart.Series[i].Data = new List<object> { 16, 9 };
-                    //}
                     barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
                     return Ok(barChart);
+
                 }
             }
             if (chart?.ChartType == AxChartType.List)
@@ -176,24 +164,6 @@ namespace API.Controllers.v1.Chart
                 return Ok(listChart);
             }
             return Ok(chart);
-        }
-
-        private List<int> GetChartData(int? reportId, int? filter)
-        {
-            if (reportId == 1)
-            {
-                return new List<int> { 25, 65, 10 };
-            }
-            if (reportId == 2)
-            {
-                if (filter == 2)
-                    return new List<int> { 15, 10 };
-                if (filter == 3)
-                    return new List<int> { 65 };
-                if (filter == 7)
-                    return new List<int> { 7, 3 };
-            }
-            return null;
         }
 
     }

@@ -95,7 +95,7 @@ namespace WebFramework.Swagger
                         .GetCustomAttributes<ApiVersionAttribute>(true)
                         .SelectMany(attr => attr.Versions);
 
-                    return versions.Any(v => $"v{v.ToString()}" == docName);
+                    return versions.Any(v => $"v{v}" == docName);
                 });
                 #endregion
 
@@ -142,8 +142,8 @@ namespace WebFramework.Swagger
                 //options.RoutePrefix = "api-docs";
                 #endregion
 
-                options.SwaggerEndpoint("/swagger/v1/swagger.json", "V1 Docs");
-                options.SwaggerEndpoint("/swagger/v2/swagger.json", "V2 Docs");
+                options.SwaggerEndpoint("/services/swagger/v1/swagger.json", "V1 Docs");
+                options.SwaggerEndpoint("/services/swagger/v2/swagger.json", "V2 Docs");
             });
         }
     }

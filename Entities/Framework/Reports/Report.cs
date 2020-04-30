@@ -16,20 +16,6 @@ namespace Entities.Framework.Reports
         public string GroupBy { get; set; }
     }
 
-    public class C
-    {
-        public string Title { get; set; }
-        public ColumnType ColumnType { get; set; }
-    }
-
-    public enum ColumnType
-    {
-        String,
-        Datetime,
-        Number,
-        Boolean
-    }
-
     public enum ReportType
     {
         All,
