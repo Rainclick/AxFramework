@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200408151928_AddAxChartIdUserCharts2")]
-    partial class AddAxChartIdUserCharts2
+    [Migration("20200429091808_AddNewReport2")]
+    partial class AddNewReport2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -74,7 +74,56 @@ namespace Data.Migrations
                     b.ToTable("Addresses");
                 });
 
-            modelBuilder.Entity("Entities.Framework.AxCharts.BarChart", b =>
+            modelBuilder.Entity("Entities.Framework.Audit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AuditType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("EntityInsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PrimaryKey")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("TableName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Audits");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AuditTable", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -87,6 +136,12 @@ namespace Data.Migrations
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndDateTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
@@ -94,6 +149,53 @@ namespace Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("StartDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TableName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditTables");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.AxChart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ChartType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("NextChartId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("NextChartType")
                         .HasColumnType("int");
 
                     b.Property<int?>("ReportId")
@@ -110,6 +212,42 @@ namespace Data.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.HasIndex("SystemId");
+
+                    b.ToTable("AxCharts");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.BarChart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AxChartId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("XField")
                         .HasColumnType("nvarchar(max)");
 
@@ -118,7 +256,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SystemId");
+                    b.HasIndex("AxChartId");
 
                     b.ToTable("BarCharts");
                 });
@@ -151,7 +289,7 @@ namespace Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PieChartId")
+                    b.Property<int>("OrderIndex")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
@@ -165,8 +303,6 @@ namespace Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("BarChartId");
-
-                    b.HasIndex("PieChartId");
 
                     b.ToTable("AxSeries");
                 });
@@ -190,6 +326,9 @@ namespace Data.Migrations
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("LineChartId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ModifiedDateTime")
                         .HasColumnType("datetime2");
 
@@ -199,7 +338,7 @@ namespace Data.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("PieChartId")
+                    b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
@@ -211,20 +350,20 @@ namespace Data.Migrations
 
                     b.HasIndex("BarChartId");
 
-                    b.HasIndex("PieChartId");
+                    b.HasIndex("LineChartId");
 
                     b.ToTable("Legends");
                 });
 
-            modelBuilder.Entity("Entities.Framework.AxCharts.PieChart", b =>
+            modelBuilder.Entity("Entities.Framework.AxCharts.LineChart", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
+                    b.Property<int>("AxChartId")
+                        .HasColumnType("int");
 
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("int");
@@ -238,7 +377,47 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReportId")
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AxChartId");
+
+                    b.ToTable("LineCharts");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.NumericWidget", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AxChartId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Color")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Label")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
                     b.Property<byte[]>("RowVersion")
@@ -246,15 +425,48 @@ namespace Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int?>("SystemId")
+                    b.HasKey("Id");
+
+                    b.HasIndex("AxChartId");
+
+                    b.ToTable("NumericWidgets");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.PieChart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("AxChartId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("SeriesId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SystemId");
+                    b.HasIndex("AxChartId");
+
+                    b.HasIndex("SeriesId");
 
                     b.ToTable("PieCharts");
                 });
@@ -357,6 +569,9 @@ namespace Data.Migrations
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Ip")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -377,12 +592,6 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Port")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RemoteAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -394,7 +603,13 @@ namespace Data.Migrations
                     b.Property<string>("ServerName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserAgent")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
@@ -497,6 +712,9 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("OrderId")
                         .HasColumnType("int");
 
@@ -568,6 +786,232 @@ namespace Data.Migrations
                     b.ToTable("Permissions");
                 });
 
+            modelBuilder.Entity("Entities.Framework.Reports.AxFilter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Connector")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCalculation")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Operation")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Property")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Value1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("AxFilters");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.ColumnReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FieldId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("ColumnReports");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.NewReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("TakeSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TypeName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NewReports");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.OrderByReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Column")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderByType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("OrderByReports");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.R", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExecuteType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GroupBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ResultTypeName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Sort")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SortType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TakeSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TypeName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("RS");
+                });
+
             modelBuilder.Entity("Entities.Framework.User", b =>
                 {
                     b.Property<int>("Id")
@@ -632,7 +1076,7 @@ namespace Data.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int>("ChartId")
+                    b.Property<int>("AxChartId")
                         .HasColumnType("int");
 
                     b.Property<int>("CreatorUserId")
@@ -658,9 +1102,6 @@ namespace Data.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("rowversion");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -668,6 +1109,8 @@ namespace Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AxChartId");
 
                     b.HasIndex("UserId");
 
@@ -823,11 +1266,31 @@ namespace Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Entities.Framework.AxCharts.BarChart", b =>
+            modelBuilder.Entity("Entities.Framework.Audit", b =>
                 {
+                    b.HasOne("Entities.Framework.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.AxChart", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.R", "Report")
+                        .WithMany()
+                        .HasForeignKey("ReportId");
+
                     b.HasOne("Entities.Framework.Menu", "System")
                         .WithMany()
                         .HasForeignKey("SystemId");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.BarChart", b =>
+                {
+                    b.HasOne("Entities.Framework.AxCharts.AxChart", "AxChart")
+                        .WithMany()
+                        .HasForeignKey("AxChartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Entities.Framework.AxCharts.Common.AxSeries", b =>
@@ -835,10 +1298,6 @@ namespace Data.Migrations
                     b.HasOne("Entities.Framework.AxCharts.BarChart", null)
                         .WithMany("Series")
                         .HasForeignKey("BarChartId");
-
-                    b.HasOne("Entities.Framework.AxCharts.PieChart", null)
-                        .WithMany("Series")
-                        .HasForeignKey("PieChartId");
                 });
 
             modelBuilder.Entity("Entities.Framework.AxCharts.Common.Legend", b =>
@@ -847,16 +1306,42 @@ namespace Data.Migrations
                         .WithMany("Legends")
                         .HasForeignKey("BarChartId");
 
-                    b.HasOne("Entities.Framework.AxCharts.PieChart", null)
+                    b.HasOne("Entities.Framework.AxCharts.LineChart", null)
                         .WithMany("Legends")
-                        .HasForeignKey("PieChartId");
+                        .HasForeignKey("LineChartId");
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.LineChart", b =>
+                {
+                    b.HasOne("Entities.Framework.AxCharts.AxChart", "AxChart")
+                        .WithMany()
+                        .HasForeignKey("AxChartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Entities.Framework.AxCharts.NumericWidget", b =>
+                {
+                    b.HasOne("Entities.Framework.AxCharts.AxChart", "AxChart")
+                        .WithMany()
+                        .HasForeignKey("AxChartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Entities.Framework.AxCharts.PieChart", b =>
                 {
-                    b.HasOne("Entities.Framework.Menu", "System")
+                    b.HasOne("Entities.Framework.AxCharts.AxChart", "AxChart")
                         .WithMany()
-                        .HasForeignKey("SystemId");
+                        .HasForeignKey("AxChartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Framework.AxCharts.Common.AxSeries", "Series")
+                        .WithMany()
+                        .HasForeignKey("SeriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Entities.Framework.LoginLog", b =>
@@ -890,8 +1375,39 @@ namespace Data.Migrations
                         .HasForeignKey("UserId");
                 });
 
+            modelBuilder.Entity("Entities.Framework.Reports.AxFilter", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.R", "Report")
+                        .WithMany("Filters")
+                        .HasForeignKey("ReportId");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.ColumnReport", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.NewReport", "Report")
+                        .WithMany("Columns")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.OrderByReport", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.NewReport", "Report")
+                        .WithMany("Orders")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Entities.Framework.UserChart", b =>
                 {
+                    b.HasOne("Entities.Framework.AxCharts.AxChart", "AxChart")
+                        .WithMany()
+                        .HasForeignKey("AxChartId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Entities.Framework.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")

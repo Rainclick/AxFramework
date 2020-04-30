@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20200422071939_AddResultTypeNameToReport")]
-    partial class AddResultTypeNameToReport
+    [Migration("20200429091440_InitMigration")]
+    partial class InitMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -341,9 +341,6 @@ namespace Data.Migrations
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PieChartId")
-                        .HasColumnType("int");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -354,8 +351,6 @@ namespace Data.Migrations
                     b.HasIndex("BarChartId");
 
                     b.HasIndex("LineChartId");
-
-                    b.HasIndex("PieChartId");
 
                     b.ToTable("Legends");
                 });
@@ -403,6 +398,9 @@ namespace Data.Migrations
 
                     b.Property<int>("AxChartId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Color")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("int");
@@ -571,6 +569,9 @@ namespace Data.Migrations
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Ip")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Level")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -591,12 +592,6 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Port")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RemoteAddress")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -608,7 +603,13 @@ namespace Data.Migrations
                     b.Property<string>("ServerName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserAgent")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserName")
@@ -801,6 +802,9 @@ namespace Data.Migrations
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool>("IsCalculation")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("ModifiedDateTime")
                         .HasColumnType("datetime2");
 
@@ -834,7 +838,7 @@ namespace Data.Migrations
                     b.ToTable("AxFilters");
                 });
 
-            modelBuilder.Entity("Entities.Framework.Reports.Report", b =>
+            modelBuilder.Entity("Entities.Framework.Reports.R", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -843,6 +847,12 @@ namespace Data.Migrations
 
                     b.Property<int>("CreatorUserId")
                         .HasColumnType("int");
+
+                    b.Property<int>("ExecuteType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GroupBy")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("InsertDateTime")
                         .HasColumnType("datetime2");
@@ -878,7 +888,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Reports");
+                    b.ToTable("RS");
                 });
 
             modelBuilder.Entity("Entities.Framework.User", b =>
@@ -1144,7 +1154,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.AxCharts.AxChart", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.Report", "Report")
+                    b.HasOne("Entities.Framework.Reports.R", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId");
 
@@ -1178,10 +1188,6 @@ namespace Data.Migrations
                     b.HasOne("Entities.Framework.AxCharts.LineChart", null)
                         .WithMany("Legends")
                         .HasForeignKey("LineChartId");
-
-                    b.HasOne("Entities.Framework.AxCharts.PieChart", null)
-                        .WithMany("Labels")
-                        .HasForeignKey("PieChartId");
                 });
 
             modelBuilder.Entity("Entities.Framework.AxCharts.LineChart", b =>
@@ -1250,7 +1256,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.Reports.AxFilter", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.Report", "Report")
+                    b.HasOne("Entities.Framework.Reports.R", "Report")
                         .WithMany("Filters")
                         .HasForeignKey("ReportId");
                 });

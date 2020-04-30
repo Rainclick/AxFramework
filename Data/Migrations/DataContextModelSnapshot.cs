@@ -590,9 +590,6 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Port")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate()
@@ -839,7 +836,180 @@ namespace Data.Migrations
                     b.ToTable("AxFilters");
                 });
 
-            modelBuilder.Entity("Entities.Framework.Reports.Report", b =>
+            modelBuilder.Entity("Entities.Framework.Reports.ColumnReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FieldId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("ColumnReports");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.Filter", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Connector")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCalculation")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Operation")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Property")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Value1")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value2")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("Filters");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.NewReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<int>("TakeSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("TypeName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NewReports");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.OrderByReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Column")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CreatorUserId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("InsertDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ModifiedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ModifierUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderByType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderIndex")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReportId")
+                        .HasColumnType("int");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportId");
+
+                    b.ToTable("OrderByReports");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.R", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -889,7 +1059,7 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Reports");
+                    b.ToTable("RS");
                 });
 
             modelBuilder.Entity("Entities.Framework.User", b =>
@@ -1155,7 +1325,7 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.AxCharts.AxChart", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.Report", "Report")
+                    b.HasOne("Entities.Framework.Reports.R", "Report")
                         .WithMany()
                         .HasForeignKey("ReportId");
 
@@ -1257,9 +1427,34 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Entities.Framework.Reports.AxFilter", b =>
                 {
-                    b.HasOne("Entities.Framework.Reports.Report", "Report")
+                    b.HasOne("Entities.Framework.Reports.R", "Report")
                         .WithMany("Filters")
                         .HasForeignKey("ReportId");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.ColumnReport", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.NewReport", "Report")
+                        .WithMany("Columns")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.Filter", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.NewReport", "Report")
+                        .WithMany()
+                        .HasForeignKey("ReportId");
+                });
+
+            modelBuilder.Entity("Entities.Framework.Reports.OrderByReport", b =>
+                {
+                    b.HasOne("Entities.Framework.Reports.NewReport", "Report")
+                        .WithMany("Orders")
+                        .HasForeignKey("ReportId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Entities.Framework.UserChart", b =>

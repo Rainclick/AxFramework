@@ -3,12 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Data.Migrations
 {
-    public partial class AddNumericwidgetChartTable : Migration
+    public partial class addFilterToNewReport : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "NumericWidgets",
+                name: "Filters",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -18,32 +18,35 @@ namespace Data.Migrations
                     CreatorUserId = table.Column<int>(nullable: false),
                     ModifierUserId = table.Column<int>(nullable: true),
                     RowVersion = table.Column<byte[]>(rowVersion: true, nullable: true),
-                    Label = table.Column<string>(nullable: true),
-                    Icon = table.Column<string>(nullable: true),
-                    LastUpdated = table.Column<string>(nullable: true),
-                    AxChartId = table.Column<int>(nullable: false)
+                    Property = table.Column<string>(nullable: true),
+                    Operation = table.Column<int>(nullable: false),
+                    Value1 = table.Column<string>(nullable: true),
+                    Value2 = table.Column<string>(nullable: true),
+                    Connector = table.Column<int>(nullable: false),
+                    ReportId = table.Column<int>(nullable: true),
+                    IsCalculation = table.Column<bool>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NumericWidgets", x => x.Id);
+                    table.PrimaryKey("PK_Filters", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_NumericWidgets_AxCharts_AxChartId",
-                        column: x => x.AxChartId,
-                        principalTable: "AxCharts",
+                        name: "FK_Filters_NewReports_ReportId",
+                        column: x => x.ReportId,
+                        principalTable: "NewReports",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_NumericWidgets_AxChartId",
-                table: "NumericWidgets",
-                column: "AxChartId");
+                name: "IX_Filters_ReportId",
+                table: "Filters",
+                column: "ReportId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "NumericWidgets");
+                name: "Filters");
         }
     }
 }

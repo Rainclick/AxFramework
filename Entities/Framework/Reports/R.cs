@@ -5,12 +5,9 @@ using Common;
 
 namespace Entities.Framework.Reports
 {
-    public class Report : BaseEntity
+    public class R : BaseEntity
     {
         public string Title { get; set; }
-
-        [NotMapped]
-        public Func<object> Action { get; set; }
         public ICollection<AxFilter> Filters { get; set; }
         public string TypeName { get; set; }
         public string ResultTypeName { get; set; }
@@ -21,7 +18,7 @@ namespace Entities.Framework.Reports
         public string GroupBy { get; set; }
     }
 
-    public class Column
+    public class C
     {
         public string Title { get; set; }
         public ColumnType ColumnType { get; set; }

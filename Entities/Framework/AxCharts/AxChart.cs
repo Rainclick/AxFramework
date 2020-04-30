@@ -16,6 +16,6 @@ namespace Entities.Framework.AxCharts
         public AxChartType? NextChartType { get; set; }
         public AxChartType ChartType { get; set; }
         [ForeignKey("ReportId")]
-        public Report Report { get; set; }
+        public R Report { get; set; }
     }
 }

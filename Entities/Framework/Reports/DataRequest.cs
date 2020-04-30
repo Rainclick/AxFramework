@@ -33,7 +33,7 @@ namespace Entities.Framework.Reports
         public Connector Connector { get; set; }
         public int? ReportId { get; set; }
         [ForeignKey("ReportId")]
-        public Report Report { get; set; }
+        public R Report { get; set; }
         public bool IsCalculation { get; set; }
 
         //public string Type { get; set; }
