@@ -84,7 +84,7 @@ namespace API.Controllers.v1.Chart
                         var data = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date1.Value.Date && x.InsertDateTime <= date2.Value.Date && x.Browser == filter).GroupBy(x => x.BrowserVersion).Select(x => new { x.Key, Count = x.Count() }).ToList();
                         pieChart.Series.Data = data.Select(x => x.Count);
                         pieChart.Labels = data.Select(x => new LegendDto { Name = x.Key }).ToList();
-                        pieChart.Title = "s";
+                        pieChart.Title = $"{chart.Title} '{filter}'";
                     }
                 }
                 return Ok(pieChart);
