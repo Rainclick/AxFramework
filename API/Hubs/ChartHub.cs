@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace API.Hubs
 {
-    public class ChartHub : Hub
+    public class AxHub : Hub
     {
         public async Task SendMessageToAll(string message)
         {
@@ -13,6 +13,11 @@ namespace API.Hubs
         public async Task SendMessage(string clientId, string message)
         {
             await Clients.Clients(clientId).SendAsync("ReceiveMessage", message);
+        }
+
+        public async Task UpdateChart(string clientId, object data)
+        {
+            await Clients.Clients(clientId).SendAsync("UpdateChart", data);
         }
     }
 }

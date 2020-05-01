@@ -5,11 +5,13 @@ using Data.Repositories;
 using Entities.Framework.AxCharts;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common.Utilities;
 using Entities.Framework;
 using Entities.Framework.AxCharts.Common;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
@@ -27,10 +29,10 @@ namespace API.Controllers.v1.Chart
         private readonly IBaseRepository<LoginLog> _loginlogRepository;
         private readonly IBaseRepository<LineChart> _lineRepository;
         private readonly IBaseRepository<Log> _logRepository;
-        //private IHubContext<ChartHub> _hub;
+        private IHubContext<AxHub> _hub;
         public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository,
             IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository,
-            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository/*, IHubContext<ChartHub> hub*/)
+            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository, IHubContext<AxHub> hub)
         {
             _repository = repository;
             _pieRepository = pieRepository;
@@ -39,13 +41,15 @@ namespace API.Controllers.v1.Chart
             _loginlogRepository = loginlogRepository;
             _lineRepository = lineRepository;
             _logRepository = logRepository;
-            //_hub = hub;
+            _hub = hub;
         }
 
         [HttpGet("[action]/{chartId}/{filter?}")]
         [AxAuthorize(StateType = StateType.Ignore)]
         public ApiResult<dynamic> GetChart(int chartId, string filter = null, DateTime? date1 = null, DateTime? date2 = null)
         {
+            _hub.Clients.Client("");
+
             bool flag = date1 == null || date2 == null;
             if (date1 == null)
                 date1 = DateTime.Now;

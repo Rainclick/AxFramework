@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200430161322_AddColumnToOrderBy")]
+    partial class AddColumnToOrderBy
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -997,6 +999,9 @@ namespace Data.Migrations
                     b.Property<int?>("ModifierUserId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("NewReportId")
+                        .HasColumnType("int");
+
                     b.Property<int>("OrderByType")
                         .HasColumnType("int");
 
@@ -1013,6 +1018,8 @@ namespace Data.Migrations
                     b.HasIndex("ColumnReportId")
                         .IsUnique()
                         .HasFilter("[ColumnReportId] IS NOT NULL");
+
+                    b.HasIndex("NewReportId");
 
                     b.ToTable("OrderByReports");
                 });
@@ -1173,49 +1180,6 @@ namespace Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserCharts");
-                });
-
-            modelBuilder.Entity("Entities.Framework.UserConnection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("ConnectionId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CreatorUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("InsertDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Ip")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("ModifiedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ModifierUserId")
-                        .HasColumnType("int");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("rowversion");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserConnections");
                 });
 
             modelBuilder.Entity("Entities.Framework.UserGroup", b =>
@@ -1504,6 +1468,10 @@ namespace Data.Migrations
                     b.HasOne("Entities.Framework.Reports.ColumnReport", "ColumnReport")
                         .WithOne("OrderByReport")
                         .HasForeignKey("Entities.Framework.Reports.OrderByReport", "ColumnReportId");
+
+                    b.HasOne("Entities.Framework.Reports.NewReport", null)
+                        .WithMany("Orders")
+                        .HasForeignKey("NewReportId");
                 });
 
             modelBuilder.Entity("Entities.Framework.UserChart", b =>
@@ -1514,15 +1482,6 @@ namespace Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Entities.Framework.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Entities.Framework.UserConnection", b =>
-                {
                     b.HasOne("Entities.Framework.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")

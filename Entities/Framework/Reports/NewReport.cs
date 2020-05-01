@@ -10,7 +10,6 @@ namespace Entities.Framework.Reports
         public string TypeName { get; set; }
         public int TakeSize { get; set; }
         public ICollection<ColumnReport> Columns { get; set; }
-        public ICollection<OrderByReport> Orders { get; set; }
     }
 
     public class ColumnReport : BaseEntity
@@ -22,15 +21,16 @@ namespace Entities.Framework.Reports
         public NewReport Report { get; set; }
         public string TargetType { get; set; }
         public string JoinId { get; set; }
+        public OrderByReport OrderByReport { get; set; }
     }
 
     public class OrderByReport : BaseEntity
     {
         public int OrderIndex { get; set; }
         public OrderByType OrderByType { get; set; }
-        public int ReportId { get; set; }
-        [ForeignKey("ReportId")]
-        public NewReport Report { get; set; }
+        public int? ColumnReportId { get; set; }
+        [ForeignKey("ColumnReportId")]
+        public ColumnReport ColumnReport { get; set; }
     }
 
     public class Filter : BaseEntity
