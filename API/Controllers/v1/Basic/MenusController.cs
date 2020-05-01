@@ -88,7 +88,8 @@ namespace API.Controllers.v1.Basic
                 x.Width,
                 x.Height,
                 x.OrderIndex,
-                x.AxChart.Id
+                x.AxChart.Id,
+                x.AxChart.IsLive
             });
             return Ok(charts);
         }

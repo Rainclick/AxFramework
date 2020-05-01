@@ -17,5 +17,6 @@ namespace Entities.Framework.AxCharts
         public AxChartType ChartType { get; set; }
         [ForeignKey("ReportId")]
         public Report Report { get; set; }
+        public bool IsLive { get; set; }
     }
 }

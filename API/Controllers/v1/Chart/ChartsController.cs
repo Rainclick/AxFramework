@@ -22,6 +22,7 @@ namespace API.Controllers.v1.Chart
     [ApiVersion("1")]
     public class ChartsController : BaseController
     {
+        private readonly IBaseRepository<UserConnection> _userConnectionRepository;
         private readonly IBaseRepository<AxChart> _repository;
         private readonly IBaseRepository<PieChart> _pieRepository;
         private readonly IBaseRepository<BarChart> _barChartRepository;
@@ -29,11 +30,12 @@ namespace API.Controllers.v1.Chart
         private readonly IBaseRepository<LoginLog> _loginlogRepository;
         private readonly IBaseRepository<LineChart> _lineRepository;
         private readonly IBaseRepository<Log> _logRepository;
-        private IHubContext<AxHub> _hub;
+        private readonly IHubContext<AxHub> _hub;
         public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository,
-            IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository,
+            IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<UserConnection> userConnectionRepository,
             IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository, IHubContext<AxHub> hub)
         {
+            _userConnectionRepository = userConnectionRepository;
             _repository = repository;
             _pieRepository = pieRepository;
             _barChartRepository = barChartRepository;
@@ -46,15 +48,20 @@ namespace API.Controllers.v1.Chart
 
         [HttpGet("[action]/{chartId}/{filter?}")]
         [AxAuthorize(StateType = StateType.Ignore)]
-        public ApiResult<dynamic> GetChart(int chartId, string filter = null, DateTime? date1 = null, DateTime? date2 = null)
+        public ApiResult<dynamic> GetChart(int chartId, string filter = null, DateTime? date1 = null, DateTime? date2 = null, string cid = null)
         {
-            _hub.Clients.Client("");
-
             bool flag = date1 == null || date2 == null;
             if (date1 == null)
                 date1 = DateTime.Now;
             if (date2 == null)
                 date2 = DateTime.Now.AddDays(1);
+
+            if (!string.IsNullOrWhiteSpace(cid))
+            {
+                var connection = _userConnectionRepository.GetFirst(x => x.ConnectionId == cid);
+                connection.Active = true;
+                _userConnectionRepository.Update(connection);
+            }
 
             var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
             if (chart?.ChartType == AxChartType.Pie)
@@ -142,7 +149,7 @@ namespace API.Controllers.v1.Chart
                     var date = DateTime.Now.AddDays(-15);
                     var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
                         .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
-                            { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
+                        { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
                     //var data = chart.Report.Execute();
                     var a = data0.Select(x => x.Count).ToList();
                     var b = data0.Select(x => x.UnScuccessCount).ToList();
@@ -168,6 +175,31 @@ namespace API.Controllers.v1.Chart
                 return Ok(listChart);
             }
             return Ok(chart);
+        }
+
+
+
+        [HttpGet("[action]/{chartId}")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public ApiResult<dynamic> GetChart(int chartId)
+        {
+            var connections = _userConnectionRepository.GetAll(x => x.Active && x.UserId == UserId).Select(x => x.ConnectionId).ToList();
+            var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
+            if (barChart != null && barChart.Series?.Count > 0)
+            {
+                var date = DateTime.Now.AddDays(-15);
+                var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
+                    .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
+                    { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
+                //var data = chart.Report.Execute();
+                var a = data0.Select(x => x.Count).ToList();
+                var b = data0.Select(x => x.UnScuccessCount).ToList();
+                barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
+                barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
+                barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
+            }
+            _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart);
+            return Ok();
         }
 
     }

@@ -38,10 +38,12 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
+        private readonly IBaseRepository<UserConnection> _userConnectionRepository;
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
-            IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository, IBaseRepository<UserGroup> userGroupRepository)
+            IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserConnection> userConnectionRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -52,6 +54,7 @@ namespace API.Controllers.v1.Basic
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
+            _userConnectionRepository = userConnectionRepository;
         }
 
         /// <summary>
@@ -253,6 +256,24 @@ namespace API.Controllers.v1.Basic
         {
             var user = _userRepository.GetAll(x => x.Id == id).ProjectTo<UserSelectDto>().FirstOrDefault();
             return Ok(user);
+        }
+
+        [AxAuthorize(StateType = StateType.OnlyToken)]
+        [HttpPost("[action]")]
+        public async Task<ApiResult> SetUserConnectionId(UserConnectionDto connectionDto, CancellationToken cancellationToken)
+        {
+            var address = Request.HttpContext.Connection.RemoteIpAddress;
+            var ip = address.GetIp();
+            var userConnection = new UserConnection
+            {
+                UserId = UserId,
+                Active = false,
+                Ip = ip,
+                ConnectionId = connectionDto.ConnectionId,
+                CreatorUserId = UserId
+            };
+            await _userConnectionRepository.AddAsync(userConnection, cancellationToken);
+            return Ok();
         }
 
     }
