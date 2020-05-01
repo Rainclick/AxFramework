@@ -151,8 +151,7 @@ namespace API.Controllers.v1.Basic
                     .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
                     { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
                 //var data = chart.Report.Execute();
-                var id = new Random((int)DateTime.Now.Ticks).Next(10, 60);
-                var a = data0.Select(x => new { Count = x.Count + id }).Select(x => x.Count).ToList();
+                var a = data0.Select(x => x.Count).ToList();
                 var b = data0.Select(x => x.UnScuccessCount).ToList();
                 barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
                 barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
