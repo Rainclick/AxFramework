@@ -276,6 +276,16 @@ namespace API.Controllers.v1.Basic
             return Ok();
         }
 
+        [AxAuthorize(StateType = StateType.OnlyToken)]
+        [HttpPost("[action]")]
+        public async Task<ApiResult> DisableUserConnectionId(UserConnectionDto connectionDto, CancellationToken cancellationToken)
+        {
+            var connection = await _userConnectionRepository.GetFirstAsync(x => x.ConnectionId == connectionDto.ConnectionId && x.UserId == UserId, cancellationToken);
+            connection.Active = false;
+            _userConnectionRepository.Update(connection);
+            return Ok();
+        }
+
     }
 
 }

@@ -56,14 +56,16 @@ namespace API.Controllers.v1.Chart
             if (date2 == null)
                 date2 = DateTime.Now.AddDays(1);
 
-            if (!string.IsNullOrWhiteSpace(cid))
+
+
+            var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
+            if (chart?.IsLive == true && !string.IsNullOrWhiteSpace(cid))
             {
                 var connection = _userConnectionRepository.GetFirst(x => x.ConnectionId == cid);
                 connection.Active = true;
                 _userConnectionRepository.Update(connection);
             }
 
-            var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
             if (chart?.ChartType == AxChartType.Pie)
             {
                 var pieChart = _pieRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<PieChartDto>().FirstOrDefault();
