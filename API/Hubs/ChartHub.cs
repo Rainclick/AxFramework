@@ -19,5 +19,13 @@ namespace API.Hubs
         {
             await Clients.Clients(clientId).SendAsync("UpdateChart", data);
         }
+
+        public string GetConnectionId()
+        {
+            return Context.ConnectionId;
+        }
+
+  
+
     }
 }

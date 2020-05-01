@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
@@ -11,8 +12,10 @@ using Common.Utilities;
 using Data.Repositories;
 using Data.Repositories.UserRepositories;
 using Entities.Framework;
+using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using Services;
 using Services.Services.Services;
@@ -39,11 +42,13 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
+        private readonly IBaseRepository<BarChart> _barChartRepository;
+        private readonly IHubContext<AxHub> _hub;
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserConnection> userConnectionRepository)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -55,6 +60,8 @@ namespace API.Controllers.v1.Basic
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
             _userConnectionRepository = userConnectionRepository;
+            _barChartRepository = barChartRepository;
+            _hub = hub;
         }
 
         /// <summary>
@@ -133,6 +140,26 @@ namespace API.Controllers.v1.Basic
                 var oldTokens = _userTokenRepository.GetAll(t => t.ExpireDateTime < DateTime.Now);
                 _userTokenRepository.DeleteRange(oldTokens);
             }, cancellationToken);
+
+
+            var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
+            var barChart = _barChartRepository.GetAll(x => x.AxChartId == 5).ProjectTo<BarChartDto>().FirstOrDefault();
+            if (barChart != null && barChart.Series?.Count > 0)
+            {
+                var date = DateTime.Now.AddDays(-15);
+                var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
+                    .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
+                    { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
+                //var data = chart.Report.Execute();
+                var id = new Random((int)DateTime.Now.Ticks).Next(10, 60);
+                var a = data0.Select(x => new { Count = x.Count + id }).Select(x => x.Count).ToList();
+                var b = data0.Select(x => x.UnScuccessCount).ToList();
+                barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
+                barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
+                barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
+            }
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, cancellationToken);
+
 
 
             await _memoryCache.GetOrCreateAsync("user" + user.Id, entry =>

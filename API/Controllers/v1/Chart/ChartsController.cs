@@ -5,6 +5,7 @@ using Data.Repositories;
 using Entities.Framework.AxCharts;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Threading.Tasks;
 using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
@@ -183,9 +184,9 @@ namespace API.Controllers.v1.Chart
 
         [HttpGet("[action]/{chartId}")]
         [AxAuthorize(StateType = StateType.Ignore)]
-        public ApiResult<dynamic> GetChart(int chartId)
+        public async Task<ApiResult<dynamic>> PushChart(int chartId)
         {
-            var connections = _userConnectionRepository.GetAll(x => x.Active && x.UserId == UserId).Select(x => x.ConnectionId).ToList();
+            var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
             var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
             if (barChart != null && barChart.Series?.Count > 0)
             {
@@ -194,13 +195,14 @@ namespace API.Controllers.v1.Chart
                     .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
                     { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
                 //var data = chart.Report.Execute();
-                var a = data0.Select(x => x.Count).ToList();
+                var id = new Random((int)DateTime.Now.Ticks).Next(10, 60);
+                var a = data0.Select(x => new { Count = x.Count + id }).Select(x => x.Count).ToList();
                 var b = data0.Select(x => x.UnScuccessCount).ToList();
                 barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
                 barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
                 barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
             }
-            _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart);
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart);
             return Ok();
         }
 
