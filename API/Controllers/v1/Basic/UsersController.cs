@@ -129,7 +129,7 @@ namespace API.Controllers.v1.Basic
                 CreatorUserId = user.Id,
                 InsertDateTime = DateTime.Now,
                 Browser = info.UA.ToString(),
-                ExpireDateTime = DateTime.Now.AddSeconds(token.expires_in)
+                ExpireDateTime = token.expires_in.UnixTimeStampToDateTime()
             };
 
             //Response.Cookies.Append("AxToken", token.access_token);
