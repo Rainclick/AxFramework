@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,14 +12,14 @@ using Pluralize.NET.Core;
 
 namespace Services.Services
 {
-    public class TimedHostedService : IHostedService, IDisposable
+    public class TimedAuditLogHostedService : IHostedService, IDisposable
     {
         private int _executionCount;
-        private readonly ILogger<TimedHostedService> _logger;
+        private readonly ILogger<TimedAuditLogHostedService> _logger;
         private readonly IBaseRepository<Audit> _auditRepository;
         private Timer _timer;
 
-        public TimedHostedService(ILogger<TimedHostedService> logger, IBaseRepository<Audit> auditRepository)
+        public TimedAuditLogHostedService(ILogger<TimedAuditLogHostedService> logger, IBaseRepository<Audit> auditRepository)
         {
             _logger = logger;
             _auditRepository = auditRepository;

@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using NLog;
 using Services.Services;
 using WebFramework.Configuration;
 using WebFramework.CustomMapping;
@@ -52,7 +51,8 @@ namespace API
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
-            services.AddHostedService<TimedHostedService>();
+            services.AddHostedService<TimedAuditLogHostedService>();
+            services.AddHostedService<TimedHardwareHostedService>();
             services.AddSwagger();
             services.AddSignalR();
 

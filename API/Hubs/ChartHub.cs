@@ -15,9 +15,9 @@ namespace API.Hubs
             await Clients.Clients(clientId).SendAsync("ReceiveMessage", message);
         }
 
-        public async Task UpdateChart(string clientId, object data)
+        public async Task UpdateChart(string clientId, object data, int chartId)
         {
-            await Clients.Clients(clientId).SendAsync("UpdateChart", data);
+            await Clients.Clients(clientId).SendAsync("UpdateChart", data, chartId);
         }
 
         public string GetConnectionId()
@@ -25,7 +25,7 @@ namespace API.Hubs
             return Context.ConnectionId;
         }
 
-  
+
 
     }
 }

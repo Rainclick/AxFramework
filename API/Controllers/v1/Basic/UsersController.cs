@@ -16,6 +16,7 @@ using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Services;
 using Services.Services.Services;
@@ -42,13 +43,15 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
+        private readonly IBaseRepository<AxChart> _chartRepository;
         private readonly IBaseRepository<BarChart> _barChartRepository;
+        private readonly IBaseRepository<NumericWidget> _numberWidgetRepository;
         private readonly IHubContext<AxHub> _hub;
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -60,7 +63,9 @@ namespace API.Controllers.v1.Basic
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
             _userConnectionRepository = userConnectionRepository;
+            _chartRepository = chartRepository;
             _barChartRepository = barChartRepository;
+            _numberWidgetRepository = numberWidgetRepository;
             _hub = hub;
         }
 
@@ -157,7 +162,17 @@ namespace API.Controllers.v1.Basic
                 barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
                 barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
             }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, cancellationToken);
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, 5, cancellationToken);
+
+            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x=> x.Report).FirstOrDefaultAsync(cancellationToken);
+            var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
+            if (chart != null && numericWidget != null)
+            {
+                var data = chart.Report.Execute();
+                numericWidget.Data = (int)data;
+                numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
+            }
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
 
 
 
@@ -189,6 +204,18 @@ namespace API.Controllers.v1.Basic
                 throw new UnauthorizedAccessException("کاربر یافت نشد");
 
             await _userTokenRepository.DeleteAsync(userToken, cancellationToken);
+
+            var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
+            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x=> x.Report).FirstOrDefaultAsync(cancellationToken);
+            var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
+            if (chart != null && numericWidget != null)
+            {
+                var data = chart.Report.Execute();
+                numericWidget.Data = (int)data;
+                numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
+            }
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
+
             return Ok();
         }
 

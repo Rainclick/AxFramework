@@ -31,10 +31,11 @@ namespace API.Controllers.v1.Chart
         private readonly IBaseRepository<LoginLog> _loginlogRepository;
         private readonly IBaseRepository<LineChart> _lineRepository;
         private readonly IBaseRepository<Log> _logRepository;
+        private readonly IBaseRepository<HardwareDataHistory> _hardRepository;
         private readonly IHubContext<AxHub> _hub;
         public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository,
             IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<UserConnection> userConnectionRepository,
-            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository, IHubContext<AxHub> hub)
+            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository, IBaseRepository<HardwareDataHistory> hardRepository, IHubContext<AxHub> hub)
         {
             _userConnectionRepository = userConnectionRepository;
             _repository = repository;
@@ -44,6 +45,7 @@ namespace API.Controllers.v1.Chart
             _loginlogRepository = loginlogRepository;
             _lineRepository = lineRepository;
             _logRepository = logRepository;
+            _hardRepository = hardRepository;
             _hub = hub;
         }
 
@@ -62,9 +64,13 @@ namespace API.Controllers.v1.Chart
             var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
             if (chart?.IsLive == true && !string.IsNullOrWhiteSpace(cid))
             {
-                var connection = _userConnectionRepository.GetFirst(x => x.ConnectionId == cid);
-                connection.Active = true;
-                _userConnectionRepository.Update(connection);
+                var connection = _userConnectionRepository.GetAll(x => x.ConnectionId == cid).FirstOrDefault();
+                //_userConnectionRepository.Entry(connection).State = EntityState.Modified;
+                if (connection != null)
+                {
+                    connection.Active = true;
+                    _userConnectionRepository.Update(connection);
+                }
             }
 
             if (chart?.ChartType == AxChartType.Pie)
@@ -103,44 +109,27 @@ namespace API.Controllers.v1.Chart
             }
             if (chart?.ChartType == AxChartType.Line)
             {
-                if (flag)
-                    date1 = date1.Value.AddDays(-30);
+
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<LineChartDto>().FirstOrDefault();
-                var data = _logRepository.GetAll(x => x.Logged.Date >= date1.Value.Date && x.Logged <= date2.Value.Date).OrderBy(x => x.Logged).ToList().GroupBy(x => x.Logged.Date).Select(x => new
-                {
-                    ErrorCount = x.Count(c => c.Level == "Error"),
-                    InfoCount = x.Count(c => c.Level == "Info"),
-                    WarnCount = x.Count(c => c.Level == "Warn"),
-                    FatalCount = x.Count(c => c.Level == "Fatal"),
-                    x.Key
-                }).ToList();
+                var data = _hardRepository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddMinutes(-30))
+                    .OrderBy(x => x.InsertDateTime).ToList();
                 if (lineChart != null)
                 {
                     lineChart.Series = new List<AxSeriesDto>();
-                    for (var i = 0; i < 7; i++)
+                    for (var i = 0; i < 2; i++)
                     {
                         if (i == 0)
                         {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "خطا", Id = i });
-                            lineChart.Series[i].Data = data.Select(c => c.ErrorCount);
-                        }
-                        if (i == 2)
-                        {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "هشدار", Id = i });
-                            lineChart.Series[i].Data = data.Select(c => c.WarnCount);
+                            lineChart.Series.Add(new AxSeriesDto { Name = "RAM", Id = i });
+                            lineChart.Series[i].Data = data.Select(c => c.Ram);
                         }
                         if (i == 1)
                         {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "اطلاعات", Id = i });
-                            lineChart.Series[i].Data = data.Select(c => c.InfoCount);
-                        }
-                        if (i == 3)
-                        {
-                            lineChart.Series.Add(new AxSeriesDto { Name = "بحرانی", Id = i });
-                            lineChart.Series[i].Data = data.Select(c => c.FatalCount);
+                            lineChart.Series.Add(new AxSeriesDto { Name = "CPU", Id = i });
+                            lineChart.Series[i].Data = data.Select(c => c.Cpu);
                         }
                     }
-                    lineChart.Labels = data.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
+                    lineChart.Labels = data.Select(x => x.InsertDateTime.ToPerDateString("HH:mm:ss")).ToList();
                     return Ok(lineChart);
                 }
             }

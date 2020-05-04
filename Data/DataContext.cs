@@ -30,9 +30,16 @@ namespace Data
 
         public int SaveChanges(AuditType type)
         {
+            var result = 0;
             CreateAuditLog(type);
-            var result = base.SaveChanges();
-
+            try
+            {
+                result = base.SaveChanges();
+            }
+            catch (DbUpdateConcurrencyException exception)
+            {
+                Console.WriteLine(exception);
+            }
             return result;
         }
 

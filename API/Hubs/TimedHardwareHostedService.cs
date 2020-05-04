@@ -1,0 +1,112 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
+using Data.Repositories;
+using Entities.Framework;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Hosting;
+using System.Linq;
+using API.Models;
+using AutoMapper.QueryableExtensions;
+using Common.Utilities;
+using Entities.Framework.AxCharts;
+
+namespace API.Hubs
+{
+    public class TimedHardwareHostedService : IHostedService, IDisposable
+    {
+        private readonly IBaseRepository<HardwareDataHistory> _repository;
+        private readonly IBaseRepository<UserConnection> _userConnectionRepository;
+        private readonly IBaseRepository<LineChart> _lineRepository;
+        private readonly IHubContext<AxHub> _hub;
+        private Timer _timer;
+
+        public TimedHardwareHostedService(IBaseRepository<HardwareDataHistory> repository, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<LineChart> lineRepository, IHubContext<AxHub> hub)
+        {
+            _repository = repository;
+            _userConnectionRepository = userConnectionRepository;
+            _lineRepository = lineRepository;
+            _hub = hub;
+        }
+
+        public Task StartAsync(CancellationToken stoppingToken)
+        {
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+            return Task.CompletedTask;
+        }
+
+        private void DoWork(object state)
+        {
+            var info = new ProcessStartInfo
+            {
+                FileName = "wmic",
+                Arguments = "OS get FreePhysicalMemory,TotalVisibleMemorySize /Value",
+                RedirectStandardOutput = true
+            };
+            string output;
+            using (var process = Process.Start(info))
+            {
+                output = process?.StandardOutput.ReadToEnd();
+            }
+
+            if (output != null)
+            {
+                var lines = output.Trim().Split("\n");
+                var freeMemoryParts = lines[0].Split("=", StringSplitOptions.RemoveEmptyEntries);
+                var totalMemoryParts = lines[1].Split("=", StringSplitOptions.RemoveEmptyEntries);
+
+                var total = Math.Round(float.Parse(totalMemoryParts[1]) / 1024, 0);
+                var free = Math.Round(float.Parse(freeMemoryParts[1]) / 1024, 0);
+                var used = total - free;
+                var ram = (float)(used * 100 / total);
+
+                var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total", true);
+                var cpu = cpuCounter.NextValue();
+                //Note: In most cases you need to call .NextValue() twice to be able to get the real value
+                if (Math.Abs(cpu) <= 0.00)
+                    cpu = cpuCounter.NextValue();
+
+                _repository.Add(new HardwareDataHistory { InsertDateTime = DateTime.Now, Ram = ram, CreatorUserId = 1, Cpu = cpu });
+
+                var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
+                var lineChart = _lineRepository.GetAll(x => x.AxChartId == 10).ProjectTo<LineChartDto>().FirstOrDefault();
+                var data = _repository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddMinutes(-30))
+                    .OrderBy(x => x.InsertDateTime).ToList();
+                if (lineChart != null)
+                {
+                    lineChart.Series = new List<AxSeriesDto>();
+                    for (var i = 0; i < 2; i++)
+                    {
+                        if (i == 0)
+                        {
+                            lineChart.Series.Add(new AxSeriesDto { Name = "RAM", Id = i });
+                            lineChart.Series[i].Data = data.Select(c => c.Ram);
+                        }
+                        if (i == 1)
+                        {
+                            lineChart.Series.Add(new AxSeriesDto { Name = "CPU", Id = i });
+                            lineChart.Series[i].Data = data.Select(c => c.Cpu);
+                        }
+                    }
+                    lineChart.Labels = data.Select(x => x.InsertDateTime.ToPerDateString("HH:mm:ss")).ToList();
+                }
+                _hub.Clients.Clients(connections).SendAsync("UpdateChart", lineChart);
+            }
+        }
+
+        public Task StopAsync(CancellationToken stoppingToken)
+        {
+            _timer?.Change(Timeout.Infinite, 0);
+            return Task.CompletedTask;
+        }
+
+        public void Dispose()
+        {
+            _timer?.Dispose();
+        }
+
+
+    }
+}

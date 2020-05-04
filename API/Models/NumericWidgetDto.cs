@@ -10,5 +10,6 @@ namespace API.Models
         public string LastUpdated { get; set; }
         public long Data { get; set; }
         public string Color { get; set; }
+        public int AxChartId { get; set; }
     }
 }

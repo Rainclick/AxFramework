@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Entities.Framework;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Data.Repositories
 {
@@ -39,6 +40,11 @@ namespace Data.Repositories
         public DbConnection GetDbConnection()
         {
             return DbContext.Database.GetDbConnection();
+        }
+
+        public EntityEntry<TEntity> Entry(TEntity entity)
+        {
+            return DbContext.Entry(entity);
         }
 
         public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken, bool saveNow = true)

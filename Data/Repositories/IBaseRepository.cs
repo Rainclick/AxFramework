@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Entities.Framework;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Data.Repositories
 {
@@ -43,5 +44,6 @@ namespace Data.Repositories
         TEntity GetFirst(Expression<Func<TEntity, bool>> predicate);
         int Run(string query, params object[] parameters);
         DbConnection GetDbConnection();
+        EntityEntry<TEntity> Entry(TEntity entity);
     }
 }

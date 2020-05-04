@@ -15,7 +15,8 @@ namespace API.Models
         public virtual List<string> Labels { get; set; }
         public int? NextChartId { get; set; }
         public AxChartType NextChartType { get; set; }
-        public string Title { get; set; }
+        public string Title { get; set; }  
+        public int AxChartId { get; set; }
 
         public override void CustomMappings(IMappingExpression<BarChart, BarChartDto> mapping)
         {
