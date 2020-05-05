@@ -67,7 +67,7 @@ namespace API.Hubs
 
                 _repository.Add(new HardwareDataHistory { InsertDateTime = DateTime.Now, Ram = ram, CreatorUserId = 1, Cpu = cpu });
 
-                var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
+                var connections = _userConnectionRepository.GetAll().Select(x => x.ConnectionId).ToList();
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == 10).ProjectTo<LineChartDto>().FirstOrDefault();
                 var data = _repository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddHours(-2))
                     .OrderBy(x => x.InsertDateTime).ToList();
@@ -109,7 +109,7 @@ namespace API.Hubs
             var startTime = DateTime.UtcNow;
             var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
             await Task.Delay(500);
-    
+
             var endTime = DateTime.UtcNow;
             var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
             var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;

@@ -147,7 +147,7 @@ namespace API.Controllers.v1.Basic
             }, cancellationToken);
 
 
-            var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
+            var connections = _userConnectionRepository.GetAll().Select(x => x.ConnectionId).ToList();
             var barChart = _barChartRepository.GetAll(x => x.AxChartId == 5).ProjectTo<BarChartDto>().FirstOrDefault();
             if (barChart != null && barChart.Series?.Count > 0)
             {
@@ -205,7 +205,7 @@ namespace API.Controllers.v1.Basic
 
             await _userTokenRepository.DeleteAsync(userToken, cancellationToken);
 
-            var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
+            var connections = _userConnectionRepository.GetAll().Select(x => x.ConnectionId).ToList();
             var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
             var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
             if (chart != null && numericWidget != null)
@@ -316,26 +316,21 @@ namespace API.Controllers.v1.Basic
         public async Task<ApiResult> SetUserConnectionId(UserConnectionDto connectionDto, CancellationToken cancellationToken)
         {
             var address = Request.HttpContext.Connection.RemoteIpAddress;
+            var clientId = User.Identity.GetClientId();
+            var oldConnections = _userConnectionRepository.GetAll(x => x.UserToken.ExpireDateTime <= DateTime.Now || x.UserToken.ClientId == clientId);
+            await _userConnectionRepository.DeleteRangeAsync(oldConnections, cancellationToken);
+
+            var userToken = await _userTokenRepository.GetFirstAsync(x => x.ClientId == clientId && x.ExpireDateTime > DateTime.Now, cancellationToken);
             var ip = address.GetIp();
             var userConnection = new UserConnection
             {
                 UserId = UserId,
-                Active = false,
                 Ip = ip,
                 ConnectionId = connectionDto.ConnectionId,
-                CreatorUserId = UserId
+                CreatorUserId = UserId,
+                UserTokenId = userToken.Id,
             };
             await _userConnectionRepository.AddAsync(userConnection, cancellationToken);
-            return Ok();
-        }
-
-        [AxAuthorize(StateType = StateType.OnlyToken)]
-        [HttpPost("[action]")]
-        public async Task<ApiResult> DisableUserConnectionId(UserConnectionDto connectionDto, CancellationToken cancellationToken)
-        {
-            var connection = await _userConnectionRepository.GetFirstAsync(x => x.ConnectionId == connectionDto.ConnectionId && x.UserId == UserId, cancellationToken);
-            connection.Active = false;
-            _userConnectionRepository.Update(connection);
             return Ok();
         }
 

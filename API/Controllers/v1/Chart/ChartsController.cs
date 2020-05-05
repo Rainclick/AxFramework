@@ -51,7 +51,7 @@ namespace API.Controllers.v1.Chart
 
         [HttpGet("[action]/{chartId}/{filter?}")]
         [AxAuthorize(StateType = StateType.Ignore)]
-        public ApiResult<dynamic> GetChart(int chartId, string filter = null, DateTime? date1 = null, DateTime? date2 = null, string cid = null)
+        public ApiResult<dynamic> GetChart(int chartId, string filter = null, DateTime? date1 = null, DateTime? date2 = null)
         {
             bool flag = date1 == null || date2 == null;
             if (date1 == null)
@@ -62,16 +62,6 @@ namespace API.Controllers.v1.Chart
 
 
             var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
-            if (chart?.IsLive == true && !string.IsNullOrWhiteSpace(cid))
-            {
-                var connection = _userConnectionRepository.GetAll(x => x.ConnectionId == cid).FirstOrDefault();
-                //_userConnectionRepository.Entry(connection).State = EntityState.Modified;
-                if (connection != null)
-                {
-                    connection.Active = true;
-                    _userConnectionRepository.Update(connection);
-                }
-            }
 
             if (chart?.ChartType == AxChartType.Pie)
             {
@@ -167,32 +157,6 @@ namespace API.Controllers.v1.Chart
                 return Ok(listChart);
             }
             return Ok(chart);
-        }
-
-
-
-        [HttpGet("[action]/{chartId}")]
-        [AxAuthorize(StateType = StateType.Ignore)]
-        public async Task<ApiResult<dynamic>> PushChart(int chartId)
-        {
-            var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
-            var barChart = _barChartRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<BarChartDto>().FirstOrDefault();
-            if (barChart != null && barChart.Series?.Count > 0)
-            {
-                var date = DateTime.Now.AddDays(-15);
-                var data0 = _loginlogRepository.GetAll(x => x.InsertDateTime.Date >= date.Date).ToList()
-                    .GroupBy(x => x.InsertDateTime.Date).OrderBy(x => x.Key).Select(x => new
-                    { Count = x.Count(), x.Key, UnScuccessCount = x.Count(t => t.ValidSignIn == false) }).ToList();
-                //var data = chart.Report.Execute();
-                var id = new Random((int)DateTime.Now.Ticks).Next(10, 60);
-                var a = data0.Select(x => new { Count = x.Count + id }).Select(x => x.Count).ToList();
-                var b = data0.Select(x => x.UnScuccessCount).ToList();
-                barChart.Series[0] = new AxSeriesDto { Data = a, Name = "تعداد ورود به سیستم" };
-                barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
-                barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
-            }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart);
-            return Ok();
         }
 
     }
