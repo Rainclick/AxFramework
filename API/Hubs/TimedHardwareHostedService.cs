@@ -87,7 +87,7 @@ namespace API.Hubs
                             lineChart.Series[i].Data = data.Select(c => c.Cpu);
                         }
                     }
-                    lineChart.Labels = data.Select(x => x.InsertDateTime.ToPerDateString("HH:mm:ss")).ToList();
+                    lineChart.Labels = data.Select(x => x.InsertDateTime.ToPerDateString("HH:mm")).ToList();
                 }
                 _hub.Clients.Clients(connections).SendAsync("UpdateChart", lineChart);
             }

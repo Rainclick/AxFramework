@@ -13,6 +13,9 @@ namespace Entities.Framework
         public int UserId { get; set; }
         [ForeignKey("UserId")]
         public User User { get; set; }
+        public int UserTokenId { get; set; }
+        [ForeignKey("UserTokenId")]
+        public UserToken UserToken{ get; set; }
     }
 
 }

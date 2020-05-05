@@ -129,7 +129,7 @@ namespace API.Controllers.v1.Chart
                             lineChart.Series[i].Data = data.Select(c => c.Cpu);
                         }
                     }
-                    lineChart.Labels = data.Select(x => x.InsertDateTime.ToPerDateString("HH:mm:ss")).ToList();
+                    lineChart.Labels = data.Select(x => x.InsertDateTime.ToPerDateString("HH:mm")).ToList();
                     return Ok(lineChart);
                 }
             }

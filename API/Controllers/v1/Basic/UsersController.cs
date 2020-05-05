@@ -162,9 +162,9 @@ namespace API.Controllers.v1.Basic
                 barChart.Series.Add(new AxSeriesDto { Data = b, Name = "تعداد ورود ناموفق" });
                 barChart.Labels = data0.Select(x => x.Key.ToPerDateString("d MMMM")).ToList();
             }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, 5, cancellationToken);
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", barChart, cancellationToken);
 
-            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x=> x.Report).FirstOrDefaultAsync(cancellationToken);
+            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
             var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
             if (chart != null && numericWidget != null)
             {
@@ -206,7 +206,7 @@ namespace API.Controllers.v1.Basic
             await _userTokenRepository.DeleteAsync(userToken, cancellationToken);
 
             var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
-            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x=> x.Report).FirstOrDefaultAsync(cancellationToken);
+            var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
             var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
             if (chart != null && numericWidget != null)
             {
