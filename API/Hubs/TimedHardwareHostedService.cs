@@ -33,7 +33,7 @@ namespace API.Hubs
 
         public Task StartAsync(CancellationToken stoppingToken)
         {
-            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(30));
+            _timer = new Timer(DoWork, null, TimeSpan.Zero, TimeSpan.FromSeconds(300));
             return Task.CompletedTask;
         }
 
@@ -62,17 +62,14 @@ namespace API.Hubs
                 var used = total - free;
                 var ram = (float)(used * 100 / total);
 
-                var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total", true);
-                var cpu = cpuCounter.NextValue();
-                //Note: In most cases you need to call .NextValue() twice to be able to get the real value
-                if (Math.Abs(cpu) <= 0.00)
-                    cpu = cpuCounter.NextValue();
+                var cpuTask = GetCpuUsageForProcess();
+                var cpu = (float)cpuTask.Result;
 
                 _repository.Add(new HardwareDataHistory { InsertDateTime = DateTime.Now, Ram = ram, CreatorUserId = 1, Cpu = cpu });
 
                 var connections = _userConnectionRepository.GetAll(x => x.Active).Select(x => x.ConnectionId).ToList();
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == 10).ProjectTo<LineChartDto>().FirstOrDefault();
-                var data = _repository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddMinutes(-30))
+                var data = _repository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddHours(-2))
                     .OrderBy(x => x.InsertDateTime).ToList();
                 if (lineChart != null)
                 {
@@ -105,6 +102,20 @@ namespace API.Hubs
         public void Dispose()
         {
             _timer?.Dispose();
+        }
+
+        private async Task<double> GetCpuUsageForProcess()
+        {
+            var startTime = DateTime.UtcNow;
+            var startCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+            await Task.Delay(500);
+    
+            var endTime = DateTime.UtcNow;
+            var endCpuUsage = Process.GetCurrentProcess().TotalProcessorTime;
+            var cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+            var totalMsPassed = (endTime - startTime).TotalMilliseconds;
+            var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
+            return cpuUsageTotal * 100;
         }
 
 

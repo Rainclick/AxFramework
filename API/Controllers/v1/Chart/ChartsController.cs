@@ -111,7 +111,7 @@ namespace API.Controllers.v1.Chart
             {
 
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == chartId).ProjectTo<LineChartDto>().FirstOrDefault();
-                var data = _hardRepository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddMinutes(-30))
+                var data = _hardRepository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddHours(-2))
                     .OrderBy(x => x.InsertDateTime).ToList();
                 if (lineChart != null)
                 {

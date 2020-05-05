@@ -14,6 +14,7 @@ namespace API.Models
         public int? NextChartId { get; set; }
         public AxChartType NextChartType { get; set; }
         public string Title { get; set; }
+        public int AxChartId { get; set; }
 
         public override void CustomMappings(IMappingExpression<LineChart, LineChartDto> mapping)
         {
