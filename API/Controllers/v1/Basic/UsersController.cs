@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Services;
+using Services.Services;
 using Services.Services.Services;
 using UAParser;
 using WebFramework.Api;
@@ -42,6 +43,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
+        private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
         private readonly IBaseRepository<AxChart> _chartRepository;
         private readonly IBaseRepository<BarChart> _barChartRepository;
@@ -51,7 +53,7 @@ namespace API.Controllers.v1.Basic
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
+            IBaseRepository<UserGroup> userGroupRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -62,6 +64,7 @@ namespace API.Controllers.v1.Basic
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
+            _userConnectionService = userConnectionService;
             _userConnectionRepository = userConnectionRepository;
             _chartRepository = chartRepository;
             _barChartRepository = barChartRepository;
@@ -147,7 +150,7 @@ namespace API.Controllers.v1.Basic
             }, cancellationToken);
 
 
-            var connections = _userConnectionRepository.GetAll().Select(x => x.ConnectionId).ToList();
+            var connections = _userConnectionService.GetActiveConnections();
             var barChart = _barChartRepository.GetAll(x => x.AxChartId == 5).ProjectTo<BarChartDto>().FirstOrDefault();
             if (barChart != null && barChart.Series?.Count > 0)
             {
@@ -205,7 +208,7 @@ namespace API.Controllers.v1.Basic
 
             await _userTokenRepository.DeleteAsync(userToken, cancellationToken);
 
-            var connections = _userConnectionRepository.GetAll().Select(x => x.ConnectionId).ToList();
+            var connections = _userConnectionService.GetActiveConnections();
             var chart = await _chartRepository.GetAll(x => x.Id == 9).Include(x => x.Report).FirstOrDefaultAsync(cancellationToken);
             var numericWidget = _numberWidgetRepository.GetAll(x => x.AxChartId == 9).ProjectTo<NumericWidgetDto>().FirstOrDefault();
             if (chart != null && numericWidget != null)

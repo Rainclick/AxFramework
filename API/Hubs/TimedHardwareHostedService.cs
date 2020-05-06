@@ -12,21 +12,22 @@ using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common.Utilities;
 using Entities.Framework.AxCharts;
+using Services.Services;
 
 namespace API.Hubs
 {
     public class TimedHardwareHostedService : IHostedService, IDisposable
     {
         private readonly IBaseRepository<HardwareDataHistory> _repository;
-        private readonly IBaseRepository<UserConnection> _userConnectionRepository;
+        private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<LineChart> _lineRepository;
         private readonly IHubContext<AxHub> _hub;
         private Timer _timer;
 
-        public TimedHardwareHostedService(IBaseRepository<HardwareDataHistory> repository, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<LineChart> lineRepository, IHubContext<AxHub> hub)
+        public TimedHardwareHostedService(IBaseRepository<HardwareDataHistory> repository, IUserConnectionService userConnectionService, IBaseRepository<LineChart> lineRepository, IHubContext<AxHub> hub)
         {
             _repository = repository;
-            _userConnectionRepository = userConnectionRepository;
+            _userConnectionService = userConnectionService;
             _lineRepository = lineRepository;
             _hub = hub;
         }
@@ -67,7 +68,7 @@ namespace API.Hubs
 
                 _repository.Add(new HardwareDataHistory { InsertDateTime = DateTime.Now, Ram = (float)decimal.Round((decimal)ram, 2), CreatorUserId = 1, Cpu = (float)decimal.Round((decimal)cpu, 2) });
 
-                var connections = _userConnectionRepository.GetAll().Select(x => x.ConnectionId).ToList();
+                var connections = _userConnectionService.GetActiveConnections();
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == 10).ProjectTo<LineChartDto>().FirstOrDefault();
                 var data = _repository.GetAll(x => x.InsertDateTime >= DateTime.Now.AddHours(-2))
                     .OrderBy(x => x.InsertDateTime).ToList();

@@ -5,14 +5,11 @@ using Data.Repositories;
 using Entities.Framework.AxCharts;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-using System.Threading.Tasks;
-using API.Hubs;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common.Utilities;
 using Entities.Framework;
 using Entities.Framework.AxCharts.Common;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
@@ -23,43 +20,35 @@ namespace API.Controllers.v1.Chart
     [ApiVersion("1")]
     public class ChartsController : BaseController
     {
-        private readonly IBaseRepository<UserConnection> _userConnectionRepository;
         private readonly IBaseRepository<AxChart> _repository;
         private readonly IBaseRepository<PieChart> _pieRepository;
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IBaseRepository<NumericWidget> _numericWidgetRepository;
         private readonly IBaseRepository<LoginLog> _loginlogRepository;
         private readonly IBaseRepository<LineChart> _lineRepository;
-        private readonly IBaseRepository<Log> _logRepository;
         private readonly IBaseRepository<HardwareDataHistory> _hardRepository;
-        private readonly IHubContext<AxHub> _hub;
+
         public ChartsController(IBaseRepository<AxChart> repository, IBaseRepository<PieChart> pieRepository, IBaseRepository<BarChart> barChartRepository,
-            IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<UserConnection> userConnectionRepository,
-            IBaseRepository<LineChart> lineRepository, IBaseRepository<Log> logRepository, IBaseRepository<HardwareDataHistory> hardRepository, IHubContext<AxHub> hub)
+            IBaseRepository<NumericWidget> numericWidgetRepository, IBaseRepository<LoginLog> loginlogRepository,
+            IBaseRepository<LineChart> lineRepository, IBaseRepository<HardwareDataHistory> hardRepository)
         {
-            _userConnectionRepository = userConnectionRepository;
             _repository = repository;
             _pieRepository = pieRepository;
             _barChartRepository = barChartRepository;
             _numericWidgetRepository = numericWidgetRepository;
             _loginlogRepository = loginlogRepository;
             _lineRepository = lineRepository;
-            _logRepository = logRepository;
             _hardRepository = hardRepository;
-            _hub = hub;
         }
 
         [HttpGet("[action]/{chartId}/{filter?}")]
         [AxAuthorize(StateType = StateType.Ignore)]
         public ApiResult<dynamic> GetChart(int chartId, string filter = null, DateTime? date1 = null, DateTime? date2 = null)
         {
-            bool flag = date1 == null || date2 == null;
             if (date1 == null)
                 date1 = DateTime.Now;
             if (date2 == null)
                 date2 = DateTime.Now.AddDays(1);
-
-
 
             var chart = _repository.GetAll(x => x.Id == chartId).Include(x => x.Report).ThenInclude(x => x.Filters).FirstOrDefault();
 
