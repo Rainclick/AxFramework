@@ -13,10 +13,8 @@ namespace Entities.Framework
         [ForeignKey("SenderId")]
         public User Sender { get; set; }
         public int ReceiverId { get; set; }
-        [ForeignKey("ReceiverId")]
-        public User Receiver { get; set; }
         public MessageType MessageType { get; set; }
-        public int? ReplayId { get; set; }   
+        public int? ReplayId { get; set; }
         [ForeignKey("ReplayId")]
         public Message ReplayMessage { get; set; }
     }
