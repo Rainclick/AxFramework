@@ -65,7 +65,7 @@ namespace API.Hubs
                 var cpuTask = GetCpuUsageForProcess();
                 var cpu = (float)cpuTask.Result;
 
-                _repository.Add(new HardwareDataHistory { InsertDateTime = DateTime.Now, Ram = ram, CreatorUserId = 1, Cpu = cpu });
+                _repository.Add(new HardwareDataHistory { InsertDateTime = DateTime.Now, Ram = (float)decimal.Round((decimal)ram, 2), CreatorUserId = 1, Cpu = (float)decimal.Round((decimal)cpu, 2) });
 
                 var connections = _userConnectionRepository.GetAll().Select(x => x.ConnectionId).ToList();
                 var lineChart = _lineRepository.GetAll(x => x.AxChartId == 10).ProjectTo<LineChartDto>().FirstOrDefault();
