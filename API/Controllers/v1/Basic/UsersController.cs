@@ -43,6 +43,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
+        private readonly IBaseRepository<UserMessage> _userMessageRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
         private readonly IBaseRepository<AxChart> _chartRepository;
@@ -53,7 +54,7 @@ namespace API.Controllers.v1.Basic
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -64,6 +65,7 @@ namespace API.Controllers.v1.Basic
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
+            _userMessageRepository = userMessageRepository;
             _userConnectionService = userConnectionService;
             _userConnectionRepository = userConnectionRepository;
             _chartRepository = chartRepository;
@@ -259,13 +261,13 @@ namespace API.Controllers.v1.Basic
                 OrganizationName = config.OrganizationName,
                 OrganizationLogo = "/api/v1/General/GetOrganizationLogo",
                 UserPicture = "/api/v1/users/GetUserPicture",
-                UnReedMsgCount = 0,
                 UserTheme = user.UserSettings?.Theme,
                 UserDisplayName = user.FullName,
                 VersionName = config.VersionName,
                 DefaultSystemId = user.UserSettings?.DefaultSystemId,
                 SystemsList = _menuRepository.GetAll(x => x.Active && x.ParentId == null).ProjectTo<AxSystem>()
             };
+            userInfo.UnReedMsgCount = _userMessageRepository.Count(x => x.Receivers.Any(r => r.PrimaryKey == UserId && !r.IsSeen));
             return userInfo;
         }
 

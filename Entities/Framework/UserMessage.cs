@@ -25,6 +25,7 @@ namespace Entities.Framework
         public int UserMessageId { get; set; }
         [ForeignKey("UserMessageId")]
         public UserMessage UserMessage { get; set; }
+        public bool IsSeen { get; set; }
     }
 
     public enum ReceiverType

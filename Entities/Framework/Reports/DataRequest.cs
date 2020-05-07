@@ -19,7 +19,7 @@ namespace Entities.Framework.Reports
         //string filter, string sort, int page, int PageSize, SortType SortType
         public List<AxFilter> Filters { get; set; }
         public string Sort { get; set; }
-        public int PageSize { get; set; }
+        public int PageSize { get; set; } = 10;
         public SortType SortType { get; set; }
         public int PageIndex { get; set; }
     }
