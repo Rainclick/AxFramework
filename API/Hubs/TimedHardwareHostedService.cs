@@ -65,7 +65,8 @@ namespace API.Hubs
 
                 var cpuTask = GetCpuUsageForProcess();
                 var cpu = (float)cpuTask.Result;
-
+                if (cpu < 0.1)
+                    cpu = 1.00f;
                 _repository.Add(new HardwareDataHistory { InsertDateTime = DateTime.Now, Ram = (float)decimal.Round((decimal)ram, 2), CreatorUserId = 1, Cpu = (float)decimal.Round((decimal)cpu, 2) });
 
                 var connections = _userConnectionService.GetActiveConnections();
