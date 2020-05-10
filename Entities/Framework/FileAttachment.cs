@@ -1,4 +1,6 @@
-﻿namespace Entities.Framework
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Entities.Framework
 {
     public class FileAttachment : BaseEntity
     {
@@ -11,5 +13,25 @@
         public int Key { get; set; }
         public long Size { get; set; }
         public string TypeName { get; set; }
+        [ForeignKey("FileAttachmentTypeId")]
+        public FileAttachmentType FileAttachmentType { get; set; }
+        public int FileAttachmentTypeId { get; set; }
+    }
+
+    public class FileAttachmentType : BaseEntity
+    {
+        public string TypeTitle { get; set; }
+        public bool IsBaseType { get; set; }
+        public FileAttachmentTypeEnum AttachmentTypeEnum { get; set; }
+    }
+
+    public enum FileAttachmentTypeEnum
+    {
+        UserAvatar,
+        CardMeli,
+        ShenasNameh,
+        Passport,
+        Contract,
+        UserDefined
     }
 }

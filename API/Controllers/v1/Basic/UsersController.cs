@@ -43,6 +43,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
+        private readonly IBaseRepository<FileAttachment> _fileAttachmentRepository;
         private readonly IBaseRepository<UserMessage> _userMessageRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
@@ -54,7 +55,7 @@ namespace API.Controllers.v1.Basic
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileAttachmentRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -65,6 +66,7 @@ namespace API.Controllers.v1.Basic
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
+            _fileAttachmentRepository = fileAttachmentRepository;
             _userMessageRepository = userMessageRepository;
             _userConnectionService = userConnectionService;
             _userConnectionRepository = userConnectionRepository;
@@ -337,6 +339,18 @@ namespace API.Controllers.v1.Basic
             };
             await _userConnectionRepository.AddAsync(userConnection, cancellationToken);
             return Ok();
+        }
+
+        [AxAuthorize(StateType = StateType.OnlyToken)]
+        [HttpGet("[action]/{userId?}")]
+        public async Task<IActionResult> GetUserAvatar(CancellationToken cancellationToken, int? userId = null)
+        {
+            if (!userId.HasValue)
+                userId = UserId;
+            var img = await _fileAttachmentRepository.GetFirstAsync(x => x.FileAttachmentType.AttachmentTypeEnum == FileAttachmentTypeEnum.UserAvatar && x.TypeName == "Users" && x.Key == userId, cancellationToken);
+            if (img == null)
+                return NotFound();
+            return File(img.ContentBytes, img.ContentType);
         }
 
     }
