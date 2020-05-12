@@ -1,4 +1,6 @@
-﻿namespace Entities.Framework
+﻿using FluentValidation;
+
+namespace Entities.Framework
 {
     public class HardwareDataHistory : BaseEntity
     {
@@ -6,5 +8,9 @@
         public float Ram { get; set; }
         public float NetworkIn { get; set; }
         public float NetworkOut { get; set; }
+    }
+
+    public class HardwareDataHistoryValidator : AbstractValidator<HardwareDataHistory>
+    {
     }
 }

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.RegularExpressions;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -14,6 +14,8 @@ namespace Entities.Framework
         public virtual User Group { get; set; }
         public int? GroupId { get; set; }
         [ForeignKey("GroupId")]
-        public virtual AxGroup  User { get; set; }
+        public virtual AxGroup User { get; set; }
     }
+
+    public class PermissionValidator : AbstractValidator<Permission> { }
 }

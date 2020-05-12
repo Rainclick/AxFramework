@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Common;
+using FluentValidation;
 
 namespace Entities.Framework.Reports
 {
@@ -15,6 +16,9 @@ namespace Entities.Framework.Reports
         public ReportType ExecuteType { get; set; }
         public string GroupBy { get; set; }
     }
+
+    public class ReportValidator : AbstractValidator<Report> { }
+
 
     public enum ReportType
     {

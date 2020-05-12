@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -34,4 +35,14 @@ namespace Entities.Framework
         [Display(Name = "حذف  شده")]
         Delete = 3
     }
+
+    public class AuditValidator : AbstractValidator<Audit>
+    {
+        public AuditValidator()
+        {
+            RuleFor(x => x.Value).NotEmpty();
+        }
+    }
+
+    public class AuditTableValidator : AbstractValidator<AuditTable> { }
 }

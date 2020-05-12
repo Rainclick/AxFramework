@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -18,12 +19,15 @@ namespace Entities.Framework
         public int FileAttachmentTypeId { get; set; }
     }
 
+    public class FileAttachmentValidator : AbstractValidator<FileAttachment> { }
+
     public class FileAttachmentType : BaseEntity
     {
         public string TypeTitle { get; set; }
         public bool IsBaseType { get; set; }
         public FileAttachmentTypeEnum AttachmentTypeEnum { get; set; }
     }
+    public class FileAttachmentTypeValidator : AbstractValidator<FileAttachmentType> { }
 
     public enum FileAttachmentTypeEnum
     {

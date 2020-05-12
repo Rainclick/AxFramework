@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework.AxCharts
 {
@@ -12,4 +13,5 @@ namespace Entities.Framework.AxCharts
         [ForeignKey("AxChartId")]
         public AxChart AxChart { get; set; }
     } 
+    public class NumericWidgetValidator : AbstractValidator<NumericWidget> { }
 }

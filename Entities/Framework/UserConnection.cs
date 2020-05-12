@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -9,7 +10,10 @@ namespace Entities.Framework
         public int UserId { get; set; }
         public int UserTokenId { get; set; }
         [ForeignKey("UserTokenId")]
-        public UserToken UserToken{ get; set; }
+        public UserToken UserToken { get; set; }
     }
+
+
+    public class UserConnectionValidator : AbstractValidator<UserConnection> { }
 
 }

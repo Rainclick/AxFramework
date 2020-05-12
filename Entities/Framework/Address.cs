@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -23,5 +24,14 @@ namespace Entities.Framework
         Home = 0,
         Work = 1,
         Other = 2
+    }
+
+    public class AddressValidator : AbstractValidator<Address>
+    {
+        public AddressValidator()
+        {
+            RuleFor(x => x.UserId).GreaterThan(0);
+            RuleFor(x => x.Content).NotEmpty();
+        }
     }
 }

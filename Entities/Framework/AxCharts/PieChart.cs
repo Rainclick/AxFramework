@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework.AxCharts.Common;
+using FluentValidation;
 
 namespace Entities.Framework.AxCharts
 {
@@ -13,4 +13,6 @@ namespace Entities.Framework.AxCharts
         [ForeignKey("AxChartId")]
         public AxChart AxChart { get; set; }
     }
+
+    public class PieChartValidator : AbstractValidator<PieChart> { }
 }

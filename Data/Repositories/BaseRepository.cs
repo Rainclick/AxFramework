@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Entities.Framework;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Data.Repositories
@@ -15,13 +16,15 @@ namespace Data.Repositories
     public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : BaseEntity, IEntity
     {
         protected readonly DataContext DbContext;
+        private readonly IValidator<TEntity> _validator;
         public DbSet<TEntity> Entities { get; }
         public virtual IQueryable<TEntity> Table => Entities;
         public virtual IQueryable<TEntity> TableNoTracking => Entities.AsNoTracking();
 
-        public BaseRepository(DataContext dbContext)
+        public BaseRepository(DataContext dbContext, IValidator<TEntity> validator)
         {
             DbContext = dbContext;
+            _validator = validator;
             Entities = DbContext.Set<TEntity>();
         }
 
@@ -144,6 +147,9 @@ namespace Data.Repositories
         {
             Assert.NotNull(entity, nameof(entity));
             entity.InsertDateTime = DateTime.Now;
+            var res = _validator.Validate(entity);
+            if(!res.IsValid)
+                throw new ValidationException(res.Errors);
             Entities.Add(entity);
             if (saveNow)
                 DbContext.SaveChanges(AuditType.Add);

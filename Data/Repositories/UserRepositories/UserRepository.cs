@@ -6,13 +6,14 @@ using Common;
 using Common.Exception;
 using Common.Utilities;
 using Entities.Framework;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories.UserRepositories
 {
     public class UserRepository : BaseRepository<User>, IUserRepository
     {
-        public UserRepository(DataContext dbContext) : base(dbContext)
+        public UserRepository(DataContext dbContext, IValidator<User> validator) : base(dbContext, validator)
         {
         }
 

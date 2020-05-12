@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -8,4 +9,6 @@ namespace Entities.Framework
         public string Description { get; set; }
         public virtual ICollection<UserGroup> GroupUsers { get; set; }
     }
+
+    public class AxGroupValidator : AbstractValidator<AxGroup> { }
 }

@@ -43,6 +43,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
+        private readonly IBaseRepository<Address> _addressRepository;
         private readonly IBaseRepository<FileAttachment> _fileAttachmentRepository;
         private readonly IBaseRepository<UserMessage> _userMessageRepository;
         private readonly IUserConnectionService _userConnectionService;
@@ -55,7 +56,7 @@ namespace API.Controllers.v1.Basic
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileAttachmentRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
+            IBaseRepository<UserGroup> userGroupRepository,IBaseRepository<Address> addressRepository, IBaseRepository<FileAttachment> fileAttachmentRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -66,6 +67,7 @@ namespace API.Controllers.v1.Basic
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
+            _addressRepository = addressRepository;
             _fileAttachmentRepository = fileAttachmentRepository;
             _userMessageRepository = userMessageRepository;
             _userConnectionService = userConnectionService;
@@ -92,6 +94,9 @@ namespace API.Controllers.v1.Basic
             var address = Request.HttpContext.Connection.RemoteIpAddress;
             var computerName = address.GetDeviceName();
             var ip = address.GetIp();
+
+            _userRepository.Add(new User());
+            _addressRepository.Add(new Address());
 
             #region loginLog And configLoad
 

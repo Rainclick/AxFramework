@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Configuration;
 using System.IO;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NLog;
 using NLog.Web;
 
 namespace API

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Common;
 using System.Net;
 using Common.Exception;
+using FluentValidation;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
@@ -74,6 +75,7 @@ namespace WebFramework.Middlewares
                         dic.Add("InnerException.Exception", exception.InnerException.Message);
                         dic.Add("InnerException.StackTrace", exception.InnerException.StackTrace);
                     }
+
                     if (exception.AdditionalData != null)
                         dic.Add("AdditionalData", JsonConvert.SerializeObject(exception.AdditionalData));
 
@@ -83,6 +85,7 @@ namespace WebFramework.Middlewares
                 {
                     message = exception.Message;
                 }
+
                 await WriteToResponseAsync();
             }
             catch (SecurityTokenExpiredException exception)
@@ -99,6 +102,13 @@ namespace WebFramework.Middlewares
                 theEvent.Exception = exception;
                 _logger.Error(theEvent);
                 SetUnAuthorizeResponse(exception);
+                await WriteToResponseAsync();
+            }
+            catch (ValidationException validationException)
+            {
+                theEvent.Message = validationException.Message;
+                theEvent.Exception = validationException;
+                _logger.Info(theEvent);
                 await WriteToResponseAsync();
             }
             catch (Exception exception)

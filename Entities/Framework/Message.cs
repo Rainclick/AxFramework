@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -25,4 +26,6 @@ namespace Entities.Framework
         Voice,
         Video,
     }
+
+    public class MessageValidator : AbstractValidator<Message> { }
 }

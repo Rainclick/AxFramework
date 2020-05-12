@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework.AxCharts;
-using Entities.Framework.AxCharts.Common;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -17,4 +17,5 @@ namespace Entities.Framework
         [ForeignKey("AxChartId")]
         public AxChart AxChart { get; set; }
     }
+    public class UserChartValidator : AbstractValidator<UserChart> { }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -11,4 +12,5 @@ namespace Entities.Framework
         [ForeignKey("UserId")]
         public virtual User User { get; set; }
     }
+    public class UserGroupValidator : AbstractValidator<UserGroup> { }
 }

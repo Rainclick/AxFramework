@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -12,4 +13,6 @@ namespace Entities.Framework
         [ForeignKey("DefaultSystemId")]
         public Menu DefaultSystem { get; set; }
     }
+
+    public class UserSettingValidator : AbstractValidator<UserSetting> { }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Reflection.Metadata.Ecma335;
+using FluentValidation;
 
 namespace Entities.Framework.Reports
 {
@@ -11,6 +11,8 @@ namespace Entities.Framework.Reports
         public int TakeSize { get; set; }
         public ICollection<ColumnReport> Columns { get; set; }
     }
+
+    public class NewReportValidator : AbstractValidator<NewReport> { }
 
     public class ColumnReport : BaseEntity
     {
@@ -23,6 +25,7 @@ namespace Entities.Framework.Reports
         public string JoinId { get; set; }
         public OrderByReport OrderByReport { get; set; }
     }
+    public class ColumnReportValidator : AbstractValidator<ColumnReport> { }
 
     public class OrderByReport : BaseEntity
     {
@@ -48,6 +51,8 @@ namespace Entities.Framework.Reports
 
         //public string Type { get; set; }
     }
+    public class FilterValidator : AbstractValidator<Filter> { }
+
 
     public enum OrderByType
     {

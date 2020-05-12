@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework.AxCharts.Common;
 using Entities.Framework.Reports;
+using FluentValidation;
 
 namespace Entities.Framework.AxCharts
 {
@@ -19,4 +20,6 @@ namespace Entities.Framework.AxCharts
         public Report Report { get; set; }
         public bool IsLive { get; set; }
     }
+
+    public class AxChartValidator : AbstractValidator<AxChart> { }
 }

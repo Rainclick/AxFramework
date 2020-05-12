@@ -4,6 +4,8 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Common;
 using Data;
+using Entities.Framework;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -47,7 +49,8 @@ namespace API
             services.AddMvc(options =>
             {
                 options.EnableEndpointRouting = false;
-            }).AddNewtonsoftJson(options => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
+            }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserValidator>())
+                .AddNewtonsoftJson(options => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();
@@ -88,8 +91,8 @@ namespace API
             var configurationVariable = Configuration.GetConnectionString("SqlServer");
             ConnSingleton.Instance.Value = configurationVariable;
             ConnSingleton.Instance.Name = "SqlServer";
-          
-  
+
+
 
             this.AutofacContainer = app.ApplicationServices.GetAutofacRoot();
 

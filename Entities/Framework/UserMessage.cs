@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -50,4 +51,7 @@ namespace Entities.Framework
         Secret,
         CompletelySecret
     }
+
+    public class UserMessageValidator : AbstractValidator<UserMessage> { }
+    public class UserMessageReceiverValidator : AbstractValidator<UserMessageReceiver> { }
 }

@@ -6,6 +6,7 @@ using Data.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using Entities.Framework;
+using FluentValidation;
 using Services.Services;
 
 namespace WebFramework.Configuration

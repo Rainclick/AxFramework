@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Common;
+using FluentValidation;
 
 
 namespace Entities.Framework
@@ -18,4 +19,5 @@ namespace Entities.Framework
         public AxOp AxOp { get; set; }
         public int OrderId { get; set; }
     }
+    public class MenuValidator : AbstractValidator<Menu> { }
 }

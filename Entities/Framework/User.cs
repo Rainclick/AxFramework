@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -27,6 +28,15 @@ namespace Entities.Framework
         Female = 0,
         Male = 1,
         None = 2
+    }
+
+    public class UserValidator : AbstractValidator<User>
+    {
+        public UserValidator() {
+            RuleFor(x => x.Id).NotNull();
+            RuleFor(x => x.FirstName).NotEmpty();
+            RuleFor(x => x.LastName).NotEmpty();
+        }
     }
 
 }

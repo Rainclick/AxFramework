@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -17,4 +18,6 @@ namespace Entities.Framework
         public string MachineName { get; set; }
         public bool ValidSignIn { get; set; }
     }
+
+    public class LoginLogValidator : AbstractValidator<LoginLog> { }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -22,4 +23,6 @@ namespace Entities.Framework
         public string Type { get; set; }
         public string UserAgent { get; set; }
     }
+
+    public class LogValidator : AbstractValidator<Log> { }
 }

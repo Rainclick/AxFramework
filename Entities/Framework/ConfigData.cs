@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -10,4 +11,6 @@ namespace Entities.Framework
         public DateTime? VersionDate { get; set; }
         public bool Active { get; set; }
     }
+
+    public class ConfigDataValidator : AbstractValidator<ConfigData> { }
 }

@@ -9,6 +9,7 @@ using ExpressionBuilder.Common;
 using ExpressionBuilder.Generics;
 using ExpressionBuilder.Interfaces;
 using ExpressionBuilder.Operations;
+using FluentValidation;
 using Z.Expressions;
 
 namespace Entities.Framework.Reports
@@ -38,6 +39,8 @@ namespace Entities.Framework.Reports
 
         //public string Type { get; set; }
     }
+
+    public class AxFilterValidator : AbstractValidator<AxFilter> { }
 
     public enum OperationType
     {

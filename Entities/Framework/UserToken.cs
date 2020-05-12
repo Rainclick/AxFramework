@@ -1,6 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -18,4 +18,5 @@ namespace Entities.Framework
         public User User { get; set; }
         public DateTime ExpireDateTime { get; set; }
     }
+    public class UserTokenValidator : AbstractValidator<UserToken> { }
 }
