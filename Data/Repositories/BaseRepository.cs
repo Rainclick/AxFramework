@@ -54,6 +54,11 @@ namespace Data.Repositories
         {
             Assert.NotNull(entity, nameof(entity));
             entity.InsertDateTime = DateTime.Now;
+
+            var res = await _validator.ValidateAsync(entity, cancellationToken);
+            if (!res.IsValid)
+                throw new ValidationException(res.Errors);
+
             await Entities.AddAsync(entity, cancellationToken).ConfigureAwait(false);
             if (saveNow)
                 await DbContext.SaveChangesAsync(AuditType.Add, cancellationToken).ConfigureAwait(false);
@@ -61,6 +66,12 @@ namespace Data.Repositories
 
         public virtual async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken, bool saveNow = true)
         {
+            foreach (var entity in entities)
+            {
+                var res = await _validator.ValidateAsync(entity, cancellationToken);
+                if (!res.IsValid)
+                    throw new ValidationException(res.Errors);
+            }
             await Entities.AddRangeAsync(entities, cancellationToken).ConfigureAwait(false);
             if (saveNow)
                 await DbContext.SaveChangesAsync(AuditType.Add, cancellationToken).ConfigureAwait(false);
@@ -70,6 +81,11 @@ namespace Data.Repositories
         {
             Assert.NotNull(entity, nameof(entity));
             entity.ModifiedDateTime = DateTime.Now;
+
+            var res = await _validator.ValidateAsync(entity, cancellationToken);
+            if (!res.IsValid)
+                throw new ValidationException(res.Errors);
+
             AttachEntity(entity);
             Entities.Update(entity);
             if (saveNow)
@@ -78,6 +94,13 @@ namespace Data.Repositories
 
         public virtual async Task UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken, bool saveNow = true)
         {
+            foreach (var entity in entities)
+            {
+                var res = await _validator.ValidateAsync(entity, cancellationToken);
+                if (!res.IsValid)
+                    throw new ValidationException(res.Errors);
+            }
+
             Entities.UpdateRange(entities);
             if (saveNow)
                 await DbContext.SaveChangesAsync(AuditType.Update, cancellationToken).ConfigureAwait(false);
@@ -148,7 +171,7 @@ namespace Data.Repositories
             Assert.NotNull(entity, nameof(entity));
             entity.InsertDateTime = DateTime.Now;
             var res = _validator.Validate(entity);
-            if(!res.IsValid)
+            if (!res.IsValid)
                 throw new ValidationException(res.Errors);
             Entities.Add(entity);
             if (saveNow)
@@ -159,6 +182,12 @@ namespace Data.Repositories
         {
             if (entities != null)
             {
+                foreach (var entity in entities)
+                {
+                    var res = _validator.Validate(entity);
+                    if (!res.IsValid)
+                        throw new ValidationException(res.Errors);
+                }
                 Entities.AddRange(entities);
                 if (saveNow)
                     DbContext.SaveChanges(AuditType.Add);
@@ -168,6 +197,10 @@ namespace Data.Repositories
         public virtual void Update(TEntity entity, bool saveNow = true)
         {
             Assert.NotNull(entity, nameof(entity));
+
+            var res = _validator.Validate(entity);
+            if (!res.IsValid)
+                throw new ValidationException(res.Errors);
 
             AttachEntity(entity);
             entity.ModifiedDateTime = DateTime.Now;
@@ -192,6 +225,13 @@ namespace Data.Repositories
 
         public virtual void UpdateRange(IEnumerable<TEntity> entities, bool saveNow = true)
         {
+            foreach (var entity in entities)
+            {
+                var res = _validator.Validate(entity);
+                if (!res.IsValid)
+                    throw new ValidationException(res.Errors);
+            }
+
             Entities.UpdateRange(entities);
             if (saveNow)
                 DbContext.SaveChanges(AuditType.Update);
