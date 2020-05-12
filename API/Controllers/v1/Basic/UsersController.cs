@@ -95,9 +95,6 @@ namespace API.Controllers.v1.Basic
             var computerName = address.GetDeviceName();
             var ip = address.GetIp();
 
-            _userRepository.Add(new User());
-            _addressRepository.Add(new Address());
-
             #region loginLog And configLoad
 
             var config = _memoryCache.GetOrCreate(CacheKeys.ConfigData, entry =>

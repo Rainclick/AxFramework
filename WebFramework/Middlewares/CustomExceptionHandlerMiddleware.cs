@@ -108,6 +108,9 @@ namespace WebFramework.Middlewares
             {
                 theEvent.Message = validationException.Message;
                 theEvent.Exception = validationException;
+                apiStatusCode = ApiResultStatusCode.LogicError;
+                httpStatusCode = HttpStatusCode.OK;
+                message = theEvent.Message;
                 _logger.Info(theEvent);
                 await WriteToResponseAsync();
             }
