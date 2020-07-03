@@ -10,7 +10,7 @@ using ExpressionBuilder.Generics;
 using ExpressionBuilder.Interfaces;
 using ExpressionBuilder.Operations;
 using FluentValidation;
-using Z.Expressions;
+//using Z.Expressions;
 
 namespace Entities.Framework.Reports
 {
@@ -126,10 +126,10 @@ namespace Entities.Framework.Reports
 
                     if (requestFilter.IsCalculation)
                     {
-                        if (!string.IsNullOrWhiteSpace(requestFilter.Value1))
-                            requestFilter.Value1 = Eval.Execute<string>(requestFilter.Value1);
-                        if (!string.IsNullOrWhiteSpace(requestFilter.Value2))
-                            requestFilter.Value2 = Eval.Execute<string>(requestFilter.Value2);
+                        //if (!string.IsNullOrWhiteSpace(requestFilter.Value1))
+                        //    requestFilter.Value1 = Eval.Execute<string>(requestFilter.Value1);
+                        //if (!string.IsNullOrWhiteSpace(requestFilter.Value2))
+                        //    requestFilter.Value2 = Eval.Execute<string>(requestFilter.Value2);
                     }
 
                     var typeConverter = TypeDescriptor.GetConverter(type);
