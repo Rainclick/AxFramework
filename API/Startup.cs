@@ -43,7 +43,7 @@ namespace API
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
                 builder.AllowAnyOrigin()
-                    .AllowAnyMethod()
+                    .AllowAnyMethod().WithExposedHeaders("X-Pagination")
                     .AllowAnyHeader();
             }));
             services.AddMvc(options =>

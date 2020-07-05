@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System;
+using AutoMapper;
 using Common.Utilities;
 using Entities.Framework;
 using WebFramework.Api;
@@ -11,6 +12,7 @@ namespace API.Models
         public int PrimaryKey { get; set; }
         public string UserDisplay { get; set; }
         public string AuditTypeDisplay { get; set; }
+        public DateTime EntityInsertDateTime { get; set; }
 
 
         public override void CustomMappings(IMappingExpression<Audit, AuditDto> mapping)

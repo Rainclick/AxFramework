@@ -5,6 +5,7 @@ using AutoMapper.QueryableExtensions;
 using Common;
 using Data.Repositories;
 using Entities.Framework;
+using Entities.Framework.Reports;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
@@ -27,9 +28,11 @@ namespace API.Controllers.v1.Basic
 
         [HttpGet]
         [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.GroupList, ShowInMenu = true)]
-        public ApiResult<IQueryable<AxGroupDto>> Get(CancellationToken cancellationToken)
+        public ApiResult<IQueryable<AxGroupDto>> Get([FromQuery] DataRequest request, CancellationToken cancellationToken)
         {
-            var groups = _groupRepository.GetAll().ProjectTo<AxGroupDto>();
+            var predicate = request.GetFilter<AxGroup>();
+            var groups = _groupRepository.GetAll(predicate).ProjectTo<AxGroupDto>();
+            Response.Headers.Add("X-Pagination", _groupRepository.Count(predicate).ToString());
             return Ok(groups);
         }
 

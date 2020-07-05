@@ -42,6 +42,7 @@ namespace API.Controllers.v1.Basic
         {
             var predicate = request.GetFilter<Log>();
             var data = _logRepository.GetAll(predicate).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<LogDto>();
+            Response.Headers.Add("X-Pagination", _logRepository.Count(predicate).ToString());
             return Ok(data);
         }
 
