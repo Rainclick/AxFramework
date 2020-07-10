@@ -302,7 +302,7 @@ namespace API.Controllers.v1.Basic
         public ApiResult<IQueryable<UserSelectDto>> Get([FromQuery] DataRequest request)
         {
             var predicate = request.GetFilter<User>();
-            var users = _userRepository.GetAll(predicate).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<UserSelectDto>();
+            var users = _userRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<UserSelectDto>();
             Response.Headers.Add("X-Pagination", _userRepository.Count(predicate).ToString());
             return Ok(users);
         }
@@ -354,6 +354,23 @@ namespace API.Controllers.v1.Basic
             if (img == null)
                 return NotFound();
             return File(img.ContentBytes, img.ContentType);
+        }
+
+        [HttpDelete("{id}")]
+        public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
+        {
+            var model = await _userRepository.GetFirstAsync(x => x.Id.Equals(id), cancellationToken);
+            await _userRepository.DeleteAsync(model, cancellationToken);
+            return Ok();
+        }
+
+        [HttpPut]
+        public virtual async Task<ApiResult<UserDto>> Update(UserDto dto, CancellationToken cancellationToken)
+        {
+            var model = await _userRepository.GetFirstAsync(x => x.Id.Equals(dto.Id), cancellationToken);
+            await _userRepository.UpdateAsync(model, cancellationToken);
+            var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.Id.Equals(model.Id), cancellationToken);
+            return resultDto;
         }
 
     }

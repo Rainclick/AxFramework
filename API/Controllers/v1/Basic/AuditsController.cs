@@ -32,7 +32,7 @@ namespace API.Controllers.v1.Basic
         public virtual ApiResult<IQueryable<AuditDto>> Get([FromQuery] DataRequest request)
         {
             var predicate = request.GetFilter<Audit>();
-            var data = _repository.GetAll(predicate).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<AuditDto>();
+            var data = _repository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<AuditDto>();
             return Ok(data);
         }
 
@@ -41,7 +41,7 @@ namespace API.Controllers.v1.Basic
         public virtual ApiResult<IQueryable<LogDto>> GetLogs([FromQuery] DataRequest request)
         {
             var predicate = request.GetFilter<Log>();
-            var data = _logRepository.GetAll(predicate).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).OrderBy(request.Sort, request.SortType).ProjectTo<LogDto>();
+            var data = _logRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<LogDto>();
             Response.Headers.Add("X-Pagination", _logRepository.Count(predicate).ToString());
             return Ok(data);
         }

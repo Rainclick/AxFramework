@@ -1,15 +1,17 @@
 ﻿using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
 using Data.Repositories;
 using Entities.Framework;
-using Entities.Framework.Reports;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebFramework.Api;
 using WebFramework.Filters;
+using Common.Utilities;
+using Entities.Framework.Reports;
 
 namespace API.Controllers.v1.Basic
 {
@@ -31,7 +33,7 @@ namespace API.Controllers.v1.Basic
         public ApiResult<IQueryable<AxGroupDto>> Get([FromQuery] DataRequest request, CancellationToken cancellationToken)
         {
             var predicate = request.GetFilter<AxGroup>();
-            var groups = _groupRepository.GetAll(predicate).ProjectTo<AxGroupDto>();
+            var groups = _groupRepository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<AxGroupDto>();
             Response.Headers.Add("X-Pagination", _groupRepository.Count(predicate).ToString());
             return Ok(groups);
         }
