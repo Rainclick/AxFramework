@@ -45,10 +45,10 @@ namespace API.Controllers.v1.Basic
 
         [HttpPost]
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GeoInfoInsert)]
-        public virtual async Task<ApiResult<LogDto>> Create(GeoDto dto, CancellationToken cancellationToken)
+        public virtual async Task<ApiResult<AddressDto>> Create(GeoDto dto, CancellationToken cancellationToken)
         {
             await _repository.AddAsync(dto.ToEntity(), cancellationToken);
-            var resultDto = await _repository.TableNoTracking.ProjectTo<LogDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
+            var resultDto = await _repository.TableNoTracking.ProjectTo<AddressDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
         }
 

@@ -8,7 +8,7 @@ namespace Entities.Framework
     {
         [Required]
         public string Content { get; set; }
-        public string City { get; set; }
+        public int Geo { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsMainAddress { get; set; }
         public User User { get; set; }
