@@ -8,17 +8,11 @@ namespace API.Models
     public class UserSelectDto: BaseDto<UserSelectDto, User, int>
     {
         public string UserName { get; set; }
-        public string FullName { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public DateTime? ExpireDateTime { get; set; }
         public bool IsActive { get; set; }
         public DateTimeOffset? LastLoginDate { get; set; }
 
-     
-        public override void CustomMappings(IMappingExpression<User, UserSelectDto> mapping)
-        {
-            mapping.ForMember(
-                dest => dest.FullName,
-                config => config.MapFrom(src => $"{src.FirstName} {src.LastName}")
-            );
-        }
     }
 }

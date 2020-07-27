@@ -12,8 +12,16 @@ namespace API.Models
     {
         public string UserName { get; set; }
         public string Password { get; set; }
+        public string RePassword { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
         public string FullName { get; set; }
+        public string LastLoginDate { get; set; }
         public bool IsActive { get; set; }
+        public GenderType GenderType { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public DateTime? ExpireDateTime { get; set; }
+        public bool OutOfOrgAccess { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         { 

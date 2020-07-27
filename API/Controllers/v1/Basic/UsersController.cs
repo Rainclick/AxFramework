@@ -317,7 +317,7 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.UserItem)]
         public ApiResult<UserSelectDto> Get(int id)
         {
-            var user = _userRepository.GetAll(x => x.Id == id).ProjectTo<UserSelectDto>().FirstOrDefault();
+            var user = _userRepository.GetAll(x => x.Id == id).ProjectTo<UserDto>().FirstOrDefault();
             return Ok(user);
         }
 
@@ -370,9 +370,8 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserUpdate, Order = 3)]
         public virtual async Task<ApiResult<UserDto>> Update(UserDto dto, CancellationToken cancellationToken)
         {
-            var model = await _userRepository.GetFirstAsync(x => x.Id.Equals(dto.Id), cancellationToken);
-            await _userRepository.UpdateAsync(model, cancellationToken);
-            var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.Id.Equals(model.Id), cancellationToken);
+            await _userRepository.UpdateAsync(dto.ToEntity(), cancellationToken);
+            var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
         }
 

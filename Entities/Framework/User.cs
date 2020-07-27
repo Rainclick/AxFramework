@@ -15,7 +15,9 @@ namespace Entities.Framework
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public GenderType GenderType { get; set; }
-        public DateTime BirthDate { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public DateTime? ExpireDateTime { get; set; }
+        public bool OutOfOrgAccess { get; set; }
         public DateTimeOffset? LastLoginDate { get; set; }
         public ICollection<Address> Addresses { get; set; }
         public UserSetting UserSettings { get; set; }

@@ -74,5 +74,15 @@
         GroupUpdate,
         [AxDisplay("حذف گروه", "10", UserManagement)]
         GroupDelete,
+        [AxDisplay("اطلاعات عمومی", "05", Basic)]
+        GeneralInfo,
+        [AxDisplay("اطلاعات جغرافیایی", "01", GeneralInfo)]
+        GeoInfo,
+        [AxDisplay("ایجاد", "01", GeoInfo)]
+        GeoInfoInsert,
+        [AxDisplay("ویرایش", "02", GeoInfo)]
+        GeoInfoUpdate,
+        [AxDisplay("حذف", "03", GeoInfo)]
+        GeoInfoDelete,
     }
 }
