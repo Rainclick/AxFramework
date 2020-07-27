@@ -315,7 +315,7 @@ namespace API.Controllers.v1.Basic
         [HttpGet]
         [Route("{id}")]
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.UserItem)]
-        public ApiResult<UserSelectDto> Get(int id)
+        public ApiResult<UserDto> Get(int id)
         {
             var user = _userRepository.GetAll(x => x.Id == id).ProjectTo<UserDto>().FirstOrDefault();
             return Ok(user);
