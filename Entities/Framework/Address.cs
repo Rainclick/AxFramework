@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using FluentValidation;
 
 namespace Entities.Framework
@@ -8,7 +9,9 @@ namespace Entities.Framework
     {
         [Required]
         public string Content { get; set; }
-        public int Geo { get; set; }
+        public int GeoId { get; set; }
+        [ForeignKey("GeoId")]
+        public Geo Geo { get; set; }
         public bool IsActive { get; set; } = true;
         public bool IsMainAddress { get; set; }
         public User User { get; set; }
@@ -21,8 +24,11 @@ namespace Entities.Framework
 
     public enum AddressType
     {
+        [Display(Name = "خانه")]
         Home = 0,
+        [Display(Name = "محل کار")]
         Work = 1,
+        [Display(Name = "سایر")]
         Other = 2
     }
 
