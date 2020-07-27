@@ -356,6 +356,7 @@ namespace API.Controllers.v1.Basic
             return File(img.ContentBytes, img.ContentType);
         }
 
+        [AxAuthorize(StateType = StateType.Authorized,AxOp = AxOp.UserDelete,Order = 4)]
         [HttpDelete("{id}")]
         public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {
@@ -365,6 +366,7 @@ namespace API.Controllers.v1.Basic
         }
 
         [HttpPut]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserUpdate, Order = 3)]
         public virtual async Task<ApiResult<UserDto>> Update(UserDto dto, CancellationToken cancellationToken)
         {
             var model = await _userRepository.GetFirstAsync(x => x.Id.Equals(dto.Id), cancellationToken);
