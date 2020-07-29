@@ -16,7 +16,7 @@ namespace API.Models
         public bool IsActive { get; set; } = true;
         public bool IsMainAddress { get; set; }
         public int UserId { get; set; }
-        public string Type { get; set; }
+        public AddressType Type { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (string.IsNullOrWhiteSpace(Content))

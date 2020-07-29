@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
+using Common.Exception;
 using Common.Utilities;
 using Data.Repositories;
 using Entities.Framework;
@@ -56,6 +57,10 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.GeoInfoUpdate)]
         public virtual async Task<ApiResult<GeoDto>> Update(GeoDto dto, CancellationToken cancellationToken)
         {
+            var data = await _repository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
+            if (data == null)
+                throw new NotFoundException("موقعیتی یافت نشد");
+
             await _repository.UpdateAsync(dto.ToEntity(), cancellationToken);
             var resultDto = await _repository.TableNoTracking.ProjectTo<GeoDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
