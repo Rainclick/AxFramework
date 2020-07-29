@@ -14,6 +14,7 @@ using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -356,7 +357,16 @@ namespace API.Controllers.v1.Basic
             return File(img.ContentBytes, img.ContentType);
         }
 
-        [AxAuthorize(StateType = StateType.Authorized,AxOp = AxOp.UserDelete,Order = 4)]
+        [HttpPost]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserInsert, Order = 1)]
+        public virtual async Task<ApiResult<UserDto>> Create(UserDto dto, CancellationToken cancellationToken)
+        {
+            await _userRepository.AddAsync(dto.ToEntity(), cancellationToken);
+            var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
+            return resultDto;
+        }
+
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserDelete, Order = 4)]
         [HttpDelete("{id}")]
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.UserDelete)]
         public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
@@ -370,7 +380,11 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserUpdate, Order = 3)]
         public virtual async Task<ApiResult<UserDto>> Update(UserDto dto, CancellationToken cancellationToken)
         {
-            await _userRepository.UpdateAsync(dto.ToEntity(), cancellationToken);
+            var user = await _userRepository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
+            if (user == null)
+                throw new NotFoundException("کاربری یافت نشد");
+
+            await _userRepository.UpdateAsync(dto.ToEntity(user), cancellationToken);
             var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
         }

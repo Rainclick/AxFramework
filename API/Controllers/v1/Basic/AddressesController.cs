@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Models;
 using AutoMapper.QueryableExtensions;
 using Common;
+using Common.Exception;
 using Common.Utilities;
 using Data.Repositories;
 using Entities.Framework;
@@ -55,7 +56,11 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.AddressUpdate)]
         public virtual async Task<ApiResult<AddressDto>> Update(AddressDto dto, CancellationToken cancellationToken)
         {
-            await _repository.UpdateAsync(dto.ToEntity(), cancellationToken);
+            var address = await _repository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
+            if (address == null)
+                throw new NotFoundException("آدرسی یافت نشد");
+
+            await _repository.UpdateAsync(dto.ToEntity(address), cancellationToken);
             var resultDto = await _repository.TableNoTracking.ProjectTo<AddressDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
         }

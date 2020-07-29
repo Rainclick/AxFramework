@@ -9,6 +9,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -42,7 +43,7 @@ namespace API
             services.AddDbContext(Configuration);
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
-                builder.AllowAnyOrigin()
+                builder.AllowAnyOrigin().WithMethods("GET","POST","DELETE","PUT")
                     .AllowAnyMethod().WithExposedHeaders("X-Pagination")
                     .AllowAnyHeader();
             }));
@@ -58,6 +59,10 @@ namespace API
             services.AddHostedService<TimedHardwareHostedService>();
             services.AddSwagger();
             services.AddSignalR();
+            services.Configure<ApiBehaviorOptions>(options =>
+            {
+                options.SuppressModelStateInvalidFilter = true;
+            });
 
         }
 
