@@ -32,10 +32,6 @@ namespace API.Models
                 dest => dest.GeoTitle,
                 config => config.MapFrom(src => $"{src.Geo.Title}")
             );
-            mapping.ForMember(
-                dest => dest.Type,
-                config => config.MapFrom(src => $"{src.AddressType.GetDisplayName()}")
-            );
         }
 
 

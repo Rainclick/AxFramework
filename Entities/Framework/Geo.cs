@@ -1,4 +1,6 @@
-﻿namespace Entities.Framework
+﻿using FluentValidation;
+
+namespace Entities.Framework
 {
     public class Geo : BaseEntity
     {
@@ -8,4 +10,6 @@
         public string Path { get; set; }
     
     }
+
+    public class GeoValidator : AbstractValidator<Geo> { }
 }

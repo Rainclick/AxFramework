@@ -35,12 +35,22 @@ namespace API.Controllers.v1.Basic
             return Ok(data);
         }
 
+
         [HttpGet]
         [Route("{id}")]
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GeoInfo)]
         public ApiResult<GeoDto> Get(int id)
         {
             var geo = _repository.GetAll(x => x.Id == id).ProjectTo<GeoDto>().FirstOrDefault();
+            return Ok(geo);
+        }
+
+        [HttpGet]
+        [Route("[action]/{parentId?}")]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GeoInfo)]
+        public ApiResult<GeoDto> GetChildren(int? parentId)
+        {
+            var geo = _repository.GetAll(x => x.ParentId == parentId).ProjectTo<GeoDto>().FirstOrDefault();
             return Ok(geo);
         }
 
