@@ -12,6 +12,7 @@ namespace API.Models
         public string LastName { get; set; }
         public DateTime? ExpireDateTime { get; set; }
         public bool IsActive { get; set; }
+        public GenderType GenderType { get; set; }
         public DateTimeOffset? LastLoginDate { get; set; }
 
     }
