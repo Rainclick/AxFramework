@@ -48,10 +48,10 @@ namespace API.Controllers.v1.Basic
         [HttpGet]
         [Route("[action]/{parentId?}")]
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GeoInfo)]
-        public ApiResult<GeoDto> GetChildren(int? parentId)
+        public ApiResult<IQueryable<GeoDto>> GetChildren(int? parentId)
         {
-            var geo = _repository.GetAll(x => x.ParentId == parentId).ProjectTo<GeoDto>().FirstOrDefault();
-            return Ok(geo);
+            var geos = _repository.GetAll(x => x.ParentId == parentId).ProjectTo<GeoDto>();
+            return Ok(geos);
         }
 
         [HttpPost]
