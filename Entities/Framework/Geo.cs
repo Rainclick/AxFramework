@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Collections.Generic;
+using FluentValidation;
 
 namespace Entities.Framework
 {
@@ -8,7 +9,7 @@ namespace Entities.Framework
         public Geo Parent { get; set; }
         public string Title { get; set; }
         public string Path { get; set; }
-    
+        public ICollection<Geo> Children { get; set; }
     }
 
     public class GeoValidator : AbstractValidator<Geo> { }

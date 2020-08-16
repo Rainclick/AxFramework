@@ -47,10 +47,14 @@ namespace API.Controllers.v1.Basic
 
         [HttpGet]
         [Route("[action]/{parentId?}")]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.GeoInfo)]
-        public ApiResult<IQueryable<GeoDto>> GetChildren(int? parentId)
+        [AxAuthorize(StateType = StateType.Ignore, Order = 1, AxOp = AxOp.GeoInfo)]
+        public ApiResult<IQueryable<dynamic>> GetWithChildren(int? parentId)
         {
-            var geos = _repository.GetAll(x => x.ParentId == parentId).ProjectTo<GeoDto>();
+
+            var geos = _repository.GetAll(x => x.ParentId == parentId).Include(x => x.Children)
+                .ThenInclude(c => c.Children)
+              
+                .Select(x => new {x.Title, x.Children, x.Id, x.ParentId});
             return Ok(geos);
         }
 
