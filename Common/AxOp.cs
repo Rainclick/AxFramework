@@ -86,5 +86,17 @@
         GeoInfoDelete,
         [AxDisplay("سامانه ردیابی محصول", "02", None)]
         Tracking,
+        [AxDisplay("اطلاعات پایه", "01", Tracking)]
+        TrackingBasicInfo,
+        [AxDisplay("کارخانه ها", "01", TrackingBasicInfo)]
+        TrackingFactoryList,
+        [AxDisplay("ایجاد", "01", TrackingFactoryList)]
+        TrackingInsert,
+        [AxDisplay("ویرایش", "02", TrackingFactoryList)]
+        TrackingUpdate,
+        [AxDisplay("حذف", "03", TrackingFactoryList)]
+        TrackingDelete,
+        [AxDisplay("مشاهده", "04", TrackingFactoryList)]
+        TrackingItem,
     }
 }

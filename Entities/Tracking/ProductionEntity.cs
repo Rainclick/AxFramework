@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework;
+using FluentValidation;
 
 namespace Entities.Tracking
 {
     public abstract class ProductionBaseEntity : BaseEntity
     {
-        //public CommonType Type { get; set; }
         public string Name { get; set; }
         public string Code { get; set; }
         public bool IsActive { get; set; }
@@ -16,6 +16,14 @@ namespace Entities.Tracking
     {
         public bool IsMother { get; set; }
         public string Address { get; set; }
+    }
+
+    public class FactoryValidator : AbstractValidator<Factory>
+    {
+        public FactoryValidator()
+        {
+            RuleFor(x => x.Name).NotEmpty();
+        }
     }
 
     public class ProductLine : ProductionBaseEntity
@@ -40,15 +48,5 @@ namespace Entities.Tracking
         public int OperationStationId { get; set; }
         [ForeignKey("OperationStationId")]
         public OperationStation OperationStation { get; set; }
-    }
-
-
-    public enum CommonType
-    {
-        Factory,
-        ProductLine,
-        OperationStation,
-        Machine
-
     }
 }

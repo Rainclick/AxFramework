@@ -67,7 +67,6 @@ namespace API.Controllers.v1.Basic
 
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.AddressDelete, Order = 3)]
         [HttpDelete("{id}")]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.UserDelete)]
         public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {
             var model = await _repository.GetFirstAsync(x => x.Id.Equals(id), cancellationToken);
