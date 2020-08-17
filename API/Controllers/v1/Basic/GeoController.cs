@@ -48,13 +48,12 @@ namespace API.Controllers.v1.Basic
         [HttpGet]
         [Route("[action]/{parentId?}")]
         [AxAuthorize(StateType = StateType.Ignore, Order = 1, AxOp = AxOp.GeoInfo)]
-        public ApiResult<IQueryable<dynamic>> GetWithChildren(int? parentId)
+        public ApiResult<IQueryable<Geo>> GetWithChildren(int? parentId)
         {
 
             var geos = _repository.GetAll(x => x.ParentId == parentId).Include(x => x.Children)
                 .ThenInclude(c => c.Children)
-              
-                .Select(x => new {x.Title, x.Children, x.Id, x.ParentId});
+                .ThenInclude(c => c.Children);
             return Ok(geos);
         }
 

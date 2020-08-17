@@ -51,7 +51,11 @@ namespace API
             {
                 options.EnableEndpointRouting = false;
             }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserValidator>())
-                .AddNewtonsoftJson(options => options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore);
+                .AddNewtonsoftJson(options =>
+                {
+                    options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                });
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddJwtAuthentication(_siteSettings.JwtSettings);
             services.AddCustomApiVersioning();

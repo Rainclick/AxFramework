@@ -84,5 +84,7 @@
         GeoInfoUpdate,
         [AxDisplay("حذف", "03", GeoInfo)]
         GeoInfoDelete,
+        [AxDisplay("سامانه ردیابی محصول", "02", None)]
+        Tracking,
     }
 }

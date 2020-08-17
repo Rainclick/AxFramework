@@ -270,7 +270,7 @@ namespace API.Controllers.v1.Basic
                 UserDisplayName = user.FullName,
                 VersionName = config.VersionName,
                 DefaultSystemId = user.UserSettings?.DefaultSystemId,
-                SystemsList = _menuRepository.GetAll(x => x.Active && x.ParentId == null).ProjectTo<AxSystem>()
+                SystemsList = _menuRepository.GetAll(x => x.Active && x.ParentId == null).OrderBy(x => x.OrderId).ProjectTo<AxSystem>()
             };
             userInfo.UnReedMsgCount = _userMessageRepository.Count(x => x.Receivers.Any(r => r.PrimaryKey == UserId && !r.IsSeen));
             return userInfo;
