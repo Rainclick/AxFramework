@@ -26,7 +26,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.TrackingFactoryList)]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.TrackingFactoryList)]
         public virtual ApiResult<IQueryable<FactoryDto>> Get([FromQuery] DataRequest request)
         {
             var predicate = request.GetFilter<Factory>();
@@ -35,7 +35,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpGet("{factoryId}")]
-        [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.TrackingItem)]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.TrackingItem)]
         public virtual ApiResult<FactoryDto> Get(int factoryId, int userId)
         {
             var factoryDto = _repository.GetAll(x => x.Id == factoryId).ProjectTo<FactoryDto>().SingleOrDefault();
@@ -43,7 +43,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpPost]
-        [AxAuthorize(StateType = StateType.Ignore, Order = 1, AxOp = AxOp.TrackingInsert)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.TrackingInsert)]
         public virtual async Task<ApiResult<FactoryDto>> Create(FactoryDto dto, CancellationToken cancellationToken)
         {
             await _repository.AddAsync(dto.ToEntity(), cancellationToken);
@@ -51,7 +51,7 @@ namespace API.Controllers.v1.Tracking
             return resultDto;
         }
         [HttpPut]
-        [AxAuthorize(StateType = StateType.Ignore, Order = 2, AxOp = AxOp.TrackingUpdate)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.TrackingUpdate)]
         public virtual async Task<ApiResult<FactoryDto>> Update(FactoryDto dto, CancellationToken cancellationToken)
         {
             var factory = await _repository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
@@ -63,7 +63,7 @@ namespace API.Controllers.v1.Tracking
             return resultDto;
         }
 
-        [AxAuthorize(StateType = StateType.Ignore, AxOp = AxOp.TrackingDelete, Order = 3)]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.TrackingDelete, Order = 3)]
         [HttpDelete("{id}")]
         public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {

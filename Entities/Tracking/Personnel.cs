@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework;
+using FluentValidation;
 
 namespace Entities.Tracking
 {
@@ -13,5 +14,12 @@ namespace Entities.Tracking
         [ForeignKey("FactoryId")]
         public Factory Factory { get; set; }
 
+    }
+    public class PersonnelValidator : AbstractValidator<Personnel>
+    {
+        public PersonnelValidator()
+        {
+            RuleFor(x => x.Code).NotEmpty();
+        }
     }
 }

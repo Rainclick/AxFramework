@@ -33,6 +33,13 @@ namespace Entities.Tracking
         public Factory Factory { get; set; }
         public bool IsMother { get; set; }
     }
+    public class ProductLineValidator : AbstractValidator<ProductLine>
+    {
+        public ProductLineValidator()
+        {
+            RuleFor(x => x.Name).NotEmpty();
+        }
+    }
 
     public class OperationStation : ProductionBaseEntity
     {
@@ -42,11 +49,25 @@ namespace Entities.Tracking
         public int Order { get; set; }
         public float Vas { get; set; }
     }
+    public class OperationStationValidator : AbstractValidator<OperationStation>
+    {
+        public OperationStationValidator()
+        {
+            RuleFor(x => x.Name).NotEmpty();
+        }
+    }
 
     public class Machine : ProductionBaseEntity
     {
         public int OperationStationId { get; set; }
         [ForeignKey("OperationStationId")]
         public OperationStation OperationStation { get; set; }
+    }
+    public class MachineValidator : AbstractValidator<Machine>
+    {
+        public MachineValidator()
+        {
+            RuleFor(x => x.Name).NotEmpty();
+        }
     }
 }

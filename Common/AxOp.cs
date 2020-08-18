@@ -98,5 +98,56 @@
         TrackingDelete,
         [AxDisplay("مشاهده", "04", TrackingFactoryList)]
         TrackingItem,
+        [AxDisplay("خط های تولید", "02", TrackingBasicInfo)]
+        ProductLineList,
+        [AxDisplay("ایجاد", "01", ProductLineList)]
+        ProductLineInsert,
+        [AxDisplay("ویرایش", "02", ProductLineList)]
+        ProductLineUpdate,
+        [AxDisplay("حذف", "03", ProductLineList)]
+        ProductLineDelete,
+        [AxDisplay("مشاهده", "04", ProductLineList)]
+        ProductLineItem,
+        [AxDisplay("ماشین ها", "03", TrackingBasicInfo)]
+        MachineList,
+        [AxDisplay("ایجاد", "01", MachineList)]
+        MachineInsert,
+        [AxDisplay("ویرایش", "02", MachineList)]
+        MachineUpdate,
+        [AxDisplay("حذف", "03", MachineList)]
+        MachineDelete,
+        [AxDisplay("مشاهده", "04", MachineList)]
+        MachineItem,
+        [AxDisplay("ایستگاه ها", "04", TrackingBasicInfo)]
+        OperationStationList,
+        [AxDisplay("ایجاد", "01", OperationStationList)]
+        OperationStationInsert,
+        [AxDisplay("ویرایش", "02", OperationStationList)]
+        OperationStationUpdate,
+        [AxDisplay("حذف", "03", OperationStationList)]
+        OperationStationDelete,
+        [AxDisplay("مشاهده", "04", OperationStationList)]
+        OperationStationItem,
+        [AxDisplay("شیفت ها", "05", TrackingBasicInfo)]
+        ShiftList,
+        [AxDisplay("ایجاد", "01", ShiftList)]
+        ShiftInsert,
+        [AxDisplay("ویرایش", "02", ShiftList)]
+        ShiftUpdate,
+        [AxDisplay("حذف", "03", ShiftList)]
+        ShiftDelete,
+        [AxDisplay("مشاهده", "04", ShiftList)]
+        ShiftItem,
+        [AxDisplay("پرسنل", "06", TrackingBasicInfo)]
+        PersonnelList,
+        [AxDisplay("ایجاد", "01", PersonnelList)]
+        PersonnelInsert,
+        [AxDisplay("ویرایش", "02", PersonnelList)]
+        PersonnelUpdate,
+        [AxDisplay("حذف", "03", PersonnelList)]
+        PersonnelDelete,
+        [AxDisplay("مشاهده", "04", PersonnelList)]
+        PersonnelItem,
+
     }
 }
