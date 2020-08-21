@@ -47,7 +47,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpPost]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.TrackingInsert)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.OperationStationInsert)]
         public virtual async Task<ApiResult<OperationStationDto>> Create(OperationStationDto dto, CancellationToken cancellationToken)
         {
             await _repository.AddAsync(dto.ToEntity(), cancellationToken);
@@ -55,7 +55,7 @@ namespace API.Controllers.v1.Tracking
             return resultDto;
         }
         [HttpPut]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.TrackingUpdate)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.OperationStationUpdate)]
         public virtual async Task<ApiResult<OperationStationDto>> Update(OperationStationDto dto, CancellationToken cancellationToken)
         {
             var op = await _repository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
@@ -67,7 +67,7 @@ namespace API.Controllers.v1.Tracking
             return resultDto;
         }
 
-        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.TrackingDelete, Order = 3)]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.OperationStationDelete, Order = 3)]
         [HttpDelete("{id}")]
         public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {

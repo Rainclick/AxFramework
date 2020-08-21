@@ -44,7 +44,7 @@ namespace API.Controllers.v1.Tracking
         }
 
         [HttpPost]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.TrackingInsert)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.ShiftInsert)]
         public virtual async Task<ApiResult<ShiftDto>> Create(ShiftDto dto, CancellationToken cancellationToken)
         {
             await _repository.AddAsync(dto.ToEntity(), cancellationToken);
@@ -52,7 +52,7 @@ namespace API.Controllers.v1.Tracking
             return resultDto;
         }
         [HttpPut]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.TrackingUpdate)]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.ShiftUpdate)]
         public virtual async Task<ApiResult<ShiftDto>> Update(ShiftDto dto, CancellationToken cancellationToken)
         {
             var shift = await _repository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
@@ -64,7 +64,7 @@ namespace API.Controllers.v1.Tracking
             return resultDto;
         }
 
-        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.TrackingDelete, Order = 3)]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ShiftDelete, Order = 3)]
         [HttpDelete("{id}")]
         public virtual async Task<ApiResult> Delete(int id, CancellationToken cancellationToken)
         {

@@ -91,13 +91,13 @@
         [AxDisplay("کارخانه ها", "01", TrackingBasicInfo)]
         TrackingFactoryList,
         [AxDisplay("ایجاد", "01", TrackingFactoryList)]
-        TrackingInsert,
+        FactoryInsert,
         [AxDisplay("ویرایش", "02", TrackingFactoryList)]
-        TrackingUpdate,
+        FactoryUpdate,
         [AxDisplay("حذف", "03", TrackingFactoryList)]
-        TrackingDelete,
+        FactoryDelete,
         [AxDisplay("مشاهده", "04", TrackingFactoryList)]
-        TrackingItem,
+        FactoryItem,
         [AxDisplay("خط های تولید", "02", TrackingBasicInfo)]
         ProductLineList,
         [AxDisplay("ایجاد", "01", ProductLineList)]
