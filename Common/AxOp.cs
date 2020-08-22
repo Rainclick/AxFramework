@@ -84,6 +84,9 @@
         GeoInfoUpdate,
         [AxDisplay("حذف", "03", GeoInfo)]
         GeoInfoDelete,
+
+
+        //==================================================================================
         [AxDisplay("سامانه ردیابی محصول", "02", None)]
         Tracking,
         [AxDisplay("اطلاعات پایه", "01", Tracking)]
@@ -148,6 +151,14 @@
         PersonnelDelete,
         [AxDisplay("مشاهده", "04", PersonnelList)]
         PersonnelItem,
-
+        //=====================
+        [AxDisplay("اطلاعات ردیابی", "07", TrackingBasicInfo)]
+        TrackingInfo,
+        [AxDisplay("لیست نمونه محصولات", "01", TrackingInfo)]
+        ProductInstanceList,
+        [AxDisplay("ایجاد", "01", ProductInstanceList)]
+        ProductInstanceInsert,
+        [AxDisplay("حذف", "02", ProductInstanceList)]
+        ProductInstanceDelete,
     }
 }
