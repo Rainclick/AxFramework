@@ -12,7 +12,7 @@ namespace API.Models.Tracking
     {
 
         public long Code { get; set; }
-        public int UserName { get; set; }
+        public string UserName { get; set; }
         public DateTime DateTime { get; set; }
         public bool IsActive { get; set; }
 
