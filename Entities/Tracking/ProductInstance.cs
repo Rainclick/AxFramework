@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework;
+using FluentValidation;
 
 namespace Entities.Tracking
 {
@@ -16,5 +17,12 @@ namespace Entities.Tracking
         public int ProductLineId { get; set; }
         [ForeignKey("ProductLineId")]
         public ProductLine ProductLine { get; set; }
+    }
+
+    public class UserValidator : AbstractValidator<ProductInstance>
+    {
+        public UserValidator() {
+            RuleFor(x => x.Id).NotNull();
+        }
     }
 }

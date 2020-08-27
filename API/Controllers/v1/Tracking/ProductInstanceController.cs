@@ -31,7 +31,7 @@ namespace API.Controllers.v1.Tracking
         public virtual ApiResult<IQueryable<ProductInstanceDto>> Get([FromQuery] DataRequest request)
         {
             var predicate = request.GetFilter<ProductInstance>();
-            var data = _repository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<FactoryDto>();
+            var data = _repository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceDto>();
             return Ok(data);
         }
 
