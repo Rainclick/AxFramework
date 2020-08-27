@@ -18,6 +18,7 @@ namespace API.Models.Tracking
         public string Code { get; set; }
         public bool IsActive { get; set; }
         public string FactoryName { get; set; }
+        public int FactoryId { get; set; }
         public bool IsMother { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {

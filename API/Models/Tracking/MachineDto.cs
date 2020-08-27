@@ -18,6 +18,7 @@ namespace API.Models.Tracking
         public string Code { get; set; }
         public bool IsActive { get; set; }
         public string OperationStationName { get; set; }
+        public int OperationStationId { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (string.IsNullOrWhiteSpace(Name))
@@ -27,7 +28,7 @@ namespace API.Models.Tracking
         {
             mapping.ForMember(
                 dest => dest.OperationStationName,
-                config => config.MapFrom(src => $"{src.Name} ")
+                config => config.MapFrom(src => $"{src.OperationStation.Name} ")
             );
         }
     }

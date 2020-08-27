@@ -66,13 +66,13 @@
         OperationsAuthorization,
         [AxDisplay("لیست گروه ها", "06", UserManagement)]
         GroupList,
-        [AxDisplay("فرم گروه", "07", UserManagement)]
+        [AxDisplay("فرم گروه", "07", GroupList)]
         GroupItem,
-        [AxDisplay("ایجاد", "08", UserManagement)]
+        [AxDisplay("ایجاد", "08", GroupList)]
         GroupInsert,
-        [AxDisplay("ویرایش", "09", UserManagement)]
+        [AxDisplay("ویرایش", "09", GroupList)]
         GroupUpdate,
-        [AxDisplay("حذف گروه", "10", UserManagement)]
+        [AxDisplay("حذف گروه", "10", GroupList)]
         GroupDelete,
         [AxDisplay("اطلاعات عمومی", "05", Basic)]
         GeneralInfo,

@@ -13,8 +13,10 @@ namespace API.Models.Tracking
     public class PersonnelDto : BaseDto<PersonnelDto, Personnel, int>, IValidatableObject
     {
         public string UserName { get; set; }
+        public int UserId { get; set; }
         public string Code { get; set; }
         public string FactoryName { get; set; }
+        public int FactoryId { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
