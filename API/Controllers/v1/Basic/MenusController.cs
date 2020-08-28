@@ -44,16 +44,17 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.OnlyToken)]
         public virtual ApiResult<List<MenuDto>> GetSystemMenus(int systemId)
         {
-            var menus = _repository.GetAll(x => x.ParentId == systemId && x.Active).Include(x => x.Children).Select(x => new
+            var menus = _repository.GetAll(x => x.ParentId == systemId && x.Active).OrderBy(x => x.OrderId).Include(x => x.Children).Select(x => new
             {
                 x.Key,
                 x.Title,
                 x.Icon,
-                Children = x.Children.Where(c => c.ShowInMenu && x.Active).Select(c => new
+                Children = x.Children.Where(c => c.ShowInMenu && x.Active).OrderBy(x => x.OrderId).Select(c => new
                 {
                     c.Key,
                     c.Title,
-                    c.Icon
+                    c.Icon,
+                    c.OrderId
                 })
             }).ProjectTo<MenuDto>();
 
