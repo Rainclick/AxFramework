@@ -19,9 +19,10 @@ namespace Entities.Tracking
         public ProductLine ProductLine { get; set; }
     }
 
-    public class UserValidator : AbstractValidator<ProductInstance>
+    public class ProductInstanceValidator : AbstractValidator<ProductInstance>
     {
-        public UserValidator() {
+        public ProductInstanceValidator()
+        {
             RuleFor(x => x.Id).NotNull();
         }
     }

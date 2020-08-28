@@ -160,8 +160,12 @@
         ProductInstanceInsert,
         [AxDisplay("حذف", "02", ProductInstanceList)]
         ProductInstanceDelete,
+        [AxDisplay("ویرایش", "03", ProductInstanceList)]
+        ProductInstanceUpdate,
+        [AxDisplay("مشاهده", "04", ProductInstanceList)]
+        ProductInstanceItem,
         //=====================
-        [AxDisplay("لیست تاریخچه ردیابی محصولات", "02",TrackingInfo )]
+        [AxDisplay("لیست تاریخچه ردیابی محصولات", "02", TrackingInfo)]
         ProductInstanceHistory,
         [AxDisplay("لیست نمونه محصولات", "01", ProductInstanceHistory)]
         ProductInstanceHistoryList,

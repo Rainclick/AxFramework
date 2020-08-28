@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using API.Models.Tracking;
 using AutoMapper.QueryableExtensions;
 using Common;
+using Common.Exception;
 using Common.Utilities;
 using Data.Repositories;
 using Entities.Framework.Reports;
@@ -35,6 +36,14 @@ namespace API.Controllers.v1.Tracking
             return Ok(data);
         }
 
+        [HttpGet("{productInstanceId}")]
+        [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ProductInstanceItem)]
+        public virtual ApiResult<ProductInstanceDto> Get(int productInstanceId, int userId)
+        {
+            var productInstanceDto = _repository.GetAll(x => x.Id == productInstanceId).ProjectTo<ProductInstanceDto>().SingleOrDefault();
+            return Ok(productInstanceDto);
+        }
+
         [HttpPost]
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.ProductInstanceInsert)]
         public virtual async Task<ApiResult<ProductInstanceDto>> Create(ProductInstanceDto dto, CancellationToken cancellationToken)
@@ -51,6 +60,19 @@ namespace API.Controllers.v1.Tracking
             var model = await _repository.GetFirstAsync(x => x.Id.Equals(id), cancellationToken);
             await _repository.DeleteAsync(model, cancellationToken);
             return Ok();
+        }
+
+        [HttpPut]
+        [AxAuthorize(StateType = StateType.Authorized, Order = 2, AxOp = AxOp.ProductInstanceUpdate)]
+        public virtual async Task<ApiResult<ProductInstanceDto>> Update(ProductInstanceDto dto, CancellationToken cancellationToken)
+        {
+            var productInstance = await _repository.GetFirstAsync(x => x.Id == dto.Id, cancellationToken);
+            if (productInstance == null)
+                throw new NotFoundException("نمونه محصولی یافت نشد");
+
+            await _repository.UpdateAsync(dto.ToEntity(productInstance), cancellationToken);
+            var resultDto = await _repository.TableNoTracking.ProjectTo<ProductInstanceDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
+            return resultDto;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Entities.Framework;
+using FluentValidation;
 
 namespace Entities.Tracking
 {
@@ -23,5 +24,12 @@ namespace Entities.Tracking
         public int ShiftId { get; set; }
         [ForeignKey("ShiftId")]
         public Shift Shift { get; set; }
+    }
+    public class ProductInstanceHistoryValidator : AbstractValidator<ProductInstanceHistory>
+    {
+        public ProductInstanceHistoryValidator()
+        {
+            RuleFor(x => x.Id).NotNull();
+        }
     }
 }
