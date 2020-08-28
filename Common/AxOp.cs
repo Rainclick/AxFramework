@@ -66,13 +66,13 @@
         OperationsAuthorization,
         [AxDisplay("لیست گروه ها", "06", UserManagement)]
         GroupList,
-        [AxDisplay("فرم گروه", "07", UserManagement)]
+        [AxDisplay("فرم گروه", "07", GroupList)]
         GroupItem,
-        [AxDisplay("ایجاد", "08", UserManagement)]
+        [AxDisplay("ایجاد", "08", GroupList)]
         GroupInsert,
-        [AxDisplay("ویرایش", "09", UserManagement)]
+        [AxDisplay("ویرایش", "09", GroupList)]
         GroupUpdate,
-        [AxDisplay("حذف گروه", "10", UserManagement)]
+        [AxDisplay("حذف گروه", "10", GroupList)]
         GroupDelete,
         [AxDisplay("اطلاعات عمومی", "05", Basic)]
         GeneralInfo,
@@ -152,7 +152,7 @@
         [AxDisplay("مشاهده", "04", PersonnelList)]
         PersonnelItem,
         //=====================
-        [AxDisplay("اطلاعات ردیابی", "07", TrackingBasicInfo)]
+        [AxDisplay("اطلاعات ردیابی", "02", Tracking)]
         TrackingInfo,
         [AxDisplay("لیست نمونه محصولات", "01", TrackingInfo)]
         ProductInstanceList,
@@ -160,5 +160,14 @@
         ProductInstanceInsert,
         [AxDisplay("حذف", "02", ProductInstanceList)]
         ProductInstanceDelete,
+        //=====================
+        [AxDisplay("لیست تاریخچه ردیابی محصولات", "02",TrackingInfo )]
+        ProductInstanceHistory,
+        [AxDisplay("لیست نمونه محصولات", "01", ProductInstanceHistory)]
+        ProductInstanceHistoryList,
+        [AxDisplay("ایجاد", "01", ProductInstanceHistoryList)]
+        ProductInstanceHistoryInsert,
+        [AxDisplay("حذف", "02", ProductInstanceHistoryList)]
+        ProductInstanceHistoryDelete,
     }
 }

@@ -9,6 +9,7 @@ namespace API.Models
         public string GroupName { get; set; }
         public string Description { get; set; }
         public int UsersCount { get; set; }
+        public int GroupUsersId { get; set; }
 
 
         public override void CustomMappings(IMappingExpression<AxGroup, AxGroupDto> mapping)

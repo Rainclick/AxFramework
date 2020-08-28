@@ -17,6 +17,7 @@ namespace API.Models.Tracking
         public string Code { get; set; }
         public bool IsActive { get; set; }
         public string ProductLineName { get; set; }
+        public int ProductLineId { get; set; }
         public int Order { get; set; }
         public float Vas { get; set; }
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -28,7 +29,7 @@ namespace API.Models.Tracking
         {
             mapping.ForMember(
                 dest => dest.ProductLineName,
-                config => config.MapFrom(src => $"{src.Name} ")
+                config => config.MapFrom(src => $"{src.ProductLine.Name} ")
             );
         }
     }
