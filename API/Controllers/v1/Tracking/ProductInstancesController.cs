@@ -18,11 +18,11 @@ namespace API.Controllers.v1.Tracking
 {
 
     [ApiVersion("1")]
-    public class ProductInstanceController : BaseController
+    public class ProductInstancesController : BaseController
     {
         private readonly IBaseRepository<ProductInstance> _repository;
 
-        public ProductInstanceController(IBaseRepository<ProductInstance> repository)
+        public ProductInstancesController(IBaseRepository<ProductInstance> repository)
         {
             _repository = repository;
         }

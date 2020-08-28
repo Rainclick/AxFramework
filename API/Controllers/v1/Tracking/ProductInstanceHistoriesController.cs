@@ -17,11 +17,11 @@ using WebFramework.Filters;
 namespace API.Controllers.v1.Tracking
 {
     [ApiVersion("1")]
-    public class ProductInstanceHistoryController : ControllerBase
+    public class ProductInstanceHistoriesController : BaseController
     {
         private readonly IBaseRepository<ProductInstanceHistory> _repository;
 
-        public ProductInstanceHistoryController(IBaseRepository<ProductInstanceHistory> repository)
+        public ProductInstanceHistoriesController(IBaseRepository<ProductInstanceHistory> repository)
         {
             _repository = repository;
         }
