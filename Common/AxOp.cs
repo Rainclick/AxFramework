@@ -166,8 +166,6 @@
         ProductInstanceItem,
         //=====================
         [AxDisplay("لیست تاریخچه ردیابی محصولات", "02", TrackingInfo)]
-        ProductInstanceHistory,
-        [AxDisplay("لیست نمونه محصولات", "01", ProductInstanceHistory)]
         ProductInstanceHistoryList,
         [AxDisplay("ایجاد", "01", ProductInstanceHistoryList)]
         ProductInstanceHistoryInsert,

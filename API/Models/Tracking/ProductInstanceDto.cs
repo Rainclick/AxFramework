@@ -13,7 +13,7 @@ namespace API.Models.Tracking
 
         public long Code { get; set; }
         public string UserName { get; set; }
-        public DateTime DateTime { get; set; }
+        public string DateTime { get; set; }
         public bool IsActive { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
