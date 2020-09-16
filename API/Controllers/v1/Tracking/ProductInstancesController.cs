@@ -33,6 +33,7 @@ namespace API.Controllers.v1.Tracking
         {
             var predicate = request.GetFilter<ProductInstance>();
             var data = _repository.GetAll(predicate).OrderBy(request.Sort, request.SortType).Skip(request.PageIndex * request.PageSize).Take(request.PageSize).ProjectTo<ProductInstanceDto>();
+            Response.Headers.Add("X-Pagination", _repository.Count(predicate).ToString());
             return Ok(data);
         }
 

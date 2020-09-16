@@ -4,14 +4,16 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20200916081048_withoneFixed")]
+    partial class withoneFixed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1988,9 +1990,11 @@ namespace Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OpId");
+                    b.HasIndex("OpId")
+                        .IsUnique();
 
-                    b.HasIndex("PersonnelId");
+                    b.HasIndex("PersonnelId")
+                        .IsUnique();
 
                     b.HasIndex("ProductInstanceId");
 
@@ -2404,14 +2408,14 @@ namespace Data.Migrations
             modelBuilder.Entity("Entities.Tracking.ProductInstanceHistory", b =>
                 {
                     b.HasOne("Entities.Tracking.OperationStation", "OperationStation")
-                        .WithMany()
-                        .HasForeignKey("OpId")
+                        .WithOne()
+                        .HasForeignKey("Entities.Tracking.ProductInstanceHistory", "OpId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Entities.Tracking.Personnel", "Personnel")
-                        .WithMany()
-                        .HasForeignKey("PersonnelId")
+                        .WithOne()
+                        .HasForeignKey("Entities.Tracking.ProductInstanceHistory", "PersonnelId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 

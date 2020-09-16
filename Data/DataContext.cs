@@ -30,23 +30,23 @@ namespace Data
 
             modelBuilder.Entity<ProductInstance>()
                 .HasOne(c => c.Personnel)
-                .WithOne()
+                .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
 
             
             modelBuilder.Entity<ProductInstance>()
                 .HasOne(c => c.ProductLine)
-                .WithOne()
+                .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ProductInstanceHistory>()
                 .HasOne(c => c.Personnel)
-                .WithOne()
+                .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<ProductInstanceHistory>()
                 .HasOne(c => c.OperationStation)
-                .WithOne()
+                .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
         }
 
