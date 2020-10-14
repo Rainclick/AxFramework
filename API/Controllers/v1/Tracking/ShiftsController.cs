@@ -40,8 +40,8 @@ namespace API.Controllers.v1.Tracking
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.ShiftItem)]
         public virtual ApiResult<ShiftDto> Get(int shiftId, int userId)
         {
-            var ShiftDto = _repository.GetAll(x => x.Id == shiftId).ProjectTo<ShiftDto>().SingleOrDefault();
-            return Ok(ShiftDto);
+            var shiftDto = _repository.GetAll(x => x.Id == shiftId).ProjectTo<ShiftDto>().SingleOrDefault();
+            return Ok(shiftDto);
         }
 
         [HttpPost]
