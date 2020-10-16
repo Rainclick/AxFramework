@@ -182,7 +182,7 @@ namespace API.Controllers.v1.Basic
                 numericWidget.Data = (int)data;
                 numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
             }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget,cancellationToken);
 
 
 
@@ -299,7 +299,7 @@ namespace API.Controllers.v1.Basic
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [AxAuthorize(StateType = StateType.Authorized, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
+        [AxAuthorize(StateType = StateType.OnlyToken, Order = 0, AxOp = AxOp.UserList, ShowInMenu = true)]
         public ApiResult<IQueryable<UserSelectDto>> Get([FromQuery] DataRequest request)
         {
             var predicate = request.GetFilter<User>();
