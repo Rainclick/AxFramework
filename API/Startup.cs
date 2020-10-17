@@ -43,9 +43,9 @@ namespace API
             services.AddDbContext(Configuration);
             services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
             {
-                builder.AllowAnyOrigin().WithMethods("GET","POST","DELETE","PUT")
+                builder.WithOrigins("http://localhost:4200").WithMethods("GET","POST","DELETE","PUT")
                     .AllowAnyMethod().WithExposedHeaders("X-Pagination")
-                    .AllowAnyHeader();
+                    .AllowAnyHeader().AllowCredentials();
             }));
             services.AddMvc(options =>
             {

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Hubs;
@@ -68,8 +69,12 @@ namespace API.Controllers.v1.Basic
             await _repository.AddAsync(dto.ToEntity(), cancellationToken);
             var resultDto = await _repository.TableNoTracking.ProjectTo<MessageDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
 
-            var connections = _userConnectionService.GetActiveConnections(dto.ReceiverId);
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChat", dto, cancellationToken);
+            dto.InsertDateTime = DateTime.Now;
+            if (dto.SenderId != dto.ReceiverId)
+            {
+                var connections = _userConnectionService.GetActiveConnections(dto.ReceiverId);
+                await _hub.Clients.Clients(connections).SendAsync("UpdateChat", dto, cancellationToken);
+            }
             return resultDto;
         }
     }
