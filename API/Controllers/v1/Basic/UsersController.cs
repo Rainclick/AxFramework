@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
-using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -44,8 +45,7 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<Menu> _menuRepository;
         private readonly IBaseRepository<ConfigData> _configDataRepository;
         private readonly IBaseRepository<UserGroup> _userGroupRepository;
-        private readonly IBaseRepository<Address> _addressRepository;
-        private readonly IBaseRepository<FileAttachment> _fileAttachmentRepository;
+        private readonly IBaseRepository<FileAttachment> _fileRepository;
         private readonly IBaseRepository<UserMessage> _userMessageRepository;
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<UserConnection> _userConnectionRepository;
@@ -57,7 +57,7 @@ namespace API.Controllers.v1.Basic
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<Address> addressRepository, IBaseRepository<FileAttachment> fileAttachmentRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -68,8 +68,7 @@ namespace API.Controllers.v1.Basic
             _menuRepository = menuRepository;
             _configDataRepository = configDataRepository;
             _userGroupRepository = userGroupRepository;
-            _addressRepository = addressRepository;
-            _fileAttachmentRepository = fileAttachmentRepository;
+            _fileRepository = fileRepository;
             _userMessageRepository = userMessageRepository;
             _userConnectionService = userConnectionService;
             _userConnectionRepository = userConnectionRepository;
@@ -182,7 +181,7 @@ namespace API.Controllers.v1.Basic
                 numericWidget.Data = (int)data;
                 numericWidget.LastUpdated = DateTime.Now.ToPerDateTimeString("yyyy/MM/dd HH:mm:ss");
             }
-            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget,cancellationToken);
+            await _hub.Clients.Clients(connections).SendAsync("UpdateChart", numericWidget, cancellationToken);
 
 
 
@@ -345,13 +344,45 @@ namespace API.Controllers.v1.Basic
             return Ok();
         }
 
-        [AxAuthorize(StateType = StateType.OnlyToken)]
+
+        [AxAuthorize(StateType = StateType.Ignore)]
+        [HttpPost("[action]/{userId}")]
+        public async Task<IActionResult> UploadUserPic(IFormFile model, int userId, CancellationToken cancellationToken)
+        {
+            if (model == null || model.Length == 0)
+                return Ok(new ApiResult(false, ApiResultStatusCode.BadRequest, "file not selected"));
+
+            var files = _fileRepository.GetAll(x => x.Key == userId);
+            await _fileRepository.DeleteRangeAsync(files, cancellationToken);
+
+            await using var ms = new MemoryStream();
+            await model.CopyToAsync(ms, cancellationToken);
+            var fileBytes = ms.ToArray();
+
+            var fa = new FileAttachment
+            {
+                InsertDateTime = DateTime.Now,
+                ContentBytes = fileBytes,
+                Key = userId,
+                FileName = model.FileName,
+                CreatorUserId = 1,
+                ContentType = model.ContentType,
+                FileAttachmentTypeId = 1,
+                Size = model.Length,
+                TypeName = "Users"
+            };
+            await _fileRepository.AddAsync(fa, cancellationToken);
+            fa.ContentBytes = null;
+            return Ok(fa);
+        }
+
+
+        [AxAuthorize(StateType = StateType.Ignore)]
         [HttpGet("[action]/{userId?}")]
         public async Task<IActionResult> GetUserAvatar(CancellationToken cancellationToken, int? userId = null)
         {
-            if (!userId.HasValue)
-                userId = UserId;
-            var img = await _fileAttachmentRepository.GetFirstAsync(x => x.FileAttachmentType.AttachmentTypeEnum == FileAttachmentTypeEnum.UserAvatar && x.TypeName == "Users" && x.Key == userId, cancellationToken);
+            userId ??= UserId;
+            var img = await _fileRepository.GetFirstAsync(x => x.FileAttachmentType.AttachmentTypeEnum == FileAttachmentTypeEnum.UserAvatar && x.TypeName == "Users" && x.Key == userId, cancellationToken);
             if (img == null)
                 return NotFound();
             return File(img.ContentBytes, img.ContentType);
@@ -361,6 +392,7 @@ namespace API.Controllers.v1.Basic
         [AxAuthorize(StateType = StateType.Authorized, AxOp = AxOp.UserInsert, Order = 1)]
         public virtual async Task<ApiResult<UserDto>> Create(UserDto dto, CancellationToken cancellationToken)
         {
+            dto.Password = SecurityHelper.GetSha256Hash(dto.Password);
             await _userRepository.AddAsync(dto.ToEntity(), cancellationToken);
             var resultDto = await _userRepository.TableNoTracking.ProjectTo<UserDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
