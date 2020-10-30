@@ -15,7 +15,6 @@ using Data.Repositories.UserRepositories;
 using Entities.Framework;
 using Entities.Framework.AxCharts;
 using Entities.Framework.Reports;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -257,7 +256,7 @@ namespace API.Controllers.v1.Basic
 
             //var menus = _menuRepository.GetAll(x => x.Active && x.ParentId == null).ProjectTo<AxSystem>();
 
-            _userRepository.LoadReference(user, t => t.UserSettings);
+            await _userRepository.LoadReferenceAsync(user, t => t.UserSettings, cancellationToken);
             var userInfo = new UserInfo
             {
                 UserName = user.UserName,
@@ -347,16 +346,17 @@ namespace API.Controllers.v1.Basic
 
         [AxAuthorize(StateType = StateType.Ignore)]
         [HttpPost("[action]/{userId}")]
-        public async Task<IActionResult> UploadUserPic(IFormFile model, int userId, CancellationToken cancellationToken)
+        public async Task<IActionResult> UploadUserPic(int userId, CancellationToken cancellationToken)
         {
-            if (model == null || model.Length == 0)
+            if (Request.Form.Files[0] == null || Request.Form.Files[0].Length == 0)
                 return Ok(new ApiResult(false, ApiResultStatusCode.BadRequest, "file not selected"));
 
             var files = _fileRepository.GetAll(x => x.Key == userId);
             await _fileRepository.DeleteRangeAsync(files, cancellationToken);
 
+
             await using var ms = new MemoryStream();
-            await model.CopyToAsync(ms, cancellationToken);
+            await Request.Form.Files[0].CopyToAsync(ms, cancellationToken);
             var fileBytes = ms.ToArray();
 
             var fa = new FileAttachment
@@ -364,11 +364,11 @@ namespace API.Controllers.v1.Basic
                 InsertDateTime = DateTime.Now,
                 ContentBytes = fileBytes,
                 Key = userId,
-                FileName = model.FileName,
+                FileName = Request.Form.Files[0].FileName,
                 CreatorUserId = 1,
-                ContentType = model.ContentType,
+                ContentType = Request.Form.Files[0].ContentType,
                 FileAttachmentTypeId = 1,
-                Size = model.Length,
+                Size = Request.Form.Files[0].Length,
                 TypeName = "Users"
             };
             await _fileRepository.AddAsync(fa, cancellationToken);
