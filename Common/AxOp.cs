@@ -27,6 +27,8 @@
         UserDelete,
         [AxDisplay("حقوق دسترسی", "11", UserManagement)]
         PermissionTree,
+        [AxDisplay("ویرایش حقوق دسترسی", "11", PermissionTree)]
+        PermissionTreeSave,
         [AxDisplay("لیست آدرس ها", "02", UserItem)]
         AddressList,
         [AxDisplay("فرم آدرس", "03", UserItem)]

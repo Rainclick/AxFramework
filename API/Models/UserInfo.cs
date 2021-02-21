@@ -16,5 +16,6 @@ namespace API.Models
         public int? DefaultSystemId { get; set; }
         public string OrganizationLogo { get; set; }
         public string UserPicture { get; set; }
+        public int PCode { get; set; }
     }
 }

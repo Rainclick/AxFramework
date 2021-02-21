@@ -76,5 +76,13 @@ namespace API.Controllers.v1.Tracking
             await _repository.DeleteAsync(model, cancellationToken);
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public virtual ApiResult<IEnumerable<OperationStationDto>> GetUserOps()
+        {
+            var data = _repository.GetAll(x => x.IsActive).ProjectTo<OperationStationDto>();
+            return Ok(data);
+        }
     }
 }

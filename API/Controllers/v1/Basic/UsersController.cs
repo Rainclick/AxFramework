@@ -52,11 +52,12 @@ namespace API.Controllers.v1.Basic
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IBaseRepository<NumericWidget> _numberWidgetRepository;
         private readonly IHubContext<AxHub> _hub;
+        private readonly IBaseRepository<AxGroup> _groupRepository;
 
         /// <inheritdoc />
         public UsersController(IUserRepository userRepository, IJwtService jwtService, IMemoryCache memoryCache, IBaseRepository<LoginLog> loginlogRepository, IBaseRepository<Permission> permissionRepository,
             IBaseRepository<UserToken> userTokenRepository, IBaseRepository<Menu> menuRepository, IBaseRepository<ConfigData> configDataRepository,
-            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub)
+            IBaseRepository<UserGroup> userGroupRepository, IBaseRepository<FileAttachment> fileRepository, IBaseRepository<UserMessage> userMessageRepository, IUserConnectionService userConnectionService, IBaseRepository<UserConnection> userConnectionRepository, IBaseRepository<AxChart> chartRepository, IBaseRepository<BarChart> barChartRepository, IBaseRepository<NumericWidget> numberWidgetRepository, IHubContext<AxHub> hub, IBaseRepository<AxGroup> groupRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
@@ -75,6 +76,7 @@ namespace API.Controllers.v1.Basic
             _barChartRepository = barChartRepository;
             _numberWidgetRepository = numberWidgetRepository;
             _hub = hub;
+            _groupRepository = groupRepository;
         }
 
         /// <summary>
@@ -267,6 +269,7 @@ namespace API.Controllers.v1.Basic
                 UserTheme = user.UserSettings?.Theme,
                 UserDisplayName = user.FullName,
                 VersionName = config.VersionName,
+                PCode = user.Id,
                 DefaultSystemId = user.UserSettings?.DefaultSystemId,
                 SystemsList = _menuRepository.GetAll(x => x.Active && x.ParentId == null).OrderBy(x => x.OrderId).ProjectTo<AxSystem>()
             };
@@ -421,6 +424,19 @@ namespace API.Controllers.v1.Basic
             return resultDto;
         }
 
+        [HttpGet("[action]")]
+        [AxAuthorize(StateType = StateType.Ignore)]
+        public virtual ApiResult<IEnumerable<UserGroupDto>> GetUsersAndGroups([FromQuery] DataRequest request)
+        {
+            var filter = request.Filters.FirstOrDefault()?.Value1;
+            filter ??= "";
+            var users = _userRepository.GetAll(x => x.IsActive && x.UserName.Contains(filter) || x.FirstName.Contains(filter) || x.FirstName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.User, Name = x.FullName, GroupLabel = "کاربر" });
+            var groups = _groupRepository.GetAll(x => x.GroupName.Contains(filter)).ToList().Select(x => new UserGroupDto { Id = x.Id, Type = UgType.Group, Name = x.GroupName, GroupLabel = "گروه کاربر" });
+            var result = users.Union(groups);
+            return Ok(result);
+        }
+
+     
     }
 
 }

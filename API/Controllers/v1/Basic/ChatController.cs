@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using API.Hubs;
@@ -59,6 +60,7 @@ namespace API.Controllers.v1.Basic
             var data = _userRepository.GetAll(x => x.IsActive).ProjectTo<UserDto>();
             return Ok(data);
         }
+
 
         [HttpPost]
         [AxAuthorize(StateType = StateType.OnlyToken)]

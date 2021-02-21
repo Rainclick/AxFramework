@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Entities.Tracking;
@@ -13,8 +12,11 @@ namespace API.Models.Tracking
 
         public long Code { get; set; }
         public string UserName { get; set; }
-        public string DateTime { get; set; }
         public bool IsActive { get; set; }
+        public int OpId { get; set; }
+        public int PersonnelId { get; set; }
+        public int ProductLineId { get; set; }
+        public bool IsEnter { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
@@ -28,6 +30,7 @@ namespace API.Models.Tracking
                 dest => dest.UserName,
                 config => config.MapFrom(src => $"{src.Personnel.User.FirstName} {src.Personnel.User.LastName}")
             );
+
         }
     }
 }
