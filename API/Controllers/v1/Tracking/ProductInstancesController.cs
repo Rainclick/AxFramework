@@ -32,7 +32,7 @@ namespace API.Controllers.v1.Tracking
         private readonly IUserConnectionService _userConnectionService;
         private readonly IBaseRepository<BarChart> _barChartRepository;
         private readonly IHubContext<AxHub> _hub;
-        
+
 
         public ProductInstancesController(IBaseRepository<ProductInstance> repository, IBaseRepository<Personnel> personnelRepository, IBaseRepository<ProductInstanceHistory> productInstanceHistoryRepository, IUserConnectionService userConnectionService, IBaseRepository<BarChart> barChartRepository, IHubContext<AxHub> hub)
         {
@@ -66,6 +66,7 @@ namespace API.Controllers.v1.Tracking
         [AxAuthorize(StateType = StateType.Authorized, Order = 1, AxOp = AxOp.ProductInstanceInsert)]
         public virtual async Task<ApiResult<ProductInstanceDto>> Create(ProductInstanceDto dto, CancellationToken cancellationToken)
         {
+            dto.IsActive = true;
             await _repository.AddAsync(dto.ToEntity(), cancellationToken);
             var resultDto = await _repository.TableNoTracking.ProjectTo<ProductInstanceDto>().SingleOrDefaultAsync(p => p.Id.Equals(dto.Id), cancellationToken);
             return resultDto;
@@ -126,13 +127,18 @@ namespace API.Controllers.v1.Tracking
             else
             {
 
-                var row = _productInstanceHistoryRepository.GetFirst(x => x.OpId == dto.OpId && x.EnterTime != null);
-                var hasExit = _productInstanceHistoryRepository.GetAll(x => x.OpId == dto.OpId && x.ExitTime != null).Any();
+                var row = _productInstanceHistoryRepository.GetFirst(x => x.OpId == dto.OpId && x.ProductInstance.Code == dto.Code && x.EnterTime != null);
+                var hasExit = _productInstanceHistoryRepository.GetFirst(x => x.OpId == dto.OpId && x.ProductInstance.Code == dto.Code && x.ExitTime != null);
 
                 if (row != null && dto.IsEnter)
                     return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "ورود این قطعه قبلا در ایستگاه ثبت شده است");
-                if (hasExit && !dto.IsEnter)
+                if (hasExit != null && !dto.IsEnter)
                     return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "خروج این قطعه از ایستگاه قبلا ثبت شده است");
+
+                if (!dto.IsEnter && row == null)
+                {
+                    return new ApiResult<ProductInstanceDto>(false, ApiResultStatusCode.LogicError, null, "این قطعه هنوز وارد ایستگاه نشده است");
+                }
 
                 var pih = new ProductInstanceHistory
                 {

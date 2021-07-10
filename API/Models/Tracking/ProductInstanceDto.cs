@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using AutoMapper;
 using Entities.Tracking;
@@ -17,6 +18,7 @@ namespace API.Models.Tracking
         public int PersonnelId { get; set; }
         public int ProductLineId { get; set; }
         public bool IsEnter { get; set; }
+        public DateTime InsertDateTime { get; set; }
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
