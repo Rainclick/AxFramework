@@ -6,3 +6,4 @@ A API FrameWork On.Net Core for create powerful and light and extendable api
  - EF Core Code First
  - Auto DI with AutoFac
  - And more features
+// Moved from Gitlab
