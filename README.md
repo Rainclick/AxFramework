@@ -1,10 +1,13 @@
-# AxFramework
-A API FrameWork On.Net Core for create powerful and light and extendable api 
- - Auto Generate Documation
- - Authentication and Authorization
- - Error Handling
- - EF Core Code First
- - Auto DI with AutoFac
- - And more features
- 
-// Moved from Gitlab
+An API Framework On.Net Core for creating powerful and light and extendable API
+
+- Auto Generate Documentation
+- Authentication and Authorization
+- Error Handling
+- EF Core Code First
+- Auto DI with AutoFac
+- DB and File Logging
+- Dependency Injection and IOC
+- And more features
+
+
+Moved from Gitlab
