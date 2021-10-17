@@ -173,5 +173,10 @@
         ProductInstanceHistoryInsert,
         [AxDisplay("حذف", "02", ProductInstanceHistoryList)]
         ProductInstanceHistoryDelete,
+        //=====================================================
+        [AxDisplay("کفایت سرمایه", "77", None)]
+        Capitar,
+        [AxDisplay("افزودن دسته بندی فرمول", "02", Capitar)]
+        CapiarFormuleCategoryInsert,
     }
 }
